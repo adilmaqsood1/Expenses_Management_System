@@ -133,3 +133,35 @@
 .animate-slideInBottom {
     animation: slideInFromBottom 0.5s ease-out;
 }
+
+/* Logo styles */
+.logo-container {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.logo-image {
+    height: 40px;
+    width: auto;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+    transform: scale(1.05);
+}
+
+.logo-container span {
+    color: white;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}

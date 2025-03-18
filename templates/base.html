@@ -25,6 +25,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
         }
         .header-title {
             font-size: 20px;
@@ -204,14 +207,22 @@
 </head>
 <body>
     <div class="header">
-        <div class="header-title"> Expense Management </div>
+        <div class="header-title">
+            <a href="{% url 'dashboard' %}" class="logo-container animate-fadeIn">
+                <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
+            </a>
+        </div>
         <div class="header-info">
-            Logged In: {{ username }} &nbsp;&nbsp; Br. Code: {{ branch_code }}
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}</span>
             <a href="{% url 'password_change' %}">Change Password</a>
             <form method="post" action="{% url 'logout' %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" style="background:none;border:none;color:#007bff;text-decoration:underline;cursor:pointer;padding:0;font:inherit;">Logout</button>
+                <button type="submit" style="background:none;border:none;color:white;margin-left:10px;padding:0;text-decoration:underline;cursor:pointer;">Logout</button>
             </form>
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            {% endif %}
         </div>
     </div>
     {% if request.path != '/login/' %}
