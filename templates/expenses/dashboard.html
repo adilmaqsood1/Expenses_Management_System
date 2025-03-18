@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header animate-fadeIn">
+    Dashboard
+</div>
+<div class="expense-content">
+    <div class="mb-6 animate-slideInLeft">
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Welcome to Expense Management </h3>
+        <p class="text-gray-600">Please select an option from the navigation menu above to proceed.</p>
+    </div>
+    
+    <!-- System Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slideInBottom">
+        <div class="stats-card bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500 mb-1">Total Expenses</div>
+            <div class="text-2xl font-bold text-gray-800">₨ {{ total_expenses|floatformat:2 }}</div>
+            <div class="text-xs {% if month_change_direction == 'up' %}text-green-500{% else %}text-red-500{% endif %} mt-1">{% if month_change_direction == 'up' %}+{% else %}-{% endif %}{{ month_change_percentage }}% from last month</div>
+        </div>
+        <div class="stats-card bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500 mb-1">Pending Approvals</div>
+            <div class="text-2xl font-bold text-gray-800">{{ pending_approvals }}</div>
+            <div class="text-xs text-yellow-500 mt-1">{% if pending_approvals > 0 %}Requires attention{% else %}No pending items{% endif %}</div>
+        </div>
+        <div class="stats-card bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500 mb-1">Budget Utilization</div>
+            <div class="text-2xl font-bold text-gray-800">{{ budget_utilization }}%</div>
+            <div class="text-xs {% if budget_utilization < 75 %}text-blue-500{% elif budget_utilization < 90 %}text-yellow-500{% else %}text-red-500{% endif %} mt-1">
+                {% if budget_utilization < 75 %}On track{% elif budget_utilization < 90 %}Caution{% else %}Over budget{% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links Section -->
+    <div class="mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
+        <h4 class="text-lg font-bold text-gray-800 mb-4">Quick Links</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{% url 'expense_list' %}" class="dashboard-card group">
+                <div class="bg-blue-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-blue-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">View Expenses</h5>
+                        <p class="text-sm text-gray-500">Review all expense records</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'add_expense' %}" class="dashboard-card group">
+                <div class="bg-green-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-green-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-green-700 transition-colors">Add New Expense</h5>
+                        <p class="text-sm text-gray-500">Create a new expense entry</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'gl_code_list' %}" class="dashboard-card group">
+                <div class="bg-purple-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-purple-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-purple-700 transition-colors">GL Code Management</h5>
+                        <p class="text-sm text-gray-500">Manage general ledger codes</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'transaction_list' %}" class="dashboard-card group">
+                <div class="bg-yellow-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-yellow-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-yellow-700 transition-colors">Transaction Management</h5>
+                        <p class="text-sm text-gray-500">View and manage transactions</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'vendor_list' %}" class="dashboard-card group">
+                <div class="bg-red-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-red-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-red-700 transition-colors">Vendor Management</h5>
+                        <p class="text-sm text-gray-500">Manage vendor information</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activity Section -->
+    <div class="animate-slideInBottom" style="animation-delay: 0.4s;">
+        <h4 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h4>
+        <div class="bg-white rounded shadow overflow-hidden">
+            <div class="divide-y divide-gray-200">
+                {% for activity in recent_activities %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-gray-800">{{ activity.title }}</p>
+                            <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                        </div>
+                        {% if activity.amount %}
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">₨ {{ activity.amount|floatformat:2 }}</span>
+                        {% elif activity.status == 'New Entry' %}
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{{ activity.status }}</span>
+                        {% elif activity.status == 'Pending' %}
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">{{ activity.status }}</span>
+                        {% elif activity.status == 'Approved' %}
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{{ activity.status }}</span>
+                        {% elif activity.status == 'Rejected' %}
+                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">{{ activity.status }}</span>
+                        {% else %}
+                        <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ activity.status }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-center items-center">
+                        <p class="text-gray-500">No recent activities found</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

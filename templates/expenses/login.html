@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+       Login
+    </div>
+    <div class="login-form">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">User Name:</label>
+                <input type="text" name="username" id="id_username" value="ft.branch">
+            </div>
+            <div class="form-group">
+                <label for="id_password">Password:</label>
+                <input type="password" name="password" id="id_password" value="*******">
+            </div>
+            <button type="submit" class="btn">Log In</button>
+        </form>
+        <div class="forgot-password">
+            <a href="#">Forgot Password?</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

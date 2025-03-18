@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Expense Management </title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Custom JavaScript -->
+    <script src="/static/js/main.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #004d66;
+            color: #333;
+        }
+        .header {
+            background-color: #004d66;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .header-info {
+            font-size: 14px;
+        }
+        .header-info a {
+            color: white;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        .nav-menu {
+            background-color: #006080;
+            display: flex;
+            flex-wrap: wrap;
+            padding: 5px;
+        }
+        .nav-item {
+            background-color: #004d66;
+            color: white;
+            margin: 2px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .content {
+            background-color: white;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .expense-header {
+            background-color: #004d66;
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-radius: 3px 3px 0 0;
+        }
+        .expense-content {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .budget-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .budget-item {
+            text-align: center;
+        }
+        .budget-label {
+            font-weight: bold;
+            color: #004d66;
+        }
+        .budget-value {
+            font-weight: bold;
+        }
+        .btn {
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #e5e5e5;
+        }
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .search-form .form-group {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .search-form .btn {
+            margin-left: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .pagination a {
+            margin: 0 5px;
+            color: #004d66;
+            text-decoration: none;
+        }
+        .required {
+            color: red;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .login-header {
+            background-color: #004d66;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .login-form {
+            padding: 20px;
+        }
+        .login-form .form-group {
+            margin-bottom: 15px;
+        }
+        .login-form .btn {
+            width: 100%;
+            background-color: #004d66;
+            color: white;
+            border: none;
+            padding: 10px;
+        }
+        .login-form .btn:hover {
+            background-color: #006080;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .forgot-password a {
+            color: #004d66;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title"> Expense Management </div>
+        <div class="header-info">
+            Logged In: {{ username }} &nbsp;&nbsp; Br. Code: {{ branch_code }}
+            <a href="{% url 'password_change' %}">Change Password</a>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" style="background:none;border:none;color:#007bff;text-decoration:underline;cursor:pointer;padding:0;font:inherit;">Logout</button>
+            </form>
+        </div>
+    </div>
+    {% if request.path != '/login/' %}
+    <div class="nav-menu">
+        <a href="{% url 'dashboard' %}" class="nav-item 
+        {% if request.path == '/' %}active{% endif %}">Dashboard</a>
+
+        <a href="{% url 'gl_code_list' %}" class="nav-item 
+        {% if '/gl-codes/' in request.path %}active{% endif %}">EPS Ledger</a>
+
+        <a href="{% url 'expense_list' %}" class="nav-item 
+        {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">EPS Expense</a>
+
+        <a href="{% url 'vendor_list' %}" class="nav-item 
+        {% if '/vendors/' in request.path %}active{% endif %}">EPS Vendor</a>
+
+        <a href="{% url 'vendor_list' %}" class="nav-item 
+        {% if request.path == '/' %}active{% endif %}"> vendor_list </a>
+        
+        <a href="{% url 'transaction_list' %}" class="nav-item 
+        {% if '/transactions/' in request.path %}active{% endif %}">GL Transaction</a>
+    </div>
+    {% endif %}
+    
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

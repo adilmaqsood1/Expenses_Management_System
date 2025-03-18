@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header">
+    Expense Posting
+</div>
+<div class="expense-content">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h4>Add New Expense:</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="region"><span class="required">*</span>Head:</label>
+                <select id="region" name="region">
+                    <option>7041000000-ADVERTISEMENT AND MARKETING</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
+                <select id="sub_head" name="sub_head">
+                    <option>7041300002-ADVERTISEMENT</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="type"><span class="required">*</span>Type:</label>
+                <select id="type" name="type">
+                    <option>Vendor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="vendor"><span class="required">*</span>Vendor:</label>
+                <select id="vendor" name="vendor">
+                    <option>dsdsad</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="budget-info">
+            <div class="budget-item">
+                <div class="budget-label">TOTAL HEAD BUDGET</div>
+                <div class="budget-value">1,000,000.00</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">UTILIZED BUDGET</div>
+                <div class="budget-value">4,300.00</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">AVAILABLE BUDGET</div>
+                <div class="budget-value">995,700.00</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">MONTHLY FINANCIAL LIMIT</div>
+                <div class="budget-value">0.00</div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="payment_mode"><span class="required">*</span>Payment Mode:</label>
+                <select id="payment_mode" name="payment_mode">
+                    <option>Account</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amount"><span class="required">*</span>Amount:</label>
+                <input type="text" id="amount" name="amount">
+            </div>
+            <div class="form-group">
+                <label for="invoice_no"><span class="required">*</span>Invoice No:</label>
+                <input type="text" id="invoice_no" name="invoice_no">
+            </div>
+            <div class="form-group">
+                <label for="invoice_date"><span class="required">*</span>Invoice Date:</label>
+                <input type="text" id="invoice_date" name="invoice_date">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="withholding_sales_tax"><span class="required">*</span>Withholding Sales Tax Amount:</label>
+                <input type="text" id="withholding_sales_tax" name="withholding_sales_tax">
+            </div>
+            <div class="form-group">
+                <label for="withholding_income_tax"><span class="required">*</span>Withholding Income Tax Amount:</label>
+                <input type="text" id="withholding_income_tax" name="withholding_income_tax">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="net_amount"><span class="required">*</span>Net Amount:</label>
+                <input type="text" id="net_amount" name="net_amount">
+            </div>
+            <div class="form-group">
+                <label for="description"><span class="required">*</span>Description:</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="attach_invoice"><span class="required">*</span>Attach Invoice:</label>
+                <input type="file" id="attach_invoice" name="attach_invoice">
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn">Save</button>
+            <button type="button" class="btn" style="margin-left: 10px;">Close</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

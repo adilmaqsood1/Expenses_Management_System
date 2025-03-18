@@ -1,0 +1,5 @@
+Django==4.2.7
+django-crispy-forms==2.0
+crispy-bootstrap4==2022.1
+django-import-export==3.3.1
+whitenoise==6.5.0
