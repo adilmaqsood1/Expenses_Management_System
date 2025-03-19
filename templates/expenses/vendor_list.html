@@ -5,26 +5,31 @@
     Vendor Management
 </div>
 <div class="expense-content">
-    <div class="search-form">
+    <form method="get" action="{% url 'vendor_list' %}" class="search-form">
         <div class="form-group">
             <label>Name:</label>
-            <input type="text">
+            <input type="text" name="name" value="{{ request.GET.name|default:'' }}">
         </div>
         <div class="form-group">
             <label>Type:</label>
-            <input type="text">
+            <select name="type">
+                <option value="">All</option>
+                <option value="Individual" {% if request.GET.type == 'Individual' %}selected{% endif %}>Individual</option>
+                <option value="Company" {% if request.GET.type == 'Company' %}selected{% endif %}>Company</option>
+                <option value="Government" {% if request.GET.type == 'Government' %}selected{% endif %}>Government</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Status:</label>
-            <select>
+            <select name="status">
                 <option value="">All</option>
-                <option>Active</option>
-                <option>Inactive</option>
+                <option value="Active" {% if request.GET.status == 'Active' %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if request.GET.status == 'Inactive' %}selected{% endif %}>Inactive</option>
             </select>
         </div>
-        <button class="btn">Search</button>
+        <button type="submit" class="btn">Search</button>
         <a href="{% url 'add_vendor' %}" class="btn" style="margin-left: 10px;">Add New Vendor</a>
-    </div>
+    </form>
     
     <div style="margin-bottom: 10px;">
         <label>Show</label>

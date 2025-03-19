@@ -1,7 +1,7 @@
 from django.db import models
 
 class GLCode(models.Model):
-    gl_code = models.CharField(max_length=20, primary_key=True)
+    gl_code = models.CharField(max_length=20, primary_key=True )
     gl_description = models.CharField(max_length=255)
     limit_in_millions = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
     limit = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)

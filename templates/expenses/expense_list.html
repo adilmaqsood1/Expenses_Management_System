@@ -8,46 +8,91 @@
     <div class="search-form">
         <div class="form-group">
             <label>Start Date:</label>
-            <input type="text" value="04 Mar 2025">
+            <input type="date" value="{% now 'Y-m-d' %}">
         </div>
         <div class="form-group">
             <label>End Date:</label>
-            <input type="text" value="04 Mar 2025">
+            <input type="date" value="{% now 'Y-m-d' %}">
         </div>
         <div class="form-group">
             <label>Type:</label>
-            <select>
-                <option>All</option>
+            <select name="type">
+                <option value="">All</option>
+                {% for type in expense_types %}
+                <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
-            <label>All:</label>
-            <select>
-                <option>All</option>
+            <label>Vendor:</label>
+            <select name="vendor">
+                <option value="">All</option>
+                {% for vendor in vendors %}
+                <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Employee:</label>
+            <select name="employee">
+                <option value="">All</option>
+                {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Head:</label>
+            <select name="head">
+                <option value="">All</option>
+                {% for head in heads %}
+                <option value="{{ head.id }}">{{ head.code }}-{{ head.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Sub-Head:</label>
+            <select name="sub_head">
+                <option value="">All</option>
+                {% for sub_head in sub_heads %}
+                <option value="{{ sub_head.id }}">{{ sub_head.code }}-{{ sub_head.name }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
             <label>Region:</label>
-            <select>
-                <option>Karachi South</option>
+            <select name="region">
+                <option value="">All</option>
+                {% for region in regions %}
+                <option value="{{ region.id }}">{{ region.name }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
             <label>Branch:</label>
-            <select>
-                <option>0002-I-Main</option>
+            <select name="branch">
+                <option value="">All</option>
+                {% for branch in branches %}
+                <option value="{{ branch.id }}">{{ branch.code }}-{{ branch.name }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
             <label>Cost Center:</label>
-            <select>
-                <option>Main Branch</option>
+            <select name="cost_center">
+                <option value="">All</option>
+                {% for cost_center in cost_centers %}
+                <option value="{{ cost_center.id }}">{{ cost_center.name }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
             <label>Status:</label>
-            <select>
-                <option>Pending</option>
+            <select name="status">
+                <option value="">All</option>
+                {% for key, value in status_choices.items %}
+                <option value="{{ key }}">{{ value }}</option>
+                {% endfor %}
             </select>
         </div>
         <button class="btn">Search</button>
@@ -57,7 +102,11 @@
     <div style="margin-bottom: 10px;">
         <label>Show</label>
         <select style="width: 60px;">
-            <option>All</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">All</option>
         </select>
         <label>entries</label>
         <div style="float: right;">
@@ -84,9 +133,28 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td colspan="12" style="text-align: center;">waiting for filter</td>
-            </tr>
+            {% if expenses %}
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.id }}</td>
+                    <td>{{ expense.cost_center.name }}</td>
+                    <td>{{ expense.region.name }}</td>
+                    <td>{{ expense.branch.code }}-{{ expense.branch.name }}</td>
+                    <td>{{ expense.invoice_no|default:'-' }}</td>
+                    <td>{{ expense.description|default:'-'|truncatechars:30 }}</td>
+                    <td>{{ expense.vendor.name }}</td>
+                    <td>{{ expense.amount }}</td>
+                    <td>{{ expense.withholding_sales_tax|add:expense.withholding_income_tax }}</td>
+                    <td>{{ expense.net_amount }}</td>
+                    <td>{{ expense.created_date|date:"Y-m-d" }}</td>
+                    <td>{{ expense.status }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="12" style="text-align: center;">No expenses found</td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
     

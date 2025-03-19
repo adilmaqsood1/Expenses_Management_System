@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/css/styles.css">
     <!-- Custom JavaScript -->
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/budget.js"></script>
     <style>
         body {
             margin: 0;
@@ -312,9 +313,14 @@
     </div>
     {% endif %}
     
-    <div class="content" style="{% if request.path == '/login/' or request.path == '/register/' %}height: auto; overflow: hidden;{% else %}height: calc(100vh - 120px); overflow-y: auto;{% endif %}">        
-        {% block content %}{% endblock %}
-    </div>
+    <div class="content" 
+    {% if request.path == '/login/' or request.path == '/register/' %}
+        style="height: auto; overflow: hidden;"
+    {% else %}
+        style="height: calc(100vh - 120px); overflow-y: auto;"
+    {% endif %}>        
+    {% block content %}{% endblock %}
+</div>
     
     {% block scripts %}{% endblock %}
 </body>

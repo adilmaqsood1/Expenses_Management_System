@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, api
 
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
@@ -13,4 +13,7 @@ urlpatterns = [
     path('vendors/', views.VendorListView.as_view(), name='vendor_list'),
     path('vendors/add/', views.AddVendorView.as_view(), name='add_vendor'),
     path('register/', views.RegisterView.as_view(), name='register'),
+    
+    # API endpoints
+    path('api/head-budget/<int:head_id>/', api.head_budget, name='api_head_budget'),
 ]

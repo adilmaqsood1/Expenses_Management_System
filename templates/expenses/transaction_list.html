@@ -17,11 +17,11 @@
         </div>
         <div class="form-group">
             <label>Date From:</label>
-            <input type="date">
+            <input type="date" value="{% now 'Y-m-d' %}">
         </div>
         <div class="form-group">
             <label>Date To:</label>
-            <input type="date">
+            <input type="date" value="{% now 'Y-m-d' %}">
         </div>
         <button class="btn">Search</button>
         <a href="{% url 'add_transaction' %}" class="btn" style="margin-left: 10px;">Add New Transaction</a>

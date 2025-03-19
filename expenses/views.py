@@ -106,8 +106,31 @@ class DashboardView(LoginRequiredMixin, View):
 class ExpenseListView(LoginRequiredMixin, View):
     def get(self, request):
         expenses = Expense.objects.all()
+        regions = Region.objects.all()
+        branches = Branch.objects.all()
+        cost_centers = CostCenter.objects.all()
+        vendors = Vendor.objects.all()
+        heads = Head.objects.all()
+        sub_heads = SubHead.objects.all()
+        employees = Employee.objects.all()
+        payment_modes = dict(Expense.PAYMENT_MODES)
+        status_choices = dict(Expense.STATUS_CHOICES)
+        
+        # Get expense types (Vendor/Employee)
+        expense_types = ['Vendor', 'Employee']
+        
         context = {
-            'expenses': expenses
+            'expenses': expenses,
+            'regions': regions,
+            'branches': branches,
+            'cost_centers': cost_centers,
+            'vendors': vendors,
+            'heads': heads,
+            'sub_heads': sub_heads,
+            'employees': employees,
+            'payment_modes': payment_modes,
+            'status_choices': status_choices,
+            'expense_types': expense_types
         }
         return render(request, 'expenses/expense_list.html', context)
 
@@ -119,6 +142,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         heads = Head.objects.all()
         sub_heads = SubHead.objects.all()
         vendors = Vendor.objects.all()
+        payment_modes = dict(Expense.PAYMENT_MODES)
         
         context = {
             'regions': regions,
@@ -127,6 +151,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             'heads': heads,
             'sub_heads': sub_heads,
             'vendors': vendors,
+            'payment_modes': payment_modes,
         }
         
         return render(request, 'expenses/add_expense.html', context)
@@ -212,6 +237,22 @@ class AddTransactionView(LoginRequiredMixin, View):
 class VendorListView(LoginRequiredMixin, View):
     def get(self, request):
         vendors = Vendor.objects.all()
+        
+        # Filter by name
+        name_filter = request.GET.get('name')
+        if name_filter:
+            vendors = vendors.filter(name__icontains=name_filter)
+        
+        # Filter by type
+        type_filter = request.GET.get('type')
+        if type_filter:
+            vendors = vendors.filter(type=type_filter)
+        
+        # Filter by status
+        status_filter = request.GET.get('status')
+        if status_filter:
+            vendors = vendors.filter(status=status_filter)
+            
         context = {
             'vendors': vendors
         }
