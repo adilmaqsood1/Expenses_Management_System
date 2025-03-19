@@ -17,9 +17,11 @@
             font-family: Arial, sans-serif;
             background-color: #004d66;
             color: #333;
+            height: 100vh;
+            overflow: hidden;
         }
         .header {
-            background-color: #004d66;
+            background: linear-gradient(to right, #004d66, #006080);
             color: white;
             padding: 10px 20px;
             display: flex;
@@ -42,19 +44,20 @@
             text-decoration: none;
         }
         .nav-menu {
-            background-color: #006080;
+            background: linear-gradient(to right, #006080, #0077a3);
             display: flex;
             flex-wrap: wrap;
             padding: 5px;
         }
         .nav-item {
-            background-color: #004d66;
+            background: linear-gradient(to bottom, #004d66, #003d52);
             color: white;
             margin: 2px;
             padding: 5px 10px;
             border-radius: 3px;
             font-size: 12px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         .content {
             background-color: white;
@@ -165,8 +168,8 @@
             color: red;
         }
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
+            max-width: 380px;
+            margin: 50px auto;
             background-color: #f5f5f5;
             border-radius: 5px;
             overflow: hidden;
@@ -206,7 +209,7 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header shadow-md">
         <div class="header-title">
             <a href="{% url 'dashboard' %}" class="logo-container animate-fadeIn">
                 <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
@@ -214,41 +217,105 @@
         </div>
         <div class="header-info">
             {% if user.is_authenticated %}
-            <span>{{ user.username }}</span>
-            <a href="{% url 'password_change' %}">Change Password</a>
-            <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" style="background:none;border:none;color:white;margin-left:10px;padding:0;text-decoration:underline;cursor:pointer;">Logout</button>
-            </form>
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-cyan-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ user.username }}</span>
+                </span>
+                <a href="{% url 'password_change' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                    Change Password
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 12.586V8z" clip-rule="evenodd" />
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
             {% else %}
-            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+                </svg>
+                Register
+            </a>
             {% endif %}
         </div>
     </div>
-    {% if request.path != '/login/' %}
-    <div class="nav-menu">
-        <a href="{% url 'dashboard' %}" class="nav-item 
-        {% if request.path == '/' %}active{% endif %}">Dashboard</a>
+    {% if request.path != '/login/' and request.path != '/register/' %}
+    <div class="nav-menu shadow-md relative z-10">
+        <div class="container mx-auto flex flex-wrap items-center justify-start space-x-2 px-2">
+            <a href="{% url 'dashboard' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
 
-        <a href="{% url 'gl_code_list' %}" class="nav-item 
-        {% if '/gl-codes/' in request.path %}active{% endif %}">EPS Ledger</a>
+            <a href="{% url 'gl_code_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/gl-codes/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    <span>EPS Ledger</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
 
-        <a href="{% url 'expense_list' %}" class="nav-item 
-        {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">EPS Expense</a>
+            <a href="{% url 'expense_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>EPS Expense</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
 
-        <a href="{% url 'vendor_list' %}" class="nav-item 
-        {% if '/vendors/' in request.path %}active{% endif %}">EPS Vendor</a>
-
-        <a href="{% url 'vendor_list' %}" class="nav-item 
-        {% if request.path == '/' %}active{% endif %}"> vendor_list </a>
-        
-        <a href="{% url 'transaction_list' %}" class="nav-item 
-        {% if '/transactions/' in request.path %}active{% endif %}">GL Transaction</a>
+            <a href="{% url 'vendor_list' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/vendors/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+                        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+                    </svg>
+                    <span>Vendor List</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            <a href="{% url 'transaction_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/transactions/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 4a1 1 0 000 2h1a1 1 0 000-2H7zm3 6a1 1 0 100-2h3a1 1 0 100 2h-3zm-3 2a1 1 0 100 2h7a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    <span>GL Transaction</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+        </div>
     </div>
     {% endif %}
     
-    <div class="content">
+    <div class="content" style="{% if request.path == '/login/' or request.path == '/register/' %}height: auto; overflow: hidden;{% else %}height: calc(100vh - 120px); overflow-y: auto;{% endif %}">        
         {% block content %}{% endblock %}
     </div>
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html>

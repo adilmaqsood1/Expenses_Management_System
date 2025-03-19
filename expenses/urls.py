@@ -12,4 +12,5 @@ urlpatterns = [
     path('transactions/add/', views.AddTransactionView.as_view(), name='add_transaction'),
     path('vendors/', views.VendorListView.as_view(), name='vendor_list'),
     path('vendors/add/', views.AddVendorView.as_view(), name='add_vendor'),
+    path('register/', views.RegisterView.as_view(), name='register'),
 ]

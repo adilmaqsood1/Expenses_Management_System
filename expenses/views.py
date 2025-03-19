@@ -13,7 +13,15 @@ from operator import attrgetter
 class CustomLoginView(LoginView):
     template_name = 'expenses/login.html'
     redirect_field_name = 'next'
-    next_page = 'dashboard'  
+    next_page = 'dashboard' 
+    
+class RegisterView(View):
+    template_name = 'expenses/register.html'
+
+    def get(self, request):
+        return render(request, self.template_name) 
+
+
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
