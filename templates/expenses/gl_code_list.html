@@ -58,8 +58,30 @@
         <table class="w-full border-collapse bg-white">
             <thead>
                 <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">GL Code</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">
+                        <a href="?sort_by=gl_code&order={% if sort_by == 'gl_code' and order == 'asc' %}desc{% else %}asc{% endif %}&gl_code={{ request.GET.gl_code|default:'' }}&description={{ request.GET.description|default:'' }}" class="flex items-center">
+                            GL Code
+                            {% if sort_by == "gl_code" %}
+                                {% if order == "asc" %}
+                                    🔼
+                                {% else %}
+                                    🔽
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">
+                        <a href="?sort_by=gl_description&order={% if sort_by == 'gl_description' and order == 'asc' %}desc{% else %}asc{% endif %}&gl_code={{ request.GET.gl_code|default:'' }}&description={{ request.GET.description|default:'' }}" class="flex items-center">
+                            Description
+                            {% if sort_by == "gl_description" %}
+                                {% if order == "asc" %}
+                                    🔼
+                                {% else %}
+                                    🔽
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit (Millions)</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit Utilized</th>
@@ -67,6 +89,7 @@
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
                 </tr>
             </thead>
+            
             <tbody class="divide-y divide-gray-200">
                 {% if gl_codes %}
                     {% for gl_code in gl_codes %}

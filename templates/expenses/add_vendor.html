@@ -15,7 +15,7 @@
             </div>
             <div class="form-group">
                 <label for="cnic">CNIC:</label>
-                <input type="text" id="cnic" name="cnic">
+                <input type="number" id="cnic" name="cnic" value="{{ vendor.cnic|default:'' }}">
             </div>
         </div>
         <div class="form-row">

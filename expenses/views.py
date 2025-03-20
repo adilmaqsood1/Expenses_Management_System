@@ -235,22 +235,28 @@ class AddExpenseView(LoginRequiredMixin, View):
 # New views for GLCode
 class GLCodeListView(LoginRequiredMixin, View):
     def get(self, request):
-        gl_codes_list = GLCode.objects.all().order_by('gl_code')
+        gl_codes_list = GLCode.objects.all()
         
-        # Filter by GL code
+        # Filtering logic
         code_filter = request.GET.get('gl_code')
         if code_filter:
             gl_codes_list = gl_codes_list.filter(gl_code__icontains=code_filter)
         
-        # Filter by description
         description_filter = request.GET.get('description')
         if description_filter:
             gl_codes_list = gl_codes_list.filter(gl_description__icontains=description_filter)
         
-        # Get the show parameter from the request, default to showing all entries
-        show = request.GET.get('show', '-1')
+        # Sorting logic
+        sort_by = request.GET.get('sort_by', 'gl_code')  # Default sorting by gl_code
+        order = request.GET.get('order', 'asc')  # Default order ascending
         
-        # If show is not 'All' (-1), paginate the results
+        if order == 'desc':
+            gl_codes_list = gl_codes_list.order_by(f'-{sort_by}')
+        else:
+            gl_codes_list = gl_codes_list.order_by(sort_by)
+
+        # Pagination logic
+        show = request.GET.get('show', '-1')
         if show != '-1':
             show = int(show)
             paginator = Paginator(gl_codes_list, show)
@@ -258,16 +264,17 @@ class GLCodeListView(LoginRequiredMixin, View):
             gl_codes = paginator.get_page(page)
             total_pages = paginator.num_pages
         else:
-            # If showing all, no pagination needed
             gl_codes = gl_codes_list
             total_pages = 1
-            
+
         context = {
             'gl_codes': gl_codes,
             'show': show,
             'total_pages': total_pages,
             'current_page': int(request.GET.get('page', 1)),
-            'total_count': gl_codes_list.count()
+            'total_count': gl_codes_list.count(),
+            'sort_by': sort_by,
+            'order': order
         }
         return render(request, 'expenses/gl_code_list.html', context)
 
