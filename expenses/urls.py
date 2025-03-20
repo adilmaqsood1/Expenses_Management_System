@@ -8,10 +8,12 @@ urlpatterns = [
     path('expenses/add/', views.AddExpenseView.as_view(), name='add_expense'),
     path('gl-codes/', views.GLCodeListView.as_view(), name='gl_code_list'),
     path('gl-codes/add/', views.AddGLCodeView.as_view(), name='add_gl_code'),
+    path('gl-codes/edit/<str:gl_code_id>/', views.EditGLCodeView.as_view(), name='edit_gl_code'),
     path('transactions/', views.TransactionListView.as_view(), name='transaction_list'),
     path('transactions/add/', views.AddTransactionView.as_view(), name='add_transaction'),
     path('vendors/', views.VendorListView.as_view(), name='vendor_list'),
     path('vendors/add/', views.AddVendorView.as_view(), name='add_vendor'),
+    path('vendors/edit/<int:vendor_id>/', views.EditVendorView.as_view(), name='edit_vendor'),
     path('register/', views.RegisterView.as_view(), name='register'),
     
     # API endpoints

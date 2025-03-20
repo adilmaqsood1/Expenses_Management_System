@@ -53,6 +53,7 @@ class Vendor(models.Model):
     cnic = models.CharField(max_length=15, blank=True, null=True)
     type = models.CharField(max_length=50, blank=True, null=True)
     status = models.CharField(max_length=50, blank=True, null=True)
+    disabled = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     updated_date = models.DateTimeField(auto_now=True, null=True)
     

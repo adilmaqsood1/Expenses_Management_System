@@ -100,19 +100,47 @@
     </div>
     
     <div style="margin-bottom: 10px;">
-        <label>Show</label>
-        <select style="width: 60px;">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="-1">All</option>
-        </select>
-        <label>entries</label>
-        <div style="float: right;">
-            <label>Search:</label>
-            <input type="text">
-        </div>
+        <form id="showEntriesForm" method="get" action="{% url 'expense_list' %}">
+            <label>Show</label>
+            <select name="show" style="width: 60px;" onchange="this.form.submit()">
+                <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
+                <option value="10" {% if show == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if show == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if show == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if show == 100 %}selected{% endif %}>100</option>
+            </select>
+            <label>entries</label>
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="1">
+            {% endif %}
+            {% if request.GET.type %}
+                <input type="hidden" name="type" value="{{ request.GET.type }}">
+            {% endif %}
+            {% if request.GET.vendor %}
+                <input type="hidden" name="vendor" value="{{ request.GET.vendor }}">
+            {% endif %}
+            {% if request.GET.employee %}
+                <input type="hidden" name="employee" value="{{ request.GET.employee }}">
+            {% endif %}
+            {% if request.GET.head %}
+                <input type="hidden" name="head" value="{{ request.GET.head }}">
+            {% endif %}
+            {% if request.GET.sub_head %}
+                <input type="hidden" name="sub_head" value="{{ request.GET.sub_head }}">
+            {% endif %}
+            {% if request.GET.region %}
+                <input type="hidden" name="region" value="{{ request.GET.region }}">
+            {% endif %}
+            {% if request.GET.branch %}
+                <input type="hidden" name="branch" value="{{ request.GET.branch }}">
+            {% endif %}
+            {% if request.GET.cost_center %}
+                <input type="hidden" name="cost_center" value="{{ request.GET.cost_center }}">
+            {% endif %}
+            {% if request.GET.status %}
+                <input type="hidden" name="status" value="{{ request.GET.status }}">
+            {% endif %}
+        </form>
     </div>
     
     <table>
@@ -159,13 +187,36 @@
     </table>
     
     <div style="margin-top: 10px; font-size: 12px;">
-        Showing 1 to 1 of 1 entries
+        {% if show != '-1' %}
+            Showing {{ expenses|length }} of {{ total_count }} entries
+        {% else %}
+            Showing {{ expenses.count }} entries
+        {% endif %}
+        
+        {% if show != '-1' and total_pages > 1 %}
         <div class="pagination">
-            <a href="#">First</a>
-            <a href="#">Previous</a>
-            <a href="#">Next</a>
-            <a href="#">Last</a>
+            <a href="{% url 'expense_list' %}?show={{ show }}&page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">First</a>
+            {% if expenses.has_previous %}
+                <a href="{% url 'expense_list' %}?show={{ show }}&page={{ expenses.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+            {% else %}
+                <a href="#" style="color: #ccc;">Previous</a>
+            {% endif %}
+            
+            {% if expenses.has_next %}
+                <a href="{% url 'expense_list' %}?show={{ show }}&page={{ expenses.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+            {% else %}
+                <a href="#" style="color: #ccc;">Next</a>
+            {% endif %}
+            <a href="{% url 'expense_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Last</a>
         </div>
+        {% else %}
+        <div class="pagination">
+            <a href="#" style="color: #ccc;">First</a>
+            <a href="#" style="color: #ccc;">Previous</a>
+            <a href="#" style="color: #ccc;">Next</a>
+            <a href="#" style="color: #ccc;">Last</a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

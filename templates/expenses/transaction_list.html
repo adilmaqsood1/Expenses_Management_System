@@ -28,15 +28,29 @@
     </div>
     
     <div style="margin-bottom: 10px;">
-        <label>Show</label>
-        <select style="width: 60px;">
-            <option>All</option>
-        </select>
-        <label>entries</label>
-        <div style="float: right;">
-            <label>Search:</label>
-            <input type="text">
-        </div>
+        <form id="showEntriesForm" method="get" action="{% url 'transaction_list' %}">
+            <label>Show</label>
+            <select name="show" style="width: 60px;" onchange="this.form.submit()">
+                <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
+                <option value="10" {% if show == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if show == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if show == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if show == 100 %}selected{% endif %}>100</option>
+            </select>
+            <label>entries</label>
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="1">
+            {% endif %}
+            {% if request.GET.gl_code %}
+                <input type="hidden" name="gl_code" value="{{ request.GET.gl_code }}">
+            {% endif %}
+            {% if request.GET.date_from %}
+                <input type="hidden" name="date_from" value="{{ request.GET.date_from }}">
+            {% endif %}
+            {% if request.GET.date_to %}
+                <input type="hidden" name="date_to" value="{{ request.GET.date_to }}">
+            {% endif %}
+        </form>
     </div>
     
     <table>
@@ -79,13 +93,36 @@
     </table>
     
     <div style="margin-top: 10px; font-size: 12px;">
-        Showing {{ transactions.count }} entries
+        {% if show != '-1' %}
+            Showing {{ transactions|length }} of {{ total_count }} entries
+        {% else %}
+            Showing {{ transactions.count }} entries
+        {% endif %}
+        
+        {% if show != '-1' and total_pages > 1 %}
         <div class="pagination">
-            <a href="#">First</a>
-            <a href="#">Previous</a>
-            <a href="#">Next</a>
-            <a href="#">Last</a>
+            <a href="{% url 'transaction_list' %}?show={{ show }}&page=1{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">First</a>
+            {% if transactions.has_previous %}
+                <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ transactions.previous_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Previous</a>
+            {% else %}
+                <a href="#" style="color: #ccc;">Previous</a>
+            {% endif %}
+            
+            {% if transactions.has_next %}
+                <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ transactions.next_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Next</a>
+            {% else %}
+                <a href="#" style="color: #ccc;">Next</a>
+            {% endif %}
+            <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Last</a>
         </div>
+        {% else %}
+        <div class="pagination">
+            <a href="#" style="color: #ccc;">First</a>
+            <a href="#" style="color: #ccc;">Previous</a>
+            <a href="#" style="color: #ccc;">Next</a>
+            <a href="#" style="color: #ccc;">Last</a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
