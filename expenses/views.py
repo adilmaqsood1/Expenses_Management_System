@@ -1,3 +1,4 @@
+from django.db import models
 from django.shortcuts import render, redirect
 from django.views import View
 from .models import Region, Branch, CostCenter, Head, SubHead, Vendor, Expense, GLCode, Transaction, Employee
@@ -23,6 +24,108 @@ class RegisterView(View):
         return render(request, self.template_name) 
 
 
+class EmployeeListView(LoginRequiredMixin, View):
+    def get(self, request):
+        employees_list = Employee.objects.all()
+        
+        # Apply filters
+        name_filter = request.GET.get('name')
+        if name_filter:
+            employees_list = employees_list.filter(name__icontains=name_filter)
+            
+        designation_filter = request.GET.get('designation')
+        if designation_filter:
+            employees_list = employees_list.filter(designation__icontains=designation_filter)
+        
+        # Get the show parameter from the request, default to showing all entries
+        show = request.GET.get('show', '-1')
+        
+        # If show is not 'All' (-1), paginate the results
+        if show != '-1':
+            show = int(show)
+            paginator = Paginator(employees_list, show)
+            page = request.GET.get('page', 1)
+            employees = paginator.get_page(page)
+            total_pages = paginator.num_pages
+        else:
+            # If showing all, no pagination needed
+            employees = employees_list
+            total_pages = 1
+        
+        context = {
+            'employees': employees,
+            'selected_name': name_filter or '',
+            'selected_designation': designation_filter or '',
+            'show': show,
+            'total_pages': total_pages,
+            'current_page': int(request.GET.get('page', 1)),
+            'total_count': employees_list.count()
+        }
+        
+        return render(request, 'expenses/employee_list.html', context)
+
+class AddEmployeeView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'expenses/add_employee.html')
+    
+    def post(self, request):
+        name = request.POST.get('name')
+        designation = request.POST.get('designation')
+        address = request.POST.get('address')
+        email = request.POST.get('email')
+        phone_no = request.POST.get('phone_no')
+        sap_id = request.POST.get('sap_id')
+        account = request.POST.get('account')
+        account_type = request.POST.get('account_type')
+        pls = request.POST.get('pls')
+        current = request.POST.get('current')
+        
+        # Create new employee
+        employee = Employee(
+            name=name,
+            designation=designation,
+            address=address,
+            email=email,
+            phone_no=phone_no,
+            sap_id=sap_id,
+            account=account,
+            account_type=account_type,
+            pls=pls,
+            current=current
+        )
+        employee.save()
+        
+        return redirect('employee_list')
+
+class EditEmployeeView(LoginRequiredMixin, View):
+    def get(self, request, employee_id):
+        employee = Employee.objects.get(sap_id=employee_id)
+        
+        context = {
+            'employee': employee
+        }
+        
+        return render(request, 'expenses/edit_employee.html', context)
+    
+    def post(self, request, employee_id):
+        employee = Employee.objects.get(sap_id=employee_id)
+        
+        employee.name = request.POST.get('name')
+        employee.designation = request.POST.get('designation')
+        employee.address = request.POST.get('address')
+        employee.email = request.POST.get('email')
+        employee.phone_no = request.POST.get('phone_no')
+        employee.sap_id = request.POST.get('sap_id')
+        employee.account = request.POST.get('account')
+        employee.account_type = request.POST.get('account_type')
+        employee.pls = request.POST.get('pls')
+        employee.current = request.POST.get('current')
+        
+        employee.save()
+        
+        return redirect('employee_list') 
+
+
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
@@ -30,7 +133,10 @@ class DashboardView(LoginRequiredMixin, View):
         total_expenses = Expense.objects.aggregate(Sum('amount'))['amount__sum'] or 0
         
         # Get pending approvals count
-        pending_approvals = Expense.objects.filter(status='Pending').count()
+        from .models_user import AllowanceRequest
+        expense_pending = Expense.objects.filter(status='Pending').count()
+        allowance_pending = AllowanceRequest.objects.filter(status='PENDING').count()
+        pending_approvals = expense_pending + allowance_pending
         
         # Calculate budget utilization
         total_budget = Head.objects.aggregate(Sum('budget'))['budget__sum'] or Decimal('1')
@@ -78,6 +184,18 @@ class DashboardView(LoginRequiredMixin, View):
             'status': 'Completed'
         } for transaction in recent_transactions]
         
+        # Recent allowance requests
+        from .models_user import AllowanceRequest
+        recent_allowances = AllowanceRequest.objects.all().order_by('-requested_date')[:5]
+        allowance_activities = [{
+            'type': 'allowance',
+            'title': f"Allowance Request",
+            'description': f"Requested by {allowance.user.username} on {allowance.requested_date.strftime('%B %d, %Y')}",
+            'amount': allowance.amount,
+            'date': allowance.requested_date,
+            'status': allowance.status
+        } for allowance in recent_allowances]
+        
         # Recent vendors
         recent_vendors = Vendor.objects.all().order_by('-created_date')[:5]
         vendor_activities = [{
@@ -90,6 +208,11 @@ class DashboardView(LoginRequiredMixin, View):
         } for vendor in recent_vendors]
         
         # Combine all activities and sort by date
+        # Convert datetime objects to date objects for consistent comparison
+        for activity in vendor_activities:
+            if isinstance(activity['date'], datetime.datetime):
+                activity['date'] = activity['date'].date()
+                
         all_activities = expense_activities + transaction_activities + vendor_activities
         recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
         
@@ -411,6 +534,52 @@ class AddTransactionView(LoginRequiredMixin, View):
             utilized_limit=utilized_limit,
             remaining_limit=remaining_limit
         )
+        
+        return redirect('transaction_list')
+
+class EditTransactionView(LoginRequiredMixin, View):
+    def get(self, request, transaction_id):
+        try:
+            transaction = Transaction.objects.get(id=transaction_id)
+        except Transaction.DoesNotExist:
+            return redirect('transaction_list')
+        
+        gl_codes = GLCode.objects.all()
+        context = {
+            'transaction': transaction,
+            'gl_codes': gl_codes
+        }
+        
+        return render(request, 'expenses/edit_transaction.html', context)
+    
+    def post(self, request, transaction_id):
+        try:
+            transaction = Transaction.objects.get(id=transaction_id)
+        except Transaction.DoesNotExist:
+            return redirect('transaction_list')
+        
+        # Handle form submission
+        gl_code_id = request.POST.get('gl_code')
+        date = request.POST.get('date')
+        wing_division = request.POST.get('wing_division')
+        particulars = request.POST.get('particulars')
+        details = request.POST.get('details')
+        bill_amount = request.POST.get('bill_amount')
+        utilized_limit = request.POST.get('utilized_limit')
+        remaining_limit = request.POST.get('remaining_limit')
+        
+        gl_code = GLCode.objects.get(gl_code=gl_code_id)
+        
+        transaction.gl_code = gl_code
+        transaction.date = date
+        transaction.wing_division = wing_division
+        transaction.particulars = particulars
+        transaction.details = details
+        transaction.bill_amount = bill_amount
+        transaction.utilized_limit = utilized_limit
+        transaction.remaining_limit = remaining_limit
+        
+        transaction.save()
         
         return redirect('transaction_list')
 

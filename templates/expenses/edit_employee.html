@@ -7,57 +7,57 @@
 <div class="expense-content">
     <form method="post">
         {% csrf_token %}
-        <h4>Add New Employee:</h4>
+        <h4>Edit Employee:</h4>
         <div class="form-row">
             <div class="form-group">
                 <label for="name"><span class="required">*</span>Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" value="{{ employee.name }}" required>
             </div>
             <div class="form-group">
                 <label for="designation"><span class="required">*</span>Designation:</label>
-                <input type="text" id="designation" name="designation" required>
+                <input type="text" id="designation" name="designation" value="{{ employee.designation }}" required>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="address"><span class="required">*</span>Address:</label>
-                <textarea id="address" name="address" rows="3" required></textarea>
+                <textarea id="address" name="address" rows="3" required>{{ employee.address }}</textarea>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="email"><span class="required">*</span>Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" value="{{ employee.email }}" required>
             </div>
             <div class="form-group">
                 <label for="phone_no"><span class="required">*</span>Phone Number:</label>
-                <input type="text" id="phone_no" name="phone_no" required>
+                <input type="text" id="phone_no" name="phone_no" value="{{ employee.phone_no }}" required>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label for="sap_id"><span class="required">*</span>SAP ID:</label>
-                <input type="text" id="sap_id" name="sap_id" required>
+                <label for="sap_id">SAP ID:</label>
+                <input type="text" id="sap_id" name="sap_id" value="{{ employee.sap_id }}">
             </div>
             <div class="form-group">
                 <label for="account">Account:</label>
-                <input type="text" id="account" name="account">
+                <input type="text" id="account" name="account" value="{{ employee.account }}">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="account_type">Account Type:</label>
-                <input type="text" id="account_type" name="account_type">
+                <input type="text" id="account_type" name="account_type" value="{{ employee.account_type }}">
             </div>
             <div class="form-group">
                 <label for="pls">Profit Loss Saving (PLS):</label>
-                <input type="text" id="pls" name="pls">
+                <input type="text" id="pls" name="pls" value="{{ employee.pls }}">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="current">Current:</label>
-                <input type="text" id="current" name="current">
+                <input type="text" id="current" name="current" value="{{ employee.current }}">
             </div>
         </div>
         

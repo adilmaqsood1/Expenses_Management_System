@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from .models import Branch
 
 def user_info(request):
@@ -16,14 +17,13 @@ def user_info(request):
         # For example, if username format is like 'ft.branch2', extract '2' as branch code
         # This is just an example, adjust according to your actual username format
         try:
-            # If branch code is stored in the Branch model and related to user somehow
-            # For this example, we're assuming branch code is the first Branch object
-            # In a real application, you would have a proper relationship between User and Branch
-            branch = Branch.objects.first()
-            if branch:
-                context['branch_code'] = branch.code
+            # Get the user's branch if it exists
+            if hasattr(request.user, 'branch') and request.user.branch:
+                context['branch_code'] = request.user.branch.code
+                context['branch_name'] = request.user.branch.name
             else:
                 context['branch_code'] = 'N/A'
+                context['branch_name'] = 'No Branch'
         except Exception:
             context['branch_code'] = 'N/A'
     

@@ -1,4 +1,5 @@
 from django.db import models
+from .models_user import User, AllowanceRequest
 
 class GLCode(models.Model):
     gl_code = models.CharField(max_length=20, primary_key=True )
@@ -107,11 +108,16 @@ class Transaction(models.Model):
         return f"{self.date} - {self.particulars} - {self.bill_amount}"
 
 class Employee(models.Model):
+    sap_id = models.CharField(max_length=50, primary_key=True)
     name = models.CharField(max_length=255)
     designation = models.CharField(max_length=100)
     address = models.TextField()
     email = models.EmailField()
     phone_no = models.CharField(max_length=15)
+    account = models.CharField(max_length=100, blank=True, null=True)
+    account_type = models.CharField(max_length=100, blank=True, null=True)
+    pls = models.CharField(max_length=100, blank=True, null=True, verbose_name="Profit Loss Saving")
+    current = models.CharField(max_length=100, blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 

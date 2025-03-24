@@ -86,8 +86,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'neondb',
         'USER': 'neondb_owner',
-        'PASSWORD': 'npg_UC3fg5WNthAd',
-        'HOST': 'ep-twilight-river-a1y1vrx0-pooler.ap-southeast-1.aws.neon.tech',
+        'PASSWORD': 'npg_SLYbF6hf2ETr',
+        'HOST': 'ep-sweet-resonance-a156qzl4-pooler.ap-southeast-1.aws.neon.tech',
         'PORT': '5432',
         'OPTIONS': {
             'sslmode': 'require',
@@ -141,6 +141,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom User Model
+AUTH_USER_MODEL = 'expenses.User'
 
 # Authentication settings
 LOGIN_URL = 'login'
