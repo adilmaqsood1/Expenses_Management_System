@@ -15,7 +15,7 @@ from django.core.paginator import Paginator
 class CustomLoginView(LoginView):
     template_name = 'expenses/login.html'
     redirect_field_name = 'next'
-    next_page = 'dashboard' 
+    next_page = 'admin:index' 
     
 class RegisterView(View):
     template_name = 'expenses/register.html'

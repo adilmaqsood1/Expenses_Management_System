@@ -5,8 +5,8 @@
     <!-- Animated background pattern -->
     <div class="absolute inset-0 overflow-hidden opacity-10">
         <div class="absolute -inset-[10%] grid grid-cols-10 gap-1 transform rotate-12">
-            {% for i in "x"|ljust:100 %}
-                <div class="h-32 bg-white rounded-full animate-pulse" style="animation-delay: {{ forloop.counter|divisibleby:7 }}00ms"></div>
+            {% for i in "x"|ljust:50 %}
+                <div class="h-32 bg-white rounded-full animate-pulse" style="animation-delay: {{ forloop.counter|divisibleby:5 }}00ms"></div>
             {% endfor %}
         </div>
     </div>

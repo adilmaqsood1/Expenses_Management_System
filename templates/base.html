@@ -249,11 +249,11 @@
                 </form>
             </div>
             {% else %}
-            <a href="{% url 'register' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+            <a href="{% url 'admin:index' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
                 </svg>
-                Register
+                login as an Admin
             </a>
             {% endif %}
         </div>
