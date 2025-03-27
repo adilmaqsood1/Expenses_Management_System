@@ -1,4 +1,5 @@
-// GL Code conversion script for expense management system
+// GL Code conversion script for expense management system 
+// Function to convert regular limit to millions
 
 document.addEventListener('DOMContentLoaded', function() {
     // Get the limit and limit_in_millions input fields
@@ -36,3 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+// done 
