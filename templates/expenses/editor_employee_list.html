@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+    </svg>
+    <span>Employee Management</span>
+</div>
+<div class="expense-content shadow-sm rounded-md">
+    <div class="flex justify-between items-center mb-4">
+        <form method="get" action="{% url 'editor_employee_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" value="{{ selected_name }}">
+            </div>
+            <div class="form-group">
+                <label>Designation:</label>
+                <input type="text" name="designation" value="{{ selected_designation }}">
+            </div>
+            <button type="submit" class="btn bg-cyan-600 text-white hover:bg-cyan-700 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+                Filter
+            </button>
+        </form>
+        <a href="{% url 'editor_add_employee' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add Employee
+        </a>
+    </div>
+    
+    <div class="overflow-x-auto rounded-lg shadow">
+        <table class="w-full border-collapse bg-white">
+            <thead>
+                <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">SAP ID</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Name</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Designation</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Email</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Phone</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% if employees %}
+                    {% for employee in employees %}
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                        <td class="py-3 px-4 text-gray-800 font-medium">{{ employee.sap_id }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ employee.name }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ employee.designation }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ employee.email }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ employee.phone_no }}</td>
+                        <td class="py-3 px-4">
+                            <a href="{% url 'editor_edit_employee' employee.sap_id %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="py-6 text-center text-gray-500 italic bg-gray-50">No employees found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if employees.has_other_pages %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-600">
+            Showing {{ employees.start_index }} to {{ employees.end_index }} of {{ total_count }} entries
+        </div>
+        <div class="flex space-x-1">
+            {% if employees.has_previous %}
+            <a href="?page={{ employees.previous_page_number }}&name={{ selected_name }}&designation={{ selected_designation }}&show={{ show }}" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+            </a>
+            {% endif %}
+            
+            {% for i in employees.paginator.page_range %}
+                {% if employees.number == i %}
+                <span class="px-3 py-1 bg-cyan-600 text-white rounded">{{ i }}</span>
+                {% elif i > employees.number|add:'-3' and i < employees.number|add:'3' %}
+                <a href="?page={{ i }}&name={{ selected_name }}&designation={{ selected_designation }}&show={{ show }}" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors duration-200">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if employees.has_next %}
+            <a href="?page={{ employees.next_page_number }}&name={{ selected_name }}&designation={{ selected_designation }}&show={{ show }}" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

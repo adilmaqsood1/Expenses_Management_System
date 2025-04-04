@@ -36,9 +36,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Date</th>
-                    {% if user.is_editor or user.is_admin %}
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    {% endif %}
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -51,7 +49,7 @@
                     </td>
                     {% endif %}
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">${{ request.amount }}</div>
+                        <div class="text-sm font-medium text-gray-900">{{ request.amount }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm text-gray-900">{{ request.purpose|truncatechars:50 }}</div>
@@ -67,15 +65,12 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ request.requested_date|date:"M d, Y" }}
                     </td>
-                    {% if user.is_editor or user.is_admin %}
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {% if request.status == 'PENDING' %}
+                        <a href="{% url 'allowance_request_detail' request.id %}" class="text-blue-600 hover:text-blue-900 mr-3">View Details</a>
+                        {% if request.status == 'PENDING' and user.is_editor or user.is_admin %}
                         <a href="{% url 'process_allowance_request' request.id %}" class="text-cyan-600 hover:text-cyan-900">Process</a>
-                        {% else %}
-                        <span class="text-gray-400">Processed</span>
                         {% endif %}
                     </td>
-                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

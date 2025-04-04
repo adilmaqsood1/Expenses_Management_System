@@ -15,7 +15,22 @@ from django.core.paginator import Paginator
 class CustomLoginView(LoginView):
     template_name = 'expenses/login.html'
     redirect_field_name = 'next'
-    next_page = 'admin:index' 
+    
+    def get_success_url(self):
+        # Get the redirect URL from the 'next' parameter if it exists
+        redirect_to = self.request.POST.get(self.redirect_field_name, '')
+        if not redirect_to:
+            # If no redirect URL is provided, redirect based on user role
+            if self.request.user.is_admin:
+                redirect_to = '/admin/'
+            
+            elif self.request.user.is_editor:
+                redirect_to = '/allowance-requests/'
+            elif self.request.user.role=='User':
+                redirect_to = '/expenses/'
+            else:
+                redirect_to = '/'
+        return redirect_to 
     
 class RegisterView(View):
     template_name = 'expenses/register.html'
@@ -216,13 +231,29 @@ class DashboardView(LoginRequiredMixin, View):
         all_activities = expense_activities + transaction_activities + vendor_activities
         recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
         
+        # Get user's allowance requests for dashboard updates
+        user_allowance_requests = []
+        pending_requests_count = 0
+        approved_requests_count = 0
+        rejected_requests_count = 0
+        
+        if request.user.is_subhead:
+            user_allowance_requests = AllowanceRequest.objects.filter(user=request.user).order_by('-requested_date')
+            pending_requests_count = user_allowance_requests.filter(status='PENDING').count()
+            approved_requests_count = user_allowance_requests.filter(status='APPROVED').count()
+            rejected_requests_count = user_allowance_requests.filter(status='REJECTED').count()
+        
         context = {
             'total_expenses': total_expenses,
             'pending_approvals': pending_approvals,
             'budget_utilization': budget_utilization,
             'month_change_percentage': month_change_percentage,
             'month_change_direction': 'up' if month_change_percentage >= 0 else 'down',
-            'recent_activities': recent_activities
+            'recent_activities': recent_activities,
+            'user_allowance_requests': user_allowance_requests,
+            'pending_requests_count': pending_requests_count,
+            'approved_requests_count': approved_requests_count,
+            'rejected_requests_count': rejected_requests_count
         }
         
         return render(request, 'expenses/dashboard.html', context)
@@ -336,6 +367,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         heads = Head.objects.all()
         sub_heads = SubHead.objects.all()
         vendors = Vendor.objects.all()
+        employees = Employee.objects.all()
         payment_modes = dict(Expense.PAYMENT_MODES)
         
         context = {
@@ -345,6 +377,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             'heads': heads,
             'sub_heads': sub_heads,
             'vendors': vendors,
+            'employees': employees,
             'payment_modes': payment_modes,
         }
         

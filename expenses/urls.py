@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, api, views_allowance
+from . import views, api, views_allowance, views_mis
 
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
@@ -23,9 +23,14 @@ urlpatterns = [
     # Allowance request URLs
     path('allowance-requests/', views_allowance.AllowanceRequestListView.as_view(), name='allowance_request_list'),
     path('allowance-requests/create/', views_allowance.CreateAllowanceRequestView.as_view(), name='create_allowance_request'),
+    path('allowance-requests/detail/<int:request_id>/', views_allowance.AllowanceRequestDetailView.as_view(), name='allowance_request_detail'),
     path('allowance-requests/process/<int:request_id>/', views_allowance.ProcessAllowanceRequestView.as_view(), name='process_allowance_request'),
     path('allowance-requests/analytics/', views_allowance.AllowanceAnalyticsView.as_view(), name='allowance_analytics'),
     
     # API endpoints
     path('api/head-budget/<int:head_id>/', api.head_budget, name='api_head_budget'),
+    path('api/mis-dashboard-data/', views_mis.MISDashboardDataAPIView.as_view(), name='api_mis_dashboard_data'),
+    
+    # MIS Dashboard
+    path('mis-dashboard/', views_mis.MISDashboardView.as_view(), name='mis_dashboard'),
 ]

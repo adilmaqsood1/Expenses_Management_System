@@ -28,14 +28,19 @@ window.onload = function() {
     toggleVendorEmployee();
 };
 </script>
-<div class="expense-header flex items-center">
+<div class="expense-header flex items-center animate-fadeIn">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
         <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
         <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
     </svg>
+    {% if request.user.role == 'USER' %}
+    <span>My Expense Dashboard</span>
+    {% else %}
     <span>Expense Management</span>
+    {% endif %}
 </div>
 <div class="expense-content shadow-sm rounded-md">
+    {% if request.user.role == 'USER' %}
     <form method="get" action="{% url 'expense_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
         <div class="form-group">
             <label>Start Date:</label>
@@ -72,7 +77,7 @@ window.onload = function() {
                 {% endfor %}
             </select>
         </div>
-        <div class="form-group">
+        {% comment %} <div class="form-group">
             <label>Sub-Head:</label>
             <select name="sub_head">
                 <option value="">All</option>
@@ -80,7 +85,7 @@ window.onload = function() {
                 <option value="{{ sub_head.id }}">{{ sub_head.code }}-{{ sub_head.name }}</option>
                 {% endfor %}
             </select>
-        </div>
+        </div> {% endcomment %}
         <div class="form-group">
             <label>Status:</label>
             <select name="status">
@@ -103,7 +108,30 @@ window.onload = function() {
             Add New Expense
         </a>
     </form>
+
+    {% endif %}
     
+    
+    {% if request.user.role == 'USER' %}
+    <div class="mb-4 p-4 bg-cyan-50 rounded-lg shadow-sm border border-cyan-100 animate-slideUp">
+        <h3 class="text-lg font-semibold text-cyan-800 mb-2">My Expense Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-cyan-500">
+                <div class="text-sm text-gray-500">Total Expenses</div>
+                <div class="text-xl font-bold text-gray-800">{{ expenses|length }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-green-500">
+                <div class="text-sm text-gray-500">Approved</div>
+                <div class="text-xl font-bold text-gray-800">{% with approved_count=0 %}{% for expense in expenses %}{% if expense.status == 'Approved' %}{% with approved_count=approved_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ approved_count }}{% endwith %}</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-yellow-500">
+                <div class="text-sm text-gray-500">Pending</div>
+                <div class="text-xl font-bold text-gray-800">{% with pending_count=0 %}{% for expense in expenses %}{% if expense.status == 'Pending' %}{% with pending_count=pending_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ pending_count }}{% endwith %}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="flex items-center mb-4 text-sm">
         <form id="showEntriesForm" method="get" action="{% url 'expense_list' %}" class="flex items-center">
             <label class="mr-2 text-gray-600">Show</label>
@@ -152,6 +180,15 @@ window.onload = function() {
         <table class="w-full border-collapse bg-white">
             <thead>
                 <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    {% if request.user.role == 'USER' %}
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    {% else %}
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Cost Center</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Region</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Branch</th>
@@ -163,12 +200,27 @@ window.onload = function() {
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 {% if expenses %}
                     {% for expense in expenses %}
                     <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                        {% if request.user.role == 'USER' %}
+                        <td class="py-3 px-4 text-gray-800">{{ expense.invoice_no|default:'-' }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
+                            <div class="text-xs text-gray-500">{{ expense.branch.name }}</div>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">{{ expense.vendor.name }}</td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.amount }}</td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.net_amount }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ expense.created_date|date:"d M Y" }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                        </td>
+                        {% else %}
                         <td class="py-3 px-4 text-gray-800">{{ expense.cost_center.name }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.region.name }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.branch.code }}-{{ expense.branch.name }}</td>
@@ -182,11 +234,12 @@ window.onload = function() {
                         <td class="py-3 px-4 text-gray-800">
                             <span class="px-2 py-1 text-xs rounded-full {% if expense.status == 'Approved' %}bg-green-100 text-green-800{% elif expense.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif expense.status == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="12" class="py-6 text-center text-gray-500 italic bg-gray-50">No expenses found</td>
+                        <td colspan="{% if request.user.role == 'USER' %}7{% else %}12{% endif %}" class="py-6 text-center text-gray-500 italic bg-gray-50">No expenses found</td>
                     </tr>
                 {% endif %}
             </tbody>

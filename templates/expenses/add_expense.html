@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<link rel="stylesheet" href="/static/css/expense_form.css">
+<script src="/static/js/expense_form.js"></script>
 <div class="expense-header">
     Expense Posting
 </div>
@@ -8,7 +10,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <h4>Add New Expense:</h4>
-        <div class="form-row">
+        {% comment %} <div class="form-row">
             <div class="form-group">
                 <label for="region"><span class="required">*</span>Region:</label>
                 <select id="region" name="region">
@@ -33,16 +35,16 @@
                     {% endfor %}
                 </select>
             </div>
-        </div>
+        </div> {% endcomment %}
         <div class="form-row">
-            <div class="form-group">
+            {% comment %} <div class="form-group">
                 <label for="head"><span class="required">*</span>Head:</label>
                 <select id="head" name="head">
                     {% for head in heads %}
                     <option value="{{ head.id }}">{{ head.code }}-{{ head.name }}</option>
                     {% endfor %}
                 </select>
-            </div>
+            </div> {% endcomment %}
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
                 <select id="sub_head" name="sub_head">
@@ -60,11 +62,19 @@
                     <option value="Employee">Employee</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="vendor-field">
                 <label for="vendor"><span class="required">*</span>Vendor:</label>
                 <select id="vendor" name="vendor">
                     {% for vendor in vendors %}
                     <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" id="employee-field" style="display: none;">
+                <label for="employee"><span class="required">*</span>Employee:</label>
+                <select id="employee" name="employee">
+                    {% for employee in employees %}
+                    <option value="{{ employee.sap_id }}">{{ employee.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -112,7 +122,7 @@
             </div>
         </div>
         
-        <div class="form-row">
+        {% comment %} <div class="form-row">
             <div class="form-group">
                 <label for="withholding_sales_tax"><span class="required">*</span>Withholding Sales Tax Amount:</label>
                 <input type="text" id="withholding_sales_tax" name="withholding_sales_tax">
@@ -121,7 +131,7 @@
                 <label for="withholding_income_tax"><span class="required">*</span>Withholding Income Tax Amount:</label>
                 <input type="text" id="withholding_income_tax" name="withholding_income_tax">
             </div>
-        </div>
+        </div> {% endcomment %}
         
         <div class="form-row">
             <div class="form-group">

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+    </svg>
+    <span>Allowance Request Management</span>
+</div>
+<div class="expense-content shadow-sm rounded-md">
+    <form method="get" action="{% url 'editor_allowance_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+        <div class="form-group">
+            <label>Status:</label>
+            <select name="status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved</option>
+                <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>From Date:</label>
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </div>
+        <div class="form-group">
+            <label>To Date:</label>
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </div>
+        <button type="submit" class="btn bg-cyan-600 text-white hover:bg-cyan-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            Filter
+        </button>
+    </form>
+    
+    <div class="overflow-x-auto rounded-lg shadow mt-4">
+        <table class="w-full border-collapse bg-white">
+            <thead>
+                <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">ID</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Requester</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Branch</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800"> Rs Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Purpose</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Requested Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% if allowance_requests %}
+                    {% for request in allowance_requests %}
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                        <td class="py-3 px-4 text-gray-800 font-medium">{{ request.id }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ request.user.username }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ request.user.branch.name|default:"No Branch" }}</td>
+                        <td class="py-3 px-4 text-gray-800">Rs {{ request.amount }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <div class="truncate max-w-xs" title="{{ request.purpose }}">
+                                {{ request.purpose|truncatechars:50 }}
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">{{ request.requested_date|date:"M d, Y" }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <span class="px-2 py-1 text-xs rounded-full {% if request.status == 'APPROVED' %}bg-green-100 text-green-800{% elif request.status == 'REJECTED' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if request.status == 'PENDING' %}
+                            <a href="{% url 'process_allowance_request' request.id %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Process
+                            </a>
+                            {% else %}
+                            <div class="text-xs text-gray-500">
+                                Processed by: {{ request.processed_by.username }}<br>
+                                {{ request.processed_date|date:"M d, Y" }}
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="py-6 text-center text-gray-500 italic bg-gray-50">No allowance requests found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if allowance_requests.has_other_pages %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-600">
+            Showing {{ allowance_requests.start_index }} to {{ allowance_requests.end_index }} of {{ allowance_requests.paginator.count }} entries
+        </div>
+        <div class="flex space-x-1">
+            {% if allowance_requests.has_previous %}
+            <a href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">&laquo; First</a>
+            <a href="?page={{ allowance_requests.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">&lsaquo; Prev</a>
+            {% endif %}
+            
+            {% for i in allowance_requests.paginator.page_range %}
+                {% if allowance_requests.number == i %}
+                <span class="px-3 py-1 rounded border border-cyan-600 bg-cyan-600 text-white text-sm">{{ i }}</span>
+                {% elif i > allowance_requests.number|add:'-3' and i < allowance_requests.number|add:'3' %}
+                <a href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if allowance_requests.has_next %}
+            <a href="?page={{ allowance_requests.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">Next &rsaquo;</a>
+            <a href="?page={{ allowance_requests.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">Last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

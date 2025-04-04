@@ -108,6 +108,21 @@ class ProcessAllowanceRequestView(LoginRequiredMixin, View):
         
         return redirect('allowance_request_list')
 
+class AllowanceRequestDetailView(LoginRequiredMixin, View):
+    def get(self, request, request_id):
+        # Get the allowance request
+        allowance_request = get_object_or_404(AllowanceRequest, id=request_id)
+        
+        # Check if the user has permission to view this request
+        if not (request.user.is_admin or request.user.is_editor or request.user.is_mis or request.user == allowance_request.user):
+            messages.error(request, "You don't have permission to view this allowance request.")
+            return redirect('dashboard')
+        
+        context = {
+            'allowance_request': allowance_request
+        }
+        return render(request, 'expenses/allowance_request_detail.html', context)
+
 class AllowanceAnalyticsView(LoginRequiredMixin, View):
     def get(self, request):
         # Only MIS and admin users can access analytics
