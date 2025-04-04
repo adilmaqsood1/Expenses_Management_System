@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -18,8 +18,9 @@ class MISDashboardView(LoginRequiredMixin, View):
     """
     def get(self, request):
         # Check if user has MIS role
-        if request.user.is_mis:
-            return render(request, 'expenses/mis_dashboard.html')
+        if not request.user.is_mis:
+            # Redirect non-MIS users to the regular dashboard
+            return redirect('dashboard')
         
         # Get all data needed for the dashboard
         context = self.get_dashboard_data()

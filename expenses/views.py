@@ -29,7 +29,7 @@ class CustomLoginView(LoginView):
             elif self.request.user.role=='User':
                 redirect_to = '/expenses/'
             else:
-                redirect_to = '/'
+                redirect_to = '/mis-dashboard/'
         return redirect_to 
     
 class RegisterView(View):
