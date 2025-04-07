@@ -50,10 +50,21 @@ class SubHead(models.Model):
         return f"{self.code}-{self.name}"
 
 class Vendor(models.Model):
+    VENDOR_TYPES = [
+        ('Individual', 'Individual'),
+        ('Company', 'Company'),
+        ('Government', 'Government'),
+    ]
+    
     name = models.CharField(max_length=255)
     cnic = models.CharField(max_length=15, blank=True, null=True)
-    type = models.CharField(max_length=50, blank=True, null=True)
-    status = models.CharField(max_length=50, blank=True, null=True)
+    type = models.CharField(max_length=50, choices=VENDOR_TYPES, blank=True, null=True)
+    
+    VENDOR_STATUS = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
+    ]
+    status = models.CharField(max_length=50, choices=VENDOR_STATUS, blank=True, null=True)
     disabled = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     updated_date = models.DateTimeField(auto_now=True, null=True)

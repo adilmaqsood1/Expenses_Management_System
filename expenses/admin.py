@@ -61,11 +61,36 @@ class SubHeadAdmin(admin.ModelAdmin):
     list_filter = ('head',)
     search_fields = ('code', 'name')
 
+class VendorTypeFilter(admin.SimpleListFilter):
+    title = 'Vendor Type'
+    parameter_name = 'type'
+    
+    def lookups(self, request, model_admin):
+        return Vendor.VENDOR_TYPES
+    
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(type=self.value())
+        return queryset
+
+class VendorStatusFilter(admin.SimpleListFilter):
+    title = 'Vendor Status'
+    parameter_name = 'status'
+    
+    def lookups(self, request, model_admin):
+        return Vendor.VENDOR_STATUS
+    
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(status=self.value())
+        return queryset
+
 class VendorAdmin(ImportExportModelAdmin):
     list_display = ('name', 'cnic', 'type', 'status', 'disabled', 'created_date', 'total_expenses')
-    list_filter = ('type', 'status', 'disabled')
+    list_filter = (VendorTypeFilter, VendorStatusFilter, 'disabled')
     search_fields = ('name', 'cnic')
     readonly_fields = ('created_date', 'updated_date')
+    list_per_page = 25
     fieldsets = (
         ('Vendor Information', {
             'fields': ('name', 'cnic', 'type')
