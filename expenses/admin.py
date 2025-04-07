@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Sum
 from import_export.admin import ImportExportModelAdmin
-from .models import GLCode, Region, Branch, CostCenter, Head, SubHead, Vendor, Expense, Transaction
+from .models import GLCode, Region, Branch, CostCenter, Head, SubHead, Vendor, Expense, Transaction, Employee
 from .models_user import User, AllowanceRequest
 
 # Enhanced Admin Classes
@@ -163,6 +163,24 @@ class AllowanceRequestAdmin(admin.ModelAdmin):
         }),
     )
 
+class EmployeeAdmin(ImportExportModelAdmin):
+    list_display = ('sap_id', 'name', 'designation', 'email', 'phone_no', 'created_date')
+    list_filter = ('designation', 'created_date')
+    search_fields = ('sap_id', 'name', 'email', 'phone_no')
+    readonly_fields = ('created_date', 'updated_date')
+    fieldsets = (
+        ('Employee Information', {
+            'fields': ('sap_id', 'name', 'designation', 'address', 'email', 'phone_no')
+        }),
+        ('Account Details', {
+            'fields': ('account_name', 'account_number', 'account_type', 'account', 'pls', 'current')
+        }),
+        ('Timestamps', {
+            'fields': ('created_date', 'updated_date'),
+            'classes': ('collapse',)
+        }),
+    )
+
 # Register models with custom admin classes
 admin.site.register(GLCode, GLCodeAdmin)
 admin.site.register(Region, RegionAdmin)
@@ -175,3 +193,4 @@ admin.site.register(Expense, ExpenseAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(AllowanceRequest, AllowanceRequestAdmin)
+admin.site.register(Employee, EmployeeAdmin)

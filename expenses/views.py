@@ -370,6 +370,9 @@ class AddExpenseView(LoginRequiredMixin, View):
         employees = Employee.objects.all()
         payment_modes = dict(Expense.PAYMENT_MODES)
         
+        # Get GL Codes for the sub-head dropdown
+        gl_codes = GLCode.objects.all()
+        
         context = {
             'regions': regions,
             'branches': branches,
@@ -379,6 +382,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             'vendors': vendors,
             'employees': employees,
             'payment_modes': payment_modes,
+            'GLCode': gl_codes,
         }
         
         return render(request, 'expenses/add_expense.html', context)

@@ -2,7 +2,7 @@
 
 {% block content %}
 <link rel="stylesheet" href="/static/css/expense_form.css">
-<script src="/static/js/expense_form.js"></script>
+<script src="/static/js/expense_form.js" defer></script>
 <div class="expense-header">
     Expense Posting
 </div>
@@ -48,8 +48,8 @@
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
                 <select id="sub_head" name="sub_head">
-                    {% for sub_head in sub_heads %}
-                    <option value="{{ sub_head.id }}">{{ sub_head.code }}-{{ sub_head.name }}</option>
+                    {% for gl_code in GLCode %}
+                    <option value="{{ gl_code.gl_code }}">{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
                     {% endfor %}
                 </select>
             </div>
