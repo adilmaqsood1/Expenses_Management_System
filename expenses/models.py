@@ -92,7 +92,7 @@ class Expense(models.Model):
     sub_head = models.ForeignKey(SubHead, on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODES)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     withholding_sales_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     withholding_income_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     net_amount = models.DecimalField(max_digits=12, decimal_places=2)

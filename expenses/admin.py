@@ -93,15 +93,15 @@ class VendorAdmin(ImportExportModelAdmin):
     list_per_page = 25
     fieldsets = (
         ('Vendor Information', {
-            'fields': ('name', 'cnic', 'type')
+            'fields': ('name', 'cnic', 'type','status', 'disabled')
         }),
-        ('Status', {
-            'fields': ('status', 'disabled')
-        }),
-        ('Timestamps', {
-            'fields': ('created_date', 'updated_date'),
-            'classes': ('collapse',)
-        }),
+        # ('Status', {
+        #     'fields': ('status', 'disabled')
+        # }),
+        # ('Timestamps', {
+        #     'fields': ('created_date', 'updated_date'),
+        #     'classes': ('collapse',)
+        # }),
     )
     
     def total_expenses(self, obj):
@@ -117,16 +117,7 @@ class ExpenseAdmin(ImportExportModelAdmin):
     readonly_fields = ('created_date',)
     fieldsets = (
         ('Basic Information', {
-            'fields': ('invoice_no', 'invoice_date', 'vendor', 'description')
-        }),
-        ('Financial Details', {
-            'fields': ('amount', 'withholding_sales_tax', 'withholding_income_tax', 'net_amount', 'payment_mode')
-        }),
-        ('Categorization', {
-            'fields': ('region', 'branch', 'cost_center', 'head', 'sub_head')
-        }),
-        ('Status', {
-            'fields': ('status', 'created_date')
+            'fields': ('invoice_no', 'invoice_date', 'vendor', 'description', 'status')
         }),
     )
     
@@ -154,20 +145,13 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email', 'first_name', 'last_name')
     fieldsets = (
         ('User Information', {
-            'fields': ('username', 'email', 'password', 'first_name', 'last_name')
+            'fields': ('username', 'email', 'password', 'first_name', 'last_name', 'date_joined')
         }),
         ('Permissions', {
             'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
         }),
         ('Account Details', {
             'fields': ('account_name', 'account_number', 'account_type')
-        }),
-        ('Branch Assignment', {
-            'fields': ('branch',)
-        }),
-        ('Important Dates', {
-            'fields': ('last_login', 'date_joined'),
-            'classes': ('collapse',)
         }),
     )
 
@@ -200,10 +184,10 @@ class EmployeeAdmin(ImportExportModelAdmin):
         ('Account Details', {
             'fields': ('account_name', 'account_number', 'account_type', 'account', 'pls', 'current')
         }),
-        ('Timestamps', {
-            'fields': ('created_date', 'updated_date'),
-            'classes': ('collapse',)
-        }),
+        # ('Timestamps', {
+        #     'fields': ('created_date', 'updated_date'),
+        #     'classes': ('collapse',)
+        # }),
     )
 
 # Register models with custom admin classes
