@@ -18,17 +18,11 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
-class Branch(models.Model):
-    code = models.CharField(max_length=20)
-    name = models.CharField(max_length=100)
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"{self.code}-{self.name}"
+# Branch model has been removed
 
 class CostCenter(models.Model):
-    name = models.CharField(max_length=100)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    # branch field has been removed
     
     def __str__(self):
         return self.name
@@ -85,16 +79,17 @@ class Expense(models.Model):
         ('Rejected', 'Rejected'),
     ]
     
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
-    head = models.ForeignKey(Head, on_delete=models.CASCADE)
+    # region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    # branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    # cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
+    # head = models.ForeignKey(Head, on_delete=models.CASCADE)
+    gl_code = models.ForeignKey(GLCode, on_delete=models.CASCADE)
     sub_head = models.ForeignKey(SubHead, on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    withholding_sales_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    withholding_income_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    # withholding_sales_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    # withholding_income_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     net_amount = models.DecimalField(max_digits=12, decimal_places=2)
     invoice_no = models.CharField(max_length=50, blank=True, null=True)
     invoice_date = models.DateField(blank=True, null=True)

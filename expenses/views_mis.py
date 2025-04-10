@@ -8,7 +8,7 @@ from decimal import Decimal
 import json
 import datetime
 
-from .models import Expense, Head, Branch, Vendor, Region, SubHead
+from .models import Expense, Head, Vendor, Region, SubHead
 from .models_user import User
 
 class MISDashboardView(LoginRequiredMixin, View):
@@ -50,7 +50,6 @@ class MISDashboardView(LoginRequiredMixin, View):
             
             # Filter by head
             head_filter = filters.get('head')
-            branch_filter = filters.get('branch')
             vendor_filter = filters.get('vendor')
             status_filter = filters.get('status')
         
@@ -60,9 +59,7 @@ class MISDashboardView(LoginRequiredMixin, View):
         # Apply additional filters if provided
         if filters:
             if head_filter and head_filter != 'all':
-                expenses = expenses.filter(head_id=head_filter)
-            if branch_filter and branch_filter != 'all':
-                expenses = expenses.filter(branch_id=branch_filter)
+                expenses = expenses.filter(sub_head_id=head_filter)
             if vendor_filter and vendor_filter != 'all':
                 expenses = expenses.filter(vendor_id=vendor_filter)
             if status_filter and status_filter != 'all':
@@ -81,8 +78,8 @@ class MISDashboardView(LoginRequiredMixin, View):
         budget_utilization = int((utilized_budget / total_budget) * 100) if total_budget > 0 else 0
         
         # Get expense by head data
-        expenses_by_head = expenses.values('head__name').annotate(total=Sum('amount')).order_by('-total')
-        head_labels = [item['head__name'] for item in expenses_by_head]
+        expenses_by_head = expenses.values('sub_head__name').annotate(total=Sum('amount')).order_by('-total')
+        head_labels = [item['sub_head__name'] for item in expenses_by_head]
         head_values = [float(item['total']) for item in expenses_by_head]
         
         # Get expense trend data (last 12 months)
@@ -100,20 +97,16 @@ class MISDashboardView(LoginRequiredMixin, View):
             trend_labels.append(month_name)
             trend_data.append(float(month_expenses))
         
-        # Get expense by branch data
-        expenses_by_branch = expenses.values('branch__name').annotate(total=Sum('amount')).order_by('-total')
-        branch_labels = [item['branch__name'] for item in expenses_by_branch]
-        branch_values = [float(item['total']) for item in expenses_by_branch]
+
         
         # Get expense by status data
         expenses_by_status = expenses.values('status').annotate(total=Sum('amount')).order_by('status')
         status_labels = [item['status'] for item in expenses_by_status]
         status_values = [float(item['total']) for item in expenses_by_status]
         
-        # Get expense by region data
-        expenses_by_region = expenses.values('branch__region__name').annotate(total=Sum('amount')).order_by('-total')
-        region_labels = [item['branch__region__name'] or 'Unassigned' for item in expenses_by_region]
-        region_values = [float(item['total']) for item in expenses_by_region]
+        # Region data has been removed
+        region_labels = []
+        region_values = []
         
         # Get top vendors data
         top_vendors = expenses.values('vendor__name').annotate(total=Sum('amount')).order_by('-total')[:5]
@@ -147,9 +140,8 @@ class MISDashboardView(LoginRequiredMixin, View):
         # Get top expenses for table
         top_expenses = expenses.order_by('-amount')[:10]
         
-        # Get all heads, branches, and vendors for filters
+        # Get all heads and vendors for filters
         heads = Head.objects.all()
-        branches = Branch.objects.all()
         vendors = Vendor.objects.all()
         
         # Prepare context
@@ -164,20 +156,17 @@ class MISDashboardView(LoginRequiredMixin, View):
             'head_values': json.dumps(head_values),
             'trend_labels': json.dumps(trend_labels),
             'trend_values': json.dumps(trend_data),
-            'branch_labels': json.dumps(branch_labels),
-            'branch_values': json.dumps(branch_values),
+
             'status_labels': json.dumps(status_labels),
             'status_values': json.dumps(status_values),
             'vendor_labels': json.dumps(vendor_labels),
             'vendor_values': json.dumps(vendor_values),
-            'region_labels': json.dumps(region_labels),
-            'region_values': json.dumps(region_values),
+
             'monthly_labels': json.dumps(monthly_labels),
             'current_year_values': json.dumps(current_year_values),
             'previous_year_values': json.dumps(previous_year_values),
             'top_expenses': top_expenses,
             'heads': heads,
-            'branches': branches,
             'vendors': vendors,
             'regions': Region.objects.all(),
         }
@@ -216,14 +205,12 @@ class MISDashboardDataAPIView(LoginRequiredMixin, View):
                 'head_values': json.loads(context['head_values']),
                 'trend_labels': json.loads(context['trend_labels']),
                 'trend_values': json.loads(context['trend_values']),
-                'branch_labels': json.loads(context['branch_labels']),
-                'branch_values': json.loads(context['branch_values']),
+
                 'status_labels': json.loads(context['status_labels']),
                 'status_values': json.loads(context['status_values']),
                 'vendor_labels': json.loads(context['vendor_labels']),
                 'vendor_values': json.loads(context['vendor_values']),
-                'region_labels': json.loads(context['region_labels']),
-                'region_values': json.loads(context['region_values']),
+
                 'monthly_labels': json.loads(context['monthly_labels']),
                 'current_year_values': json.loads(context['current_year_values']),
                 'previous_year_values': json.loads(context['previous_year_values'])

@@ -11,6 +11,8 @@ import datetime
 
 from .models import Vendor, Employee, Expense
 from .models_user import AllowanceRequest, User
+from django.utils.timezone import now
+import datetime
 
 # Custom decorator for editor role check
 def editor_required(view_func):
@@ -35,10 +37,11 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         # Get pending allowance requests count
         pending_allowances = AllowanceRequest.objects.filter(status='PENDING').count()
         
-        # Get recently processed allowance requests
-        recent_processed = AllowanceRequest.objects.filter(
-            processed_by=request.user
-        ).order_by('-processed_date')[:5]
+        # Get recently processed expenses
+        recent_processed = Expense.objects.filter(
+            status__in=['Pending', 'Approved', 'Rejected'],
+            created_date__gte=timezone.now() - datetime.timedelta(days=30)
+        ).order_by('-created_date')[:5]
         
         # Get pending expense approvals count
         pending_expenses = Expense.objects.filter(status='Pending').count()
@@ -389,3 +392,130 @@ class EditorToggleVendorStatusView(LoginRequiredMixin, EditorRequiredMixin, View
             })
         
         return redirect('editor_vendor_list')
+
+class EditorExpenseListView(LoginRequiredMixin, EditorRequiredMixin, View):
+    """View for listing expenses for editors to approve or reject"""
+    def get(self, request):
+        expenses_list = Expense.objects.all().order_by('-created_date')
+        vendors = Vendor.objects.all()
+        employees = Employee.objects.all()
+        status_choices = dict(Expense.STATUS_CHOICES)
+        expense_types = ['Vendor', 'Employee']
+        
+        # Apply filters
+        # Date filters
+        start_date = request.GET.get('start_date')
+        if start_date:
+            expenses_list = expenses_list.filter(created_date__gte=start_date)
+            
+        end_date = request.GET.get('end_date')
+        if end_date:
+            expenses_list = expenses_list.filter(created_date__lte=end_date)
+        
+        # Type filter
+        type_filter = request.GET.get('type')
+        
+        # Vendor filter
+        vendor_filter = request.GET.get('vendor')
+        if vendor_filter:
+            expenses_list = expenses_list.filter(vendor_id=vendor_filter)
+        
+        # Employee filter (not implemented yet as it's not a field in Expense model)
+        employee_filter = request.GET.get('employee')
+        
+        # Status filter
+        status_filter = request.GET.get('status')
+        if status_filter:
+            expenses_list = expenses_list.filter(status=status_filter)
+        
+        # Get the show parameter from the request, default to showing all entries
+        show = request.GET.get('show', '-1')
+        
+        # If show is not 'All' (-1), paginate the results
+        if show != '-1':
+            show = int(show)
+            paginator = Paginator(expenses_list, show)
+            page = request.GET.get('page', 1)
+            expenses = paginator.get_page(page)
+            total_pages = paginator.num_pages
+        else:
+            # If showing all, no pagination needed
+            expenses = expenses_list
+            total_pages = 1
+        
+        # Count expenses processed today
+        today = now().date()
+        processed_today = Expense.objects.filter(
+            Q(status='Approved') | Q(status='Rejected'),
+            created_date=today
+        ).count()
+        
+        context = {
+            'expenses': expenses,
+            'vendors': vendors,
+            'employees': employees,
+            'status_choices': status_choices,
+            'expense_types': expense_types,
+            'show': show,
+            'total_pages': total_pages,
+            'current_page': int(request.GET.get('page', 1)),
+            'total_count': expenses_list.count(),
+            'processed_today': processed_today,
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        
+        return render(request, 'expenses/editor_expense_list.html', context)
+
+class ProcessExpenseView(LoginRequiredMixin, EditorRequiredMixin, View):
+    """View for processing expense requests with approval/rejection reasons"""
+    def get(self, request, expense_id=None):
+        # If expense_id is provided, show the individual expense processing page
+        if expense_id:
+            expense = get_object_or_404(Expense, id=expense_id)
+            context = {
+                'expense': expense
+            }
+            return render(request, 'expenses/process_expense.html', context)
+        
+        # If no expense_id, redirect to the expense list
+        return redirect('editor_expense_list')
+    
+    def post(self, request, expense_id=None):
+        # Handle form submission from the expense list page
+        if not expense_id:
+            expense_id = request.POST.get('expense_id')
+            if not expense_id:
+                messages.error(request, "No expense specified.")
+                return redirect('editor_expense_list')
+        
+        expense = get_object_or_404(Expense, id=expense_id)
+        
+        # Check if expense is already processed
+        if expense.status != 'Pending':
+            messages.warning(request, f"This expense has already been {expense.status.lower()}.")
+            return redirect('editor_expense_list')
+        
+        # Process the expense
+        action = request.POST.get('action')
+        if action == 'approve':
+            expense.status = 'Approved'
+            approval_reason = request.POST.get('approval_reason', '')
+            # You might want to add a field to store approval reason in your Expense model
+            messages.success(request, "Expense approved successfully.")
+        elif action == 'reject':
+            expense.status = 'Rejected'
+            rejection_reason = request.POST.get('rejection_reason', '')
+            if not rejection_reason:
+                messages.error(request, "Please provide a reason for rejection.")
+                return redirect('process_expense', expense_id=expense_id) if expense_id else redirect('editor_expense_list')
+            # You might want to add a field to store rejection reason in your Expense model
+            messages.success(request, "Expense rejected successfully.")
+        else:
+            messages.error(request, "Invalid action specified.")
+            return redirect('editor_expense_list')
+        
+        # Save the expense
+        expense.save()
+        
+        return redirect('editor_expense_list')

@@ -170,7 +170,7 @@ JAZZMIN_SETTINGS = {
     # Copyright on the footer
     "copyright": "Expense Management ",
     # The model admin to search from the search bar, search bar omitted if excluded
-    "search_model": "expenses.Expense",
+    # "search_model": "expenses.Expense",
     # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
     "user_avatar": None,
     
@@ -254,7 +254,9 @@ JAZZMIN_SETTINGS = {
     "custom_css": "css/jazzmin-custom.css",
     "custom_js": "js/jazzmin-custom.js",
     # Whether to show the UI customizer on the sidebar
-    "show_ui_builder": True,
+    "show_ui_builder": False,
+    
+    "user_avatar": None,
     # Theme (Use Bootswatch themes or custom CSS)
     "theme": "default",
     # Theme customizations

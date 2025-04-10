@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Sum
 from import_export.admin import ImportExportModelAdmin
-from .models import GLCode, Region, Branch, CostCenter, Head, SubHead, Vendor, Expense, Transaction, Employee
+from .models import GLCode, Region, CostCenter, Head, SubHead, Vendor, Expense, Transaction, Employee, GLCode
 from .models_user import User, AllowanceRequest
 
 # Enhanced Admin Classes
@@ -31,21 +31,22 @@ class GLCodeAdmin(ImportExportModelAdmin):
     utilization_percentage.short_description = 'Utilization'
 
 class RegionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'branch_count')
+    list_display = ('name',)
     search_fields = ('name',)
     
-    def branch_count(self, obj):
-        return obj.branch_set.count()
-    branch_count.short_description = 'Number of Branches'
+    # Remove branch_count method as Branch model no longer exists
+    # def branch_count(self, obj):
+    #     return obj.branch_set.count()
+    # branch_count.short_description = 'Number of Branches'
 
-class BranchAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'region')
-    list_filter = ('region',)
-    search_fields = ('code', 'name')
+# Remove BranchAdmin class as Branch model no longer exists
+# class BranchAdmin(admin.ModelAdmin):
+#     list_display = ('code', 'name', 'region')
+#     list_filter = ('region',)
+#     search_fields = ('code', 'name')
 
 class CostCenterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'branch')
-    list_filter = ('branch',)
+    list_display = ('name',)
     search_fields = ('name',)
 
 class HeadAdmin(admin.ModelAdmin):
@@ -111,15 +112,43 @@ class VendorAdmin(ImportExportModelAdmin):
 
 class ExpenseAdmin(ImportExportModelAdmin):
     list_display = ('invoice_no', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status', 'status_badge')
-    list_filter = ('status', 'payment_mode', 'region', 'branch', 'created_date')
+    list_filter = ('status', 'payment_mode', 'created_date')
     search_fields = ('invoice_no', 'description', 'vendor__name')
     date_hierarchy = 'created_date'
-    readonly_fields = ('created_date',)
+    readonly_fields = ('created_date', 'budget_info')
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('invoice_no', 'invoice_date', 'vendor', 'description', 'status')
+        ('Add New Expense', {
+            'fields': ('gl_code', 'vendor', 'payment_mode', 'amount', 'invoice_no', 'invoice_date', 'net_amount', 'description', 'status')
+        }),
+        ('Budget Information', {
+            'fields': ('budget_info',),
+            'classes': ('collapse',)
         }),
     )
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "sub_head":
+            # Display GL code and description together
+            kwargs["queryset"] = SubHead.objects.all().order_by('code')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def budget_info(self, obj):
+        # Display budget information in a formatted way
+        return format_html(
+            '<div class="budget-info">' 
+            '<div class="budget-item"><div class="budget-label">TOTAL HEAD BUDGET</div><div class="budget-value">Loading...</div></div>' 
+            '<div class="budget-item"><div class="budget-label">UTILIZED BUDGET</div><div class="budget-value">Loading...</div></div>' 
+            '<div class="budget-item"><div class="budget-label">AVAILABLE BUDGET</div><div class="budget-value">Loading...</div></div>' 
+            '<div class="budget-item"><div class="budget-label">MONTHLY FINANCIAL LIMIT</div><div class="budget-value">Loading...</div></div>' 
+            '</div>'
+        )
+    budget_info.short_description = 'Budget Information'
+    
+    class Media:
+        js = ('js/expense_form.js',)
+        css = {
+            'all': ('css/expense_form.css',)
+        }
     
     def status_badge(self, obj):
         colors = {
@@ -140,8 +169,8 @@ class TransactionAdmin(ImportExportModelAdmin):
     date_hierarchy = 'date'
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'role', 'branch', 'is_staff', 'is_active')
-    list_filter = ('role', 'is_staff', 'is_active', 'branch')
+    list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff', 'is_active')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     fieldsets = (
         ('User Information', {
@@ -193,7 +222,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
 # Register models with custom admin classes
 admin.site.register(GLCode, GLCodeAdmin)
 admin.site.register(Region, RegionAdmin)
-admin.site.register(Branch, BranchAdmin)
+# admin.site.register(Branch, BranchAdmin)
 admin.site.register(CostCenter, CostCenterAdmin)
 admin.site.register(Head, HeadAdmin)
 admin.site.register(SubHead, SubHeadAdmin)

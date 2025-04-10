@@ -1,33 +1,31 @@
-{% extends 'base.html' %}
-
 {% block content %}
-<div class="expense-header animate-fadeIn">
+<div class="expense-header animate-fadeIn bg-gradient-to-r from-cyan-700 to-cyan-600 text-white p-4 square-lg shadow-md transform transition-all duration-300 ">
     Editor Dashboard
 </div>
 <div class="expense-content">
     <div class="mb-6 animate-slideInLeft">
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Welcome to Editor Dashboard</h3>
+        <h3 class="text-xl text-center font-bold text-gray-800 mb-2">Welcome to Editor Dashboard</h3>
         <p class="text-gray-600">Manage allowance requests, employees, and vendors from this dashboard.</p>
     </div>
     
     <!-- System Overview Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animate-slideInBottom">
-        <div class="stats-card bg-white p-4 rounded shadow">
+        <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <div class="text-sm text-gray-500 mb-1">Pending Allowances</div>
             <div class="text-2xl font-bold text-gray-800">{{ pending_allowances }}</div>
             <div class="text-xs text-yellow-500 mt-1">{% if pending_allowances > 0 %}Requires attention{% else %}No pending requests{% endif %}</div>
         </div>
-        <div class="stats-card bg-white p-4 rounded shadow">
+        <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <div class="text-sm text-gray-500 mb-1">Pending Expenses</div>
             <div class="text-2xl font-bold text-gray-800">{{ pending_expenses }}</div>
             <div class="text-xs text-yellow-500 mt-1">{% if pending_expenses > 0 %}Requires review{% else %}No pending expenses{% endif %}</div>
         </div>
-        <div class="stats-card bg-white p-4 rounded shadow">
+        <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <div class="text-sm text-gray-500 mb-1">Total Employees</div>
             <div class="text-2xl font-bold text-gray-800">{{ employee_count }}</div>
             <div class="text-xs text-blue-500 mt-1">Manage employee records</div>
         </div>
-        <div class="stats-card bg-white p-4 rounded shadow">
+        <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <div class="text-sm text-gray-500 mb-1">Active Vendors</div>
             <div class="text-2xl font-bold text-gray-800">{{ vendor_count }}</div>
             <div class="text-xs text-blue-500 mt-1">Manage vendor records</div>
@@ -51,7 +49,20 @@
                     </div>
                 </div>
             </a>
-            <a href="{% url 'editor_employee_list' %}" class="dashboard-card group">
+            <a href="{% url 'editor_expense_list' %}" class="dashboard-card group">
+                <div class="bg-yellow-50 p-4 flex items-center">
+                    <div class="dashboard-icon bg-yellow-100 p-3 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-800 group-hover:text-yellow-700 transition-colors">Expense Approvals</h5>
+                        <p class="text-sm text-gray-500">Review and process expense requests</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'employee_list' %}" class="dashboard-card group">
                 <div class="bg-green-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-green-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,7 +75,7 @@
                     </div>
                 </div>
             </a>
-            <a href="{% url 'editor_vendor_list' %}" class="dashboard-card group">
+            <a href="{% url 'vendor_list' %}" class="dashboard-card group">
                 <div class="bg-purple-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-purple-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,25 +92,57 @@
     </div>
     
     <!-- Recent Activities Section -->
+    {% comment %} <div class="p-4">
+        {% if recent_processed %}
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice No</th>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for expense in recent_processed %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-800">{{ expense.user.username }}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ expense.vendor.name|default:"-" }}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ expense.invoice_number|default:"-" }}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ expense.processed_date|date:"M d, Y" }}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm font-medium">₨ {{ expense.amount }}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800{% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ expense.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+            {% endfor %}
+        </div> {% endcomment %}
+
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-slideInBottom" style="animation-delay: 0.3s;">
         <!-- Recent Processed Allowances -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="bg-gradient-to-r from-cyan-700 to-cyan-600 px-4 py-3">
-                <h4 class="text-white font-medium">Recently Processed Allowances</h4>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-lg">
+            <div class="bg-gradient-to-r from-cyan-700 to-cyan-600 px-4 py-3 transform transition-all duration-300 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-cyan-500">
+                <h4 class="text-white font-medium">Recently Processed Expenses</h4>
             </div>
             <div class="p-4">
                 {% if recent_processed %}
                 <div class="divide-y divide-gray-200">
-                    {% for allowance in recent_processed %}
+                    {% for expense in recent_processed %}
                     <div class="py-3 flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-800">{{ allowance.user.username }}</p>
-                            <p class="text-xs text-gray-500">{{ allowance.processed_date|date:"M d, Y" }}</p>
+                            <p class="text-sm font-medium text-gray-800">{{ expense.vendor.name|default:"-" }}</p>
+                            <p class="text-xs text-gray-500">Updated on: {{ expense.created_date|date:"M d, Y" }}</p>
+                            <p class="text-xs text-gray-500">Payment mode: {{ expense.payment_mode }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-medium">₨ {{ allowance.amount }}</p>
-                            <span class="inline-block px-2 py-1 text-xs rounded-full {% if allowance.status == 'APPROVED' %}bg-green-100 text-green-800{% elif allowance.status == 'REJECTED' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                {{ allowance.get_status_display }}
+                            <p class="text-sm font-medium">₨ {{ expense.amount }}</p>
+                            <span class="inline-block px-2 py-1 text-xs rounded-full {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800{% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ expense.get_status_display }}
                             </span>
                         </div>
                     </div>
@@ -114,8 +157,8 @@
         </div>
         
         <!-- Recent Activities -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="bg-gradient-to-r from-cyan-700 to-cyan-600 px-4 py-3">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-lg">
+            <div class="bg-gradient-to-r from-cyan-700 to-cyan-600 px-4 py-3 transform transition-all duration-300 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-cyan-500">
                 <h4 class="text-white font-medium">Recent Activities</h4>
             </div>
             <div class="p-4">

@@ -36,11 +36,11 @@ window.onload = function() {
     {% if request.user.role == 'USER' %}
     <span>My Expense Dashboard</span>
     {% else %}
-    <span>Expense Management</span>
+    <span> Expense Management</span>
     {% endif %}
 </div>
 <div class="expense-content shadow-sm rounded-md">
-    {% if request.user.role == 'USER' %}
+    {% comment %} {% if request.user.role == 'USER' %} {% endcomment %}
     <form method="get" action="{% url 'expense_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
         <div class="form-group">
             <label>Start Date:</label>
@@ -101,6 +101,7 @@ window.onload = function() {
             </svg>
             Search
         </button>
+        {% if request.user.role == 'USER' %}
         <a href="{% url 'add_expense' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -115,18 +116,22 @@ window.onload = function() {
     {% if request.user.role == 'USER' %}
     <div class="mb-4 p-4 bg-cyan-50 rounded-lg shadow-sm border border-cyan-100 animate-slideUp">
         <h3 class="text-lg font-semibold text-cyan-800 mb-2">My Expense Summary</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-cyan-500">
                 <div class="text-sm text-gray-500">Total Expenses</div>
                 <div class="text-xl font-bold text-gray-800">{{ expenses|length }}</div>
             </div>
             <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-green-500">
                 <div class="text-sm text-gray-500">Approved</div>
-                <div class="text-xl font-bold text-gray-800">{% with approved_count=0 %}{% for expense in expenses %}{% if expense.status == 'Approved' %}{% with approved_count=approved_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ approved_count }}{% endwith %}</div>
+                <div class="text-xl font-bold text-gray-800">{{ approved_count|default:"0" }}</div>
             </div>
             <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-yellow-500">
                 <div class="text-sm text-gray-500">Pending</div>
-                <div class="text-xl font-bold text-gray-800">{% with pending_count=0 %}{% for expense in expenses %}{% if expense.status == 'Pending' %}{% with pending_count=pending_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ pending_count }}{% endwith %}</div>
+                <div class="text-xl font-bold text-gray-800">{{ pending_count|default:"0" }}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg shadow-sm border-l-4 border-red-500">
+                <div class="text-sm text-gray-500">Rejected</div>
+                <div class="text-xl font-bold text-gray-800">{{ rejected_count|default:"0" }}</div>
             </div>
         </div>
     </div>
@@ -189,9 +194,6 @@ window.onload = function() {
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
                     {% else %}
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Cost Center</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Region</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Branch</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
@@ -221,14 +223,11 @@ window.onload = function() {
                             <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
                         </td>
                         {% else %}
-                        <td class="py-3 px-4 text-gray-800">{{ expense.cost_center.name }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.region.name }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.branch.code }}-{{ expense.branch.name }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.invoice_no|default:'-' }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.description|default:'-'|truncatechars:30 }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.vendor.name }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.amount }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.withholding_sales_tax|add:expense.withholding_income_tax }}</td>
+                        <td class="py-3 px-4 text-gray-800">0.00</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.net_amount }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ expense.created_date|date:"d M Y" }}</td>
                         <td class="py-3 px-4 text-gray-800">

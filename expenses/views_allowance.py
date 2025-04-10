@@ -147,7 +147,8 @@ class AllowanceAnalyticsView(LoginRequiredMixin, View):
                 'approved_requests': approved_requests,
                 'rejected_requests': rejected_requests,
                 'total_amount': total_amount,
-                'branch': subhead.branch
+                # Remove reference to branch which no longer exists
+                # 'branch': subhead.branch
             })
         
         context = {

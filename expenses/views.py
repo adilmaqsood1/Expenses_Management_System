@@ -1,7 +1,8 @@
 from django.db import models
 from django.shortcuts import render, redirect
 from django.views import View
-from .models import Region, Branch, CostCenter, Head, SubHead, Vendor, Expense, GLCode, Transaction, Employee
+from .models import Region, CostCenter, Head, SubHead, Vendor, Expense, GLCode, Transaction, Employee
+from .models_user import User, AllowanceRequest
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
@@ -11,6 +12,7 @@ import datetime
 from itertools import chain
 from operator import attrgetter
 from django.core.paginator import Paginator
+from django.contrib import messages
 
 class CustomLoginView(LoginView):
     template_name = 'expenses/login.html'
@@ -25,7 +27,7 @@ class CustomLoginView(LoginView):
                 redirect_to = '/admin/'
             
             elif self.request.user.is_editor:
-                redirect_to = '/allowance-requests/'
+                redirect_to = '/'
             elif self.request.user.role=='User':
                 redirect_to = '/expenses/'
             else:
@@ -181,8 +183,8 @@ class DashboardView(LoginRequiredMixin, View):
         recent_expenses = Expense.objects.all().order_by('-created_date')[:5]
         expense_activities = [{
             'type': 'expense',
-            'title': f"{expense.head.name} Expense",
-            'description': f"Added by {request.user.username} on {expense.created_date.strftime('%B %d, %Y')}",
+            'title': f"{expense.sub_head.head.name} Expense",
+            'description': f"Added on {expense.created_date.strftime('%B %d, %Y')}",
             'amount': expense.amount,
             'date': expense.created_date,
             'status': expense.status
@@ -243,6 +245,64 @@ class DashboardView(LoginRequiredMixin, View):
             approved_requests_count = user_allowance_requests.filter(status='APPROVED').count()
             rejected_requests_count = user_allowance_requests.filter(status='REJECTED').count()
         
+        
+            """Dashboard view for editors"""
+        pending_allowances = AllowanceRequest.objects.filter(status='PENDING').count()
+        
+        # Get recently processed expenses
+        recent_processed = Expense.objects.filter(
+            status__in=['Pending', 'Approved', 'Rejected'],
+            created_date__gte=timezone.now() - datetime.timedelta(days=30)
+        ).order_by('-created_date')[:5]
+        
+        # Get pending expense approvals count
+        pending_expenses = Expense.objects.filter(status='Pending').count()
+        
+        # Get total employees and vendors count
+        employee_count = Employee.objects.count()
+        vendor_count = Vendor.objects.filter(disabled=False).count()
+        
+        # Get recent activities
+        recent_expense = Expense.objects.filter(
+            created_date__gte=timezone.now() - datetime.timedelta(days=30)
+        ).order_by('-created_date')[:5]
+        
+        expense_activities = [{
+            'type': 'expense',
+            'title': f"Expense Request {expense.id}",
+            'description': f"Created on {expense.created_date.strftime('%B %d, %Y')}",
+            'amount': expense.amount,
+            'date': expense.created_date,
+            'status': expense.status
+        } for expense in recent_expenses]
+        
+        # Get recent employees added/updated
+        recent_employees = Employee.objects.all().order_by('-updated_date')[:5]
+        employee_activities = [{
+            'type': 'employee',
+            'title': f"Employee: {employee.name}",
+            'description': f"Updated on {employee.updated_date.strftime('%B %d, %Y')}",
+            'amount': None,
+            'date': employee.updated_date,
+            'status': 'Updated'
+        } for employee in recent_employees]
+        
+        # Get recent vendors added/updated
+        recent_vendors = Vendor.objects.all().order_by('-updated_date')[:5]
+        vendor_activities = [{
+            'type': 'vendor',
+            'title': f"Vendor: {vendor.name}",
+            'description': f"Updated on {vendor.updated_date.strftime('%B %d, %Y')}",
+            'amount': None,
+            'date': vendor.updated_date,
+            'status': 'Updated' if vendor.disabled else 'Active'
+        } for vendor in recent_vendors]
+        
+        # Combine all activities and sort by date
+        all_activities = allowance_activities + employee_activities + vendor_activities
+        recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
+       
+       
         context = {
             'total_expenses': total_expenses,
             'pending_approvals': pending_approvals,
@@ -253,7 +313,13 @@ class DashboardView(LoginRequiredMixin, View):
             'user_allowance_requests': user_allowance_requests,
             'pending_requests_count': pending_requests_count,
             'approved_requests_count': approved_requests_count,
-            'rejected_requests_count': rejected_requests_count
+            'rejected_requests_count': rejected_requests_count,
+            'pending_allowances': pending_allowances,
+            'pending_expenses': pending_expenses,
+            'employee_count': employee_count,
+            'vendor_count': vendor_count,
+            'recent_processed': recent_processed,
+            'recent_activities': recent_activities
         }
         
         return render(request, 'expenses/dashboard.html', context)
@@ -262,7 +328,7 @@ class ExpenseListView(LoginRequiredMixin, View):
     def get(self, request):
         expenses_list = Expense.objects.all()
         regions = Region.objects.all()
-        branches = Branch.objects.all()
+        # Branches removed
         cost_centers = CostCenter.objects.all()
         vendors = Vendor.objects.all()
         heads = Head.objects.all()
@@ -310,10 +376,7 @@ class ExpenseListView(LoginRequiredMixin, View):
         if region_filter:
             expenses_list = expenses_list.filter(region_id=region_filter)
         
-        # Branch filter
-        branch_filter = request.GET.get('branch')
-        if branch_filter:
-            expenses_list = expenses_list.filter(branch_id=branch_filter)
+        # Branch filter removed
         
         # Cost center filter
         cost_center_filter = request.GET.get('cost_center')
@@ -328,6 +391,11 @@ class ExpenseListView(LoginRequiredMixin, View):
         # Get the show parameter from the request, default to showing all entries
         show = request.GET.get('show', '-1')
         
+        # Calculate expense counts by status
+        approved_count = expenses_list.filter(status='Approved').count()
+        pending_count = expenses_list.filter(status='Pending').count()
+        rejected_count = expenses_list.filter(status='Rejected').count()
+
         # If show is not 'All' (-1), paginate the results
         if show != '-1':
             show = int(show)
@@ -343,7 +411,7 @@ class ExpenseListView(LoginRequiredMixin, View):
         context = {
             'expenses': expenses,
             'regions': regions,
-            'branches': branches,
+            # Branches removed from context
             'cost_centers': cost_centers,
             'vendors': vendors,
             'heads': heads,
@@ -355,15 +423,15 @@ class ExpenseListView(LoginRequiredMixin, View):
             'show': show,
             'total_pages': total_pages,
             'current_page': int(request.GET.get('page', 1)),
-            'total_count': expenses_list.count()
+            'total_count': expenses_list.count(),
+            'approved_count': approved_count,
+            'pending_count': pending_count,
+            'rejected_count': rejected_count
         }
         return render(request, 'expenses/expense_list.html', context)
 
 class AddExpenseView(LoginRequiredMixin, View):
     def get(self, request):
-        regions = Region.objects.all()
-        branches = Branch.objects.all()
-        cost_centers = CostCenter.objects.all()
         heads = Head.objects.all()
         sub_heads = SubHead.objects.all()
         vendors = Vendor.objects.all()
@@ -374,9 +442,6 @@ class AddExpenseView(LoginRequiredMixin, View):
         gl_codes = GLCode.objects.all()
         
         context = {
-            'regions': regions,
-            'branches': branches,
-            'cost_centers': cost_centers,
             'heads': heads,
             'sub_heads': sub_heads,
             'vendors': vendors,
@@ -388,9 +453,129 @@ class AddExpenseView(LoginRequiredMixin, View):
         return render(request, 'expenses/add_expense.html', context)
     
     def post(self, request):
-        # This would handle the form submission
-        # For now, just redirect back to the expense list
-        return redirect('expense_list')
+        # Print form data for debugging
+        print("Form data received:", request.POST)
+        print("Files received:", request.FILES)
+        
+        # Get form data
+        gl_code_value = request.POST.get('sub_head')
+        expense_type = request.POST.get('type')  # Get the expense type (Vendor/Employee)
+        vendor_id = request.POST.get('vendor')
+        employee_id = request.POST.get('employee')
+        payment_mode = request.POST.get('payment_mode')
+        amount = request.POST.get('amount')
+        net_amount = request.POST.get('net_amount')
+        invoice_no = request.POST.get('invoice_no')
+        invoice_date = request.POST.get('invoice_date')
+        description = request.POST.get('description')
+        invoice_attachment = request.FILES.get('attach_invoice')
+        
+        # Validate required fields
+        missing_fields = []
+        if not gl_code_value: missing_fields.append('GL Code')
+        if not payment_mode: missing_fields.append('Payment Mode')
+        if not amount: missing_fields.append('Amount')
+        if not net_amount: missing_fields.append('Net Amount')
+        if not invoice_no: missing_fields.append('Invoice Number')
+        
+        if missing_fields:
+            messages.error(request, f"Please fill in all required fields: {', '.join(missing_fields)}")
+            return redirect('add_expense')
+            
+        # Validate expense type and related fields
+        if expense_type == 'Vendor' and not vendor_id:
+            messages.error(request, "Please select a vendor.")
+            return redirect('add_expense')
+        elif expense_type == 'Employee' and not employee_id:
+            messages.error(request, "Please select an employee.")
+            return redirect('add_expense')
+        
+        # Get model instances
+        # The form is submitting GL code value instead of SubHead ID
+        # We need to find a SubHead that corresponds to this GL code or create a default one
+        try:
+            # Try to find a SubHead with a matching code
+            sub_head = SubHead.objects.filter(code=gl_code_value).first()
+            
+            # If no SubHead found, get or create a default one
+            if not sub_head:
+                # Get or create a default Head
+                default_head, _ = Head.objects.get_or_create(
+                    code='DEFAULT',
+                    defaults={'name': 'Default Head', 'budget': 0}
+                )
+                
+                # Get or create a SubHead with the GL code
+                gl_code_obj = GLCode.objects.get(gl_code=gl_code_value)
+                sub_head, _ = SubHead.objects.get_or_create(
+                    code=gl_code_value,
+                    defaults={
+                        'name': gl_code_obj.gl_description,
+                        'head': default_head
+                    }
+                )
+        except Exception as e:
+            # If there's an error, redirect back with an error message
+            messages.error(request, f"Error processing SubHead: {str(e)}")
+            return redirect('add_expense')
+        
+        # Get vendor based on expense type
+        vendor = None
+        if expense_type == 'Vendor':
+            try:
+                vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
+                if not vendor:
+                    messages.error(request, "Selected vendor does not exist.")
+                    return redirect('add_expense')
+            except Vendor.DoesNotExist:
+                messages.error(request, "Selected vendor does not exist.")
+                return redirect('add_expense')
+        else:
+            # For Employee type expenses, use a default vendor
+            vendor, _ = Vendor.objects.get_or_create(
+                name="Employee Expense",
+                defaults={'type': 'Individual', 'status': 'Active'}
+            )
+        
+        # Convert string values to appropriate types
+        try:
+            amount_decimal = Decimal(amount)
+            net_amount_decimal = Decimal(net_amount)
+        except Exception as e:
+            messages.error(request, f"Invalid amount format: {str(e)}")
+            return redirect('add_expense')
+        
+        # Create and save the expense
+        try:
+            # Check if invoice_date is provided and valid
+            if not invoice_date:
+                invoice_date = None
+                
+            # Create the expense object
+            expense = Expense(
+                # Only include fields that are actually defined in the model
+                # region, cost_center, and head fields are commented out in the model
+                sub_head=sub_head,
+                vendor=vendor,  # Always use vendor (default for employee expenses)
+                payment_mode=payment_mode,
+                amount=amount_decimal,
+                net_amount=net_amount_decimal,
+                invoice_no=invoice_no,
+                invoice_date=invoice_date,
+                description=description
+            )
+            
+            # Save the expense
+            expense.save()
+            
+            # Add success message and redirect to expense list
+            messages.success(request, "Expense added successfully.")
+            return redirect('expense_list')
+        except Exception as e:
+            # Provide detailed error message
+            messages.error(request, f"Error saving expense: {str(e)}")
+            return redirect('add_expense')
+
 
 # New views for GLCode
 class GLCodeListView(LoginRequiredMixin, View):
@@ -549,30 +734,48 @@ class AddTransactionView(LoginRequiredMixin, View):
         return render(request, 'expenses/add_transaction.html', context)
     
     def post(self, request):
-        # Handle form submission
-        gl_code_id = request.POST.get('gl_code')
-        date = request.POST.get('date')
-        wing_division = request.POST.get('wing_division')
-        particulars = request.POST.get('particulars')
-        details = request.POST.get('details')
-        bill_amount = request.POST.get('bill_amount')
-        utilized_limit = request.POST.get('utilized_limit')
-        remaining_limit = request.POST.get('remaining_limit')
+        # Get form data
+        region_id = request.POST.get('region')
+        # Branch ID removed
+        cost_center_id = request.POST.get('cost_center')
+        head_id = request.POST.get('head')
+        sub_head_id = request.POST.get('sub_head')
+        vendor_id = request.POST.get('vendor')
+        payment_mode = request.POST.get('payment_mode')
+        amount = request.POST.get('amount')
+        withholding_sales_tax = request.POST.get('withholding_sales_tax', 0)
+        withholding_income_tax = request.POST.get('withholding_income_tax', 0)
+        net_amount = request.POST.get('net_amount')
+        invoice_no = request.POST.get('invoice_no')
+        invoice_date = request.POST.get('invoice_date')
+        description = request.POST.get('description')
         
-        gl_code = GLCode.objects.get(gl_code=gl_code_id)
+        # Get model instances
+        region = Region.objects.get(id=region_id) if region_id else None
+        # Branch removed
+        cost_center = CostCenter.objects.get(id=cost_center_id) if cost_center_id else None
+        head = Head.objects.get(id=head_id) if head_id else None
+        sub_head = SubHead.objects.get(id=sub_head_id) if sub_head_id else None
+        vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
         
-        Transaction.objects.create(
-            gl_code=gl_code,
-            date=date,
-            wing_division=wing_division,
-            particulars=particulars,
-            details=details,
-            bill_amount=bill_amount,
-            utilized_limit=utilized_limit,
-            remaining_limit=remaining_limit
+        # Create and save the expense
+        expense = Expense(
+            # Only include fields that are actually defined in the model
+            # region, cost_center, and head fields are commented out in the model
+            sub_head=sub_head,
+            vendor=vendor,
+            payment_mode=payment_mode,
+            amount=amount,
+            withholding_sales_tax=withholding_sales_tax,
+            withholding_income_tax=withholding_income_tax,
+            net_amount=net_amount,
+            invoice_no=invoice_no,
+            invoice_date=invoice_date,
+            description=description
         )
+        expense.save()
         
-        return redirect('transaction_list')
+        return redirect('expense_list')
 
 class EditTransactionView(LoginRequiredMixin, View):
     def get(self, request, transaction_id):

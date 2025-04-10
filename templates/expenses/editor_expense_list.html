@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/expense_list_enhanced.css">
+
+<div class="expense-header flex items-center animate-fadeIn">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+    </svg>
+    <span>Expense Approval Management</span>
+</div>
+
+<div class="expense-content shadow-sm rounded-md">
+    <form method="get" action="{% url 'editor_expense_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+        <div class="form-group">
+            <label>Start Date:</label>
+            <input type="date" name="start_date" value="{{ start_date|default:'' }}">
+        </div>
+        <div class="form-group">
+            <label>End Date:</label>
+            <input type="date" name="end_date" value="{{ end_date|default:'' }}">
+        </div>
+        <div class="form-group">
+            <label>Vendor/Employee:</label>
+            <select name="type" id="expenseType" onchange="toggleVendorEmployee()">
+                <option value="">All</option>
+                {% for type in expense_types %}
+                <option value="{{ type }}" {% if request.GET.type == type %}selected{% endif %}>{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group vendor-group" id="vendorGroup">
+            <label>Vendor</label>
+            <select name="vendor" id="vendorSelect">
+                <option value="">All</option>
+                {% for vendor in vendors %}
+                <option value="{{ vendor.id }}" {% if request.GET.vendor == vendor.id|stringformat:'s' %}selected{% endif %}>{{ vendor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group employee-group" id="employeeGroup" style="display: none;">
+            <label>Employee:</label>
+            <select name="employee" id="employeeSelect">
+                <option value="">All</option>
+                {% for employee in employees %}
+                <option value="{{ employee.id }}" {% if request.GET.employee == employee.id|stringformat:'s' %}selected{% endif %}>{{ employee.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Status:</label>
+            <select name="status">
+                <option value="">All</option>
+                {% for key, value in status_choices.items %}
+                <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn bg-cyan-600 text-white hover:bg-cyan-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            Search
+        </button>
+    </form>
+
+    <div class="mb-4 p-4 bg-cyan-50 rounded-lg shadow-sm border border-cyan-100 animate-slideUp">
+        <h3 class="text-lg font-semibold text-cyan-800 mb-2">Expense Approval Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-cyan-500">
+                <div class="text-sm text-gray-500">Total Expenses</div>
+                <div class="text-xl font-bold text-gray-800">{{ expenses|length }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-yellow-500">
+                <div class="text-sm text-gray-500">Pending</div>
+                <div class="text-xl font-bold text-gray-800">{% with pending_count=0 %}{% for expense in expenses %}{% if expense.status == 'Pending' %}{% with pending_count=pending_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ pending_count }}{% endwith %}</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-green-500">
+                <div class="text-sm text-gray-500">Processed Today</div>
+                <div class="text-xl font-bold text-gray-800">{{ processed_today }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center mb-4 text-sm">
+        <form id="showEntriesForm" method="get" action="{% url 'editor_expense_list' %}" class="flex items-center">
+            <label class="mr-2 text-gray-600">Show</label>
+            <select name="show" class="border border-gray-300 rounded px-2 py-1 w-16" onchange="this.form.submit()">
+                <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
+                <option value="10" {% if show == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if show == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if show == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if show == 100 %}selected{% endif %}>100</option>
+            </select>
+            <label class="ml-2 text-gray-600">entries</label>
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="1">
+            {% endif %}
+            {% if request.GET.type %}
+                <input type="hidden" name="type" value="{{ request.GET.type }}">
+            {% endif %}
+            {% if request.GET.vendor %}
+                <input type="hidden" name="vendor" value="{{ request.GET.vendor }}">
+            {% endif %}
+            {% if request.GET.employee %}
+                <input type="hidden" name="employee" value="{{ request.GET.employee }}">
+            {% endif %}
+            {% if request.GET.status %}
+                <input type="hidden" name="status" value="{{ request.GET.status }}">
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto rounded-lg shadow">
+        <table class="w-full border-collapse bg-white">
+            <thead>
+                <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% if expenses %}
+                    {% for expense in expenses %}
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                        <td class="py-3 px-4 text-gray-800">{{ expense.invoice_no|default:'-' }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">{{ expense.vendor.name }}</td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.amount }}</td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.net_amount }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ expense.created_date|date:"d M Y" }}</td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            {% if expense.status == 'Pending' %}
+                            <div class="flex space-x-2">
+                                <button onclick="showApprovalModal({{ expense.id }})" class="btn-sm bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 rounded px-2 py-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    Approve
+                                </button>
+                                <button onclick="showRejectionModal({{ expense.id }})" class="btn-sm bg-red-600 text-white hover:bg-red-700 transition-colors duration-200 rounded px-2 py-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                    Reject
+                                </button>
+                            </div>
+                            {% else %}
+                            <span class="text-gray-500 text-sm italic">Already processed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="py-6 text-center text-gray-500 italic bg-gray-50">No expenses found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4 flex flex-wrap justify-between items-center text-sm text-gray-600">
+        <div>
+            {% if show != '-1' %}
+                Showing {{ expenses|length }} of {{ total_count }} entries
+            {% else %}
+                Showing {{ expenses.count }} entries
+            {% endif %}
+        </div>
+        
+        {% if show != '-1' and total_pages > 1 %}
+        <div class="pagination flex space-x-2">
+            <a href="{% url 'editor_expense_list' %}?show={{ show }}&page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L3.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                First
+            </a>
+            {% if expenses.has_previous %}
+                <a href="{% url 'editor_expense_list' %}?show={{ show }}&page={{ expenses.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </span>
+            {% endif %}
+            
+            {% if expenses.has_next %}
+                <a href="{% url 'editor_expense_list' %}?show={{ show }}&page={{ expenses.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            {% endif %}
+            <a href="{% url 'editor_expense_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                Last
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 00-1.414 1.414L8.586 10 4.293 14.293a1 1 0 000 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12.293 15.707a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 00-1.414 1.414L16.586 10l-4.293 4.293a1 1 0 000 1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Approval Modal -->
+<div id="approvalModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Approve Expense</h3>
+        <form method="post" action="{% url 'process_expense' %}">
+            {% csrf_token %}
+            <input type="hidden" name="expense_id" id="approvalExpenseId">
+            <input type="hidden" name="action" value="approve">
+            <div class="mb-4">
+                <label for="approvalReason" class="block text-sm font-medium text-gray-700 mb-1">Approval Comment (Optional)</label>
+                <textarea id="approvalReason" name="approval_reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideApprovalModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200">Confirm Approval</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rejection Modal -->
+<div id="rejectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Reject Expense</h3>
+        <form method="post" action="{% url 'process_expense' %}">
+            {% csrf_token %}
+            <input type="hidden" name="expense_id" id="rejectionExpenseId">
+            <input type="hidden" name="action" value="reject">
+            <div class="mb-4">
+                <label for="rejectionReason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Rejection <span class="text-red-500">*</span></label>
+                <textarea id="rejectionReason" name="rejection_reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500" required></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideRejectionModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200">Confirm Rejection</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleVendorEmployee() {
+        var typeSelect = document.getElementById('expenseType');
+        var vendorGroup = document.getElementById('vendorGroup');
+        var employeeGroup = document.getElementById('employeeGroup');
+        var vendorSelect = document.getElementById('vendorSelect');
+        var employeeSelect = document.getElementById('employeeSelect');
+        
+        if (typeSelect.value.toLowerCase() === 'employee') {
+            vendorGroup.style.display = 'none';
+            employeeGroup.style.display = 'block';
+            vendorSelect.name = '';
+            employeeSelect.name = 'employee';
+        } else {
+            vendorGroup.style.display = 'block';
+            employeeGroup.style.display = 'none';
+            vendorSelect.name = 'vendor';
+            employeeSelect.name = '';
+        }
+    }
+
+    // Run the function on page load to set initial state
+    window.onload = function() {
+        toggleVendorEmployee();
+    };
+    
+    // Modal functions
+    function showApprovalModal(expenseId) {
+        document.getElementById('approvalExpenseId').value = expenseId;
+        document.getElementById('approvalModal').classList.remove('hidden');
+    }
+    
+    function hideApprovalModal() {
+        document.getElementById('approvalModal').classList.add('hidden');
+    }
+    
+    function showRejectionModal(expenseId) {
+        document.getElementById('rejectionExpenseId').value = expenseId;
+        document.getElementById('rejectionModal').classList.remove('hidden');
+    }
+    
+    function hideRejectionModal() {
+        document.getElementById('rejectionModal').classList.add('hidden');
+    }
+ </script>
+ 
+{% endblock content %}

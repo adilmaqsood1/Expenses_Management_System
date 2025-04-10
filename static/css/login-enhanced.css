@@ -2,19 +2,19 @@
 
 /* Variables for consistent theming */
 :root {
-    --primary-color: #004d66;
-    --secondary-color: #006080;
-    --accent-color: #0ea5e9;
-    --light-accent: #7dd3fc;
-    --text-color: #1f2328;
+    --primary-color: #2563eb;
+    --secondary-color: #1d4ed8;
+    --accent-color: #3b82f6;
+    --light-accent: #60a5fa;
+    --text-color: #111827;
     --light-text: #ffffff;
     --border-radius: 8px;
-    --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15), 0 2px 4px rgba(37, 99, 235, 0.1);
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     --hover-transform: translateY(-4px);
     --active-transform: translateY(1px);
-    --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    --gradient-hover: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    --gradient-primary: linear-gradient(135deg, #2563eb, #1e40af);
+    --gradient-hover: linear-gradient(135deg, #1e40af, #2563eb);
 }
 
 /* Background pattern enhancement */
@@ -49,13 +49,12 @@
 }
 
 /* Container enhancements */
-.login-container {
-    box-shadow: 0 25px 50px -12px rgba(0, 77, 102, 0.25) !important;
-    transform: translateY(0);
-    transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(125, 211, 252, 0.3) !important;
-    opacity: 0;
+.login-container, .logout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-container.animate-in {
@@ -115,7 +114,9 @@
 
 /* Form enhancements */
 .login-form {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 
 .login-form input {
@@ -125,8 +126,9 @@
 
 .login-form input:focus {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 77, 102, 0.15);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
     border-color: var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .login-form .input-icon {
@@ -198,14 +200,81 @@
 
 /* Error message styling */
 .login-error {
-    background-color: rgba(254, 226, 226, 0.8);
+    background-color: rgba(254, 226, 226, 0.9);
     border-left: 4px solid #ef4444;
     color: #b91c1c;
-    padding: 12px;
+    padding: 12px 16px;
     margin-bottom: 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
     animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Logout page enhancements */
+.login-box, .logout-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.logout-box h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+.logout-box p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.login-again-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-again-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logout-message {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.logout-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--gradient-primary);
+    color: var(--light-text);
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logout-btn:hover {
+    background: var(--gradient-hover);
+    transform: var(--hover-transform);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.logout-btn:active {
+    transform: var(--active-transform);
 }
 
 @keyframes shake {
