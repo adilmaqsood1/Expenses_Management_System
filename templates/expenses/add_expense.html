@@ -3,6 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="/static/css/expense_form.css">
 <script src="/static/js/expense_form.js" defer></script>
+<script src="/static/js/budget_new.js" defer></script>
 <div class="expense-header">
     Expense Posting
 </div>
@@ -47,7 +48,7 @@
             </div> {% endcomment %}
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
-                <select id="sub_head" name="sub_head">
+                <select id="head" name="sub_head">
                     {% for gl_code in GLCode %}
                     <option value="{{ gl_code.gl_code }}">{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
                     {% endfor %}
@@ -81,22 +82,37 @@
         </div>
         
         <div class="budget-info">
-            <div class="budget-item">
-                <div class="budget-label">TOTAL HEAD BUDGET</div>
-                <div id="total-budget" class="budget-value">Loading...</div>
-            </div>
-            <div class="budget-item">
-                <div class="budget-label">UTILIZED BUDGET</div>
-                <div id="utilized-budget" class="budget-value">Loading...</div>
-            </div>
-            <div class="budget-item">
-                <div class="budget-label">AVAILABLE BUDGET</div>
-                <div id="available-budget" class="budget-value">Loading...</div>
-            </div>
-            <div class="budget-item">
-                <div class="budget-label">MONTHLY FINANCIAL LIMIT</div>
-                <div id="monthly-limit" class="budget-value">Loading...</div>
-            </div>
+            <table class="budget-table">
+                <thead>
+                    <tr>
+                        <th>Budget</th>
+                        <th>Amount</th>
+                        <th>Amount<br>(In Million)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="total-budget-row">
+                        <td>Total Head Budget</td>
+                        <td id="total-budget">Loading...</td>
+                        <td id="total-budget-million">Loading...</td>
+                    </tr>
+                    <tr class="utilized-budget-row">
+                        <td>Utilized Budget</td>
+                        <td id="utilized-budget">Loading...</td>
+                        <td id="utilized-budget-million">Loading...</td>
+                    </tr>
+                    <tr class="available-budget-row">
+                        <td>Available Budget</td>
+                        <td id="available-budget">Loading...</td>
+                        <td id="available-budget-million">Loading...</td>
+                    </tr>
+                    <tr class="monthly-limit-row">
+                        <td>Monthly Financial Limit</td>
+                        <td id="monthly-limit">Loading...</td>
+                        <td id="monthly-limit-million">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         
         <div class="form-row">

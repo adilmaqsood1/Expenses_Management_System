@@ -29,6 +29,7 @@ urlpatterns = [
     
     # API endpoints
     path('api/head-budget/<int:head_id>/', api.head_budget, name='api_head_budget'),
+    # path('api/subhead-budget/<int:subhead_id>/', api_budget.subhead_budget, name='api_subhead_budget'),
     path('api/mis-dashboard-data/', views_mis.MISDashboardDataAPIView.as_view(), name='api_mis_dashboard_data'),
     
     # MIS Dashboard

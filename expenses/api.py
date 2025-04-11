@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
-from .models import Head, Expense
+from .models import Head, Expense, GLCode
 from django.db.models import Sum
 from decimal import Decimal
 from django.utils import timezone
@@ -14,14 +14,14 @@ def head_budget(request, head_id):
     """
     try:
         # Get the head object
-        head = Head.objects.get(id=head_id)
+        head = Head.objects.get(code=head_id)
         
         # Get total budget for this head
         total_budget = head.budget
         
         # Calculate utilized budget (sum of approved expenses for this head)
         utilized_budget = Expense.objects.filter(
-            head=head,
+            # head=head,
             status='Approved'
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
         
@@ -33,7 +33,7 @@ def head_budget(request, head_id):
         current_month = timezone.now().month
         current_year = timezone.now().year
         monthly_expenses = Expense.objects.filter(
-            head=head,
+            # head=head,
             created_date__month=current_month,
             created_date__year=current_year
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')

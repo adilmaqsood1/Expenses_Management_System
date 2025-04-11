@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                // Update the budget information in the UI
+                // Update the budget information in the UI - both amount and amount in millions
                 document.getElementById('total-budget').textContent = 
                     formatCurrency(data.total_budget);
                 document.getElementById('utilized-budget').textContent = 
@@ -42,6 +42,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     formatCurrency(data.available_budget);
                 document.getElementById('monthly-limit').textContent = 
                     formatCurrency(data.monthly_limit);
+                
+                // Update the million values
+                document.getElementById('total-budget-million').textContent = 
+                    formatMillions(data.total_budget);
+                document.getElementById('utilized-budget-million').textContent = 
+                    formatMillions(data.utilized_budget);
+                document.getElementById('available-budget-million').textContent = 
+                    formatMillions(data.available_budget);
+                document.getElementById('monthly-limit-million').textContent = 
+                    formatMillions(data.monthly_limit);
             })
             .catch(error => {
                 console.error('Error fetching budget data:', error);
@@ -61,6 +71,18 @@ document.addEventListener('DOMContentLoaded', function() {
         return num.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
+        });
+    }
+
+    // Helper function to format values in millions
+    function formatMillions(value) {
+        // Convert to number and handle potential null/undefined
+        const num = parseFloat(value || 0) / 1000000;
+        
+        // Format with commas for thousands and 3 decimal places
+        return num.toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
         });
     }
 });

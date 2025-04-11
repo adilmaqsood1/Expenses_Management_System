@@ -24,8 +24,8 @@ class GLCodeAdmin(ImportExportModelAdmin):
             return format_html(
                 '<div style="width:100%%; background-color: #f1f1f1; border-radius: 4px;">' 
                 '<div style="width:{}%%; background-color: {}; height: 20px; border-radius: 4px; text-align: center; color: white;">' 
-                '{:.1f}%</div></div>', 
-                min(percentage, 100), color, percentage
+                '{}</div></div>', 
+                min(percentage, 100), color, '{:.1f}%'.format(percentage)
             )
         return "N/A"
     utilization_percentage.short_description = 'Utilization'
@@ -50,8 +50,54 @@ class CostCenterAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 class HeadAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'budget', 'subhead_count')
+    list_display = ('code', 'name', 'budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'subhead_count')
     search_fields = ('code', 'name')
+    readonly_fields = ('utilized_budget', 'available_budget')
+    
+    def utilized_budget(self, obj):
+        from django.db.models import Sum
+        from decimal import Decimal
+        utilized = Expense.objects.filter(
+            sub_head__head=obj,
+            status='Approved'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+        return format_html("Rs{}", "{:.2f}".format(utilized))
+    utilized_budget.short_description = 'Utilized Budget'
+    
+    def available_budget(self, obj):
+        from django.db.models import Sum
+        from decimal import Decimal
+        utilized = Expense.objects.filter(
+            sub_head__head=obj,
+            status='Approved'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+        available = obj.budget - utilized
+        return format_html("Rs{}", "{:.2f}".format(available))
+    available_budget.short_description = 'Available Budget'
+    
+    def utilization_percentage(self, obj):
+        from django.db.models import Sum
+        from decimal import Decimal
+        utilized = Expense.objects.filter(
+            sub_head__head=obj,
+            status='Approved'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+        
+        if obj.budget and obj.budget > 0:
+            percentage = (utilized / obj.budget) * 100
+            color = 'green'
+            if percentage > 70:
+                color = 'orange'
+            if percentage > 90:
+                color = 'red'
+            return format_html(
+                '<div style="width:100%%; background-color: #f1f1f1; border-radius: 4px;">' 
+                '<div style="width:{}%%; background-color: {}; height: 20px; border-radius: 4px; text-align: center; color: white;">' 
+                '{}</div></div>', 
+                min(percentage, 100), color, '{:.1f}%'.format(percentage)
+            )
+        return "N/A"
+    utilization_percentage.short_description = 'Utilization'
     
     def subhead_count(self, obj):
         return obj.subhead_set.count()
@@ -88,7 +134,7 @@ class VendorStatusFilter(admin.SimpleListFilter):
 
 class VendorAdmin(ImportExportModelAdmin):
     list_display = ('name', 'cnic', 'type', 'status', 'disabled', 'created_date', 'total_expenses')
-    list_filter = (VendorTypeFilter, VendorStatusFilter, 'disabled')
+    # list_filter = (VendorTypeFilter, VendorStatusFilter, 'disabled')
     search_fields = ('name', 'cnic')
     readonly_fields = ('created_date', 'updated_date')
     list_per_page = 25
@@ -107,22 +153,17 @@ class VendorAdmin(ImportExportModelAdmin):
     
     def total_expenses(self, obj):
         total = Expense.objects.filter(vendor=obj).aggregate(total=Sum('amount'))['total']
-        return f"${total:.2f}" if total else "$0.00"
+        return "Rs{:.2f}".format(total) if total else "Rs0.00"
     total_expenses.short_description = 'Total Expenses'
 
-class ExpenseAdmin(ImportExportModelAdmin):
-    list_display = ('invoice_no', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status', 'status_badge')
-    list_filter = ('status', 'payment_mode', 'created_date')
-    search_fields = ('invoice_no', 'description', 'vendor__name')
-    date_hierarchy = 'created_date'
-    readonly_fields = ('created_date', 'budget_info')
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ['invoice_no', 'gl_code', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status']
+    list_filter = ('status', )
+    search_fields = ('invoice_no', 'description', 'vendor__name', 'gl_code__gl_code')
+    readonly_fields = ('created_date',)
     fieldsets = (
-        ('Add New Expense', {
-            'fields': ('gl_code', 'vendor', 'payment_mode', 'amount', 'invoice_no', 'invoice_date', 'net_amount', 'description', 'status')
-        }),
-        ('Budget Information', {
-            'fields': ('budget_info',),
-            'classes': ('collapse',)
+        ('Expense Details', {
+            'fields': ('gl_code', 'vendor', 'payment_mode', 'amount', 'net_amount', 'invoice_no', 'invoice_date', 'description', 'status')
         }),
     )
     
@@ -227,8 +268,8 @@ admin.site.register(CostCenter, CostCenterAdmin)
 admin.site.register(Head, HeadAdmin)
 admin.site.register(SubHead, SubHeadAdmin)
 admin.site.register(Vendor, VendorAdmin)
-admin.site.register(Expense, ExpenseAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(AllowanceRequest, AllowanceRequestAdmin)
 admin.site.register(Employee, EmployeeAdmin)
+admin.site.register(Expense, ExpenseAdmin)
