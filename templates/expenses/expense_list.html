@@ -208,30 +208,60 @@ window.onload = function() {
             <tbody class="divide-y divide-gray-200">
                 {% if expenses %}
                     {% for expense in expenses %}
-                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150 cursor-pointer" onclick="window.location='{% url 'expense_detail' expense.id %}'">
                         {% if request.user.role == 'USER' %}
-                        <td class="py-3 px-4 text-gray-800">{{ expense.invoice_no|default:'-' }}</td>
                         <td class="py-3 px-4 text-gray-800">
-                            <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
-                            <div class="text-xs text-gray-500">{{ expense.branch.name }}</div>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
                         </td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.vendor.name }}</td>
-                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.amount }}</td>
-                        <td class="py-3 px-4 text-gray-800 font-medium">₨ {{ expense.net_amount }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.created_date|date:"d M Y" }}</td>
                         <td class="py-3 px-4 text-gray-800">
-                            <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700">
+                                <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
+                                <div class="text-xs text-gray-500">{{ expense.branch.name }}</div>
+                            </a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="block">
+                                <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                            </a>
                         </td>
                         {% else %}
-                        <td class="py-3 px-4 text-gray-800">{{ expense.invoice_no|default:'-' }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.description|default:'-'|truncatechars:30 }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.vendor.name }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.amount }}</td>
-                        <td class="py-3 px-4 text-gray-800">0.00</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.net_amount }}</td>
-                        <td class="py-3 px-4 text-gray-800">{{ expense.created_date|date:"d M Y" }}</td>
                         <td class="py-3 px-4 text-gray-800">
-                            <span class="px-2 py-1 text-xs rounded-full {% if expense.status == 'Approved' %}bg-green-100 text-green-800{% elif expense.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif expense.status == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.description|default:'-'|truncatechars:30 }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.amount }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">0.00</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.net_amount }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="block">
+                                <span class="px-2 py-1 text-xs rounded-full {% if expense.status == 'Approved' %}bg-green-100 text-green-800{% elif expense.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif expense.status == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
+                            </a>
                         </td>
                         {% endif %}
                     </tr>

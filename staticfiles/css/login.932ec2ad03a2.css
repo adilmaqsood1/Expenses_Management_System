@@ -1,22 +1,5 @@
 /* Enhanced Login Page Styles */
 
-/* Variables for consistent theming */
-:root {
-    --primary-color: #004d66;
-    --secondary-color: #006080;
-    --accent-color: #0ea5e9;
-    --light-accent: #7dd3fc;
-    --text-color: #1f2328;
-    --light-text: #ffffff;
-    --border-radius: 8px;
-    --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --hover-transform: translateY(-4px);
-    --active-transform: translateY(1px);
-    --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    --gradient-hover: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-}
-
 /* Background pattern enhancement */
 .login-bg-pattern {
     position: absolute;
@@ -37,7 +20,6 @@
 
 .login-bg-pattern .pattern-item {
     height: 120px;
-    width: 120px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     animation: pulse-pattern 8s infinite;
@@ -55,22 +37,6 @@
     transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
     backdrop-filter: blur(8px);
     border: 1px solid rgba(125, 211, 252, 0.3) !important;
-    opacity: 0;
-}
-
-.login-container.animate-in {
-    animation: fadeInUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .login-container:hover {
@@ -82,7 +48,6 @@
 .login-header {
     position: relative;
     overflow: hidden;
-    background: var(--gradient-primary) !important;
 }
 
 .login-header::before {
@@ -92,9 +57,8 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(to right, var(--light-accent), var(--accent-color), var(--light-accent));
+    background: linear-gradient(to right, #7dd3fc, #0ea5e9, #7dd3fc);
     animation: shimmer 2s infinite linear;
-    background-size: 200% 100%;
     z-index: 1;
 }
 
@@ -119,66 +83,61 @@
 }
 
 .login-form input {
-    transition: var(--transition);
+    transition: all 0.3s ease;
     border: 1px solid rgba(0, 77, 102, 0.2);
 }
 
 .login-form input:focus {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 77, 102, 0.15);
-    border-color: var(--accent-color);
 }
 
 .login-form .input-icon {
-    transition: var(--transition);
+    transition: all 0.3s ease;
     color: rgba(0, 77, 102, 0.5);
 }
 
 .login-form input:focus + .input-icon {
-    color: var(--accent-color);
+    color: #0ea5e9;
     transform: scale(1.1);
 }
 
-/* Input focus effects */
-.input-focused {
-    box-shadow: 0 4px 12px rgba(0, 77, 102, 0.15);
-}
-
-.label-active {
-    color: var(--accent-color);
-    transform: translateY(-5px) scale(0.9);
-}
-
 /* Button enhancements */
-.btn {
+.login-btn {
     position: relative;
     overflow: hidden;
+    transition: all 0.4s ease;
+    background: linear-gradient(to right, #1a365d, #2c5282) !important;
 }
 
-.btn-ripple {
+.login-btn:hover {
+    background: linear-gradient(to right, #2c5282, #4299e1) !important;
+}
+
+.login-btn::after {
+    content: '';
     position: absolute;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.4);
-    width: 100px;
-    height: 100px;
-    margin-top: -50px;
-    margin-left: -50px;
-    animation: ripple 0.6s linear;
-    transform: scale(0);
-    opacity: 1;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1);
+    transition: 0.9s all;
 }
 
-@keyframes ripple {
-    to {
-        transform: scale(2.5);
-        opacity: 0;
-    }
+.login-btn:active::after {
+    opacity: 0.3;
+    transform: scale(20);
+    transition: 0s;
 }
 
 /* Links enhancements */
 .login-links a {
     position: relative;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .login-links a::after {
@@ -188,7 +147,7 @@
     left: 0;
     width: 0;
     height: 1px;
-    background-color: var(--accent-color);
+    background-color: #0ea5e9;
     transition: width 0.3s ease;
 }
 

@@ -157,13 +157,13 @@ class VendorAdmin(ImportExportModelAdmin):
     total_expenses.short_description = 'Total Expenses'
 
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ['invoice_no', 'gl_code', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status']
+    list_display = ['invoice_no', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status']
     list_filter = ('status', )
-    search_fields = ('invoice_no', 'description', 'vendor__name', 'gl_code__gl_code')
+    search_fields = ('invoice_no', 'description', 'vendor__name')
     readonly_fields = ('created_date',)
     fieldsets = (
         ('Expense Details', {
-            'fields': ('gl_code', 'vendor', 'payment_mode', 'amount', 'net_amount', 'invoice_no', 'invoice_date', 'description', 'status')
+            'fields': ('vendor', 'wing', 'division','payment_mode', 'amount', 'net_amount', 'invoice_no', 'invoice_date', 'description', 'status')
         }),
     )
     

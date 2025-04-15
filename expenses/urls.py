@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('expenses/', views.ExpenseListView.as_view(), name='expense_list'),
+    path('expenses/detail/<int:expense_id>/', views.ExpenseDetailView.as_view(), name='expense_detail'),
     path('expenses/add/', views.AddExpenseView.as_view(), name='add_expense'),
     path('gl-codes/', views.GLCodeListView.as_view(), name='gl_code_list'),
     path('gl-codes/add/', views.AddGLCodeView.as_view(), name='add_gl_code'),

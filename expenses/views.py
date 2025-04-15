@@ -429,6 +429,18 @@ class ExpenseListView(LoginRequiredMixin, View):
             'rejected_count': rejected_count
         }
         return render(request, 'expenses/expense_list.html', context)
+        
+class ExpenseDetailView(LoginRequiredMixin, View):
+    def get(self, request, expense_id):
+        try:
+            expense = Expense.objects.get(id=expense_id)
+            context = {
+                'expense': expense
+            }
+            return render(request, 'expenses/expense_detail.html', context)
+        except Expense.DoesNotExist:
+            messages.error(request, "Expense not found.")
+            return redirect('expense_list')
 
 class AddExpenseView(LoginRequiredMixin, View):
     def get(self, request):

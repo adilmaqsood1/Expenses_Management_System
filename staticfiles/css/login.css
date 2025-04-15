@@ -107,11 +107,11 @@
     position: relative;
     overflow: hidden;
     transition: all 0.4s ease;
-    background: linear-gradient(to right, #004d66, #006080) !important;
+    background: linear-gradient(to right, #1a365d, #2c5282) !important;
 }
 
 .login-btn:hover {
-    background: linear-gradient(to right, #006080, #0284c7) !important;
+    background: linear-gradient(to right, #2c5282, #4299e1) !important;
 }
 
 .login-btn::after {

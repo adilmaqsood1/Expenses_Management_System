@@ -83,7 +83,7 @@ class Expense(models.Model):
     # branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     # cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
     # head = models.ForeignKey(Head, on_delete=models.CASCADE)
-    gl_code = models.ForeignKey(GLCode, on_delete=models.CASCADE)
+    # gl_code = models.ForeignKey(GLCode, on_delete=models.CASCADE)
     sub_head = models.ForeignKey(SubHead, on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODES)
@@ -96,6 +96,8 @@ class Expense(models.Model):
     description = models.TextField(blank=True, null=True)
     created_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    wing = models.CharField(max_length=100, blank=True, null=True, default=None)
+    division = models.CharField(max_length=100, blank=True, null=True, default=None)
     
     def __str__(self):
         return f"{self.invoice_no} - {self.amount}"

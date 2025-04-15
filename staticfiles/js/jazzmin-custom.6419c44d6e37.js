@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Replace profile icon with logout button in admin navbar
+    // Add user profile icon and logout button to navbar
     function addLogoutButtonToNavbar() {
         const navbar = document.querySelector('.navbar-nav.ml-auto');
         if (navbar) {
@@ -13,6 +13,54 @@ document.addEventListener('DOMContentLoaded', function() {
             if (userMenu) {
                 userMenu.remove();
             }
+            
+            // Create user profile icon with link to admin user profile
+            const userProfileButton = document.createElement('li');
+            userProfileButton.className = 'nav-item mr-2';
+            
+            // Get current user ID from the page context
+            // We'll use JavaScript to dynamically find the current user ID
+            let userProfileUrl = '/admin/expenses/user/';
+            
+            // Try to get the user ID from the page
+            // This looks for a user ID in the page content or cookies
+            function getCurrentUserId() {
+                // Check if we can find the user ID in the page
+                const userElement = document.querySelector('[data-user-id]');
+                if (userElement && userElement.dataset.userId) {
+                    return userElement.dataset.userId;
+                }
+                
+                // If we can't find it directly, we'll redirect to the user list page
+                // The admin can then select their profile from the list
+                return '';
+            }
+            
+            const userId = getCurrentUserId();
+            if (userId) {
+                userProfileUrl = `/admin/expenses/user/${userId}/change/`;
+            }
+            
+            userProfileButton.innerHTML = `
+                <a href="${userProfileUrl}" class="nav-link user-profile-link" title="My Profile" style="color: #fff; padding: 0.5rem 1rem; display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; margin-left: 10px; font-weight: 500;">
+                    <i class="fas fa-user" style="font-size: 1.2rem; margin-right: 0.5rem;"></i>
+                    <span class="d-none d-md-inline">Profile</span>
+                </a>
+            `;
+            
+            // Add hover effect to user profile link
+            const userProfileLink = userProfileButton.querySelector('a');
+            userProfileLink.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            });
+            
+            userProfileLink.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
             
             // Create logout button with enhanced styling
             const logoutButton = document.createElement('li');
@@ -66,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Add to navbar
+            navbar.appendChild(userProfileButton);
             navbar.appendChild(logoutButton);
         }
     }
