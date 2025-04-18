@@ -50,9 +50,18 @@ class Vendor(models.Model):
         ('Government', 'Government'),
     ]
     
+    VENDOR_CATEGORIES = [
+        ('General', 'General'),
+        ('Water', 'Water'),
+        ('Electricity', 'Electricity'),
+        ('Internet', 'Internet'),
+        ('Office Supplies', 'Office Supplies'),
+    ]
+    
     name = models.CharField(max_length=255)
     cnic = models.CharField(max_length=15, blank=True, null=True)
     type = models.CharField(max_length=50, choices=VENDOR_TYPES, blank=True, null=True)
+    category = models.CharField(max_length=50, choices=VENDOR_CATEGORIES, default='General')
     
     VENDOR_STATUS = [
         ('Active', 'Active'),

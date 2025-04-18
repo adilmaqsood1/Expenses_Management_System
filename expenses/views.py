@@ -453,6 +453,9 @@ class AddExpenseView(LoginRequiredMixin, View):
         # Get GL Codes for the sub-head dropdown
         gl_codes = GLCode.objects.all()
         
+        # Get vendor categories for the dropdown
+        vendor_categories = dict(Vendor.VENDOR_CATEGORIES)
+        
         context = {
             'heads': heads,
             'sub_heads': sub_heads,
@@ -460,6 +463,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             'employees': employees,
             'payment_modes': payment_modes,
             'GLCode': gl_codes,
+            'vendor_categories': vendor_categories,
         }
         
         return render(request, 'expenses/add_expense.html', context)

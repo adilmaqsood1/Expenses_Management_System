@@ -118,17 +118,17 @@ function initVendorEmployeeToggle() {
         
         // Force display style to be a string value
         if (typeSelect.value === 'Employee') {
-            // Hide both vendor fields
-            vendorCategoryField.setAttribute('style', 'display: none !important');
-            vendorSelectField.setAttribute('style', 'display: none !important');
-            employeeField.setAttribute('style', 'display: block !important');
+            // Hide both vendor fields - use !important to override any inline styles
+            vendorCategoryField.style.cssText = 'display: none !important';
+            vendorSelectField.style.cssText = 'display: none !important';
+            employeeField.style.cssText = 'display: block !important';
             // Update the form header to show the selected type
             updateFormHeader('Employee');
         } else {
             // Show both vendor fields
-            vendorCategoryField.setAttribute('style', 'display: block !important');
-            vendorSelectField.setAttribute('style', 'display: block !important');
-            employeeField.setAttribute('style', 'display: none !important');
+            vendorCategoryField.style.cssText = 'display: block !important';
+            vendorSelectField.style.cssText = 'display: block !important';
+            employeeField.style.cssText = 'display: none !important';
             // Update the form header to show the selected type
             updateFormHeader('Vendor');
         }

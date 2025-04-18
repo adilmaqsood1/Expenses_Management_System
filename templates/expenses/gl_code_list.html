@@ -96,8 +96,8 @@
                     <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
                         <td class="py-3 px-4 text-gray-800 font-medium">{{ gl_code.gl_code }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ gl_code.gl_description }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.limit_in_millions }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.limit }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right limit-in-millions">{{ gl_code.limit_in_millions }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right limit-value">{{ gl_code.limit }}</td>
                         <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.limit_utilized }}</td>
                         <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.balance_available }}</td>
                         <td class="py-3 px-4">
@@ -186,4 +186,59 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to convert regular limit to millions
+    function convertToMillions(value) {
+        if (!value || value === '') return '';
+        return (parseFloat(value) / 1000000).toFixed(3);
+    }
+    
+    // Function to format currency with rupee symbol and millions in parentheses
+    function formatCurrency(value) {
+        if (!value || value === '') return '';
+        const numValue = parseFloat(value.toString().replace(/[^0-9.-]+/g, ''));
+        if (isNaN(numValue)) return 'None';
+        const millionsValue = (numValue / 1000000).toFixed(2);
+        return `₨ ${numValue.toFixed(2)} (${millionsValue} M)`;
+    }
+    
+    // Function to ensure limit values are properly displayed
+    function updateLimitDisplay() {
+        // For each row in the table
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const limitCell = row.querySelector('.limit-value');
+            const millionsCell = row.querySelector('.limit-in-millions');
+            const limitUtilizedCell = row.querySelector('td:nth-child(5)');
+            const balanceAvailableCell = row.querySelector('td:nth-child(6)');
+            
+            if (limitCell && millionsCell) {
+                // Format the limit value with rupee symbol and millions
+                if (limitCell.textContent.trim() !== '') {
+                    const originalValue = limitCell.textContent.trim();
+                    limitCell.textContent = formatCurrency(originalValue);
+                    // We don't need to display millions separately anymore
+                    millionsCell.textContent = '';
+                }
+                
+                // Format limit utilized and balance available
+                if (limitUtilizedCell && limitUtilizedCell.textContent.trim() !== '') {
+                    limitUtilizedCell.textContent = formatCurrency(limitUtilizedCell.textContent.trim());
+                }
+                
+                if (balanceAvailableCell && balanceAvailableCell.textContent.trim() !== '') {
+                    balanceAvailableCell.textContent = formatCurrency(balanceAvailableCell.textContent.trim());
+                }
+            }
+        });
+    }
+    
+    // Run the function when the page loads
+    updateLimitDisplay();
+});
+</script>
+
 {% endblock %}

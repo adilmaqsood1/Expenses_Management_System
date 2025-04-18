@@ -23,6 +23,11 @@ function toggleVendorEmployee() {
     }
 }
 
+// Function to convert amount to millions format
+function convertToMillions(amount) {
+    return (parseFloat(amount) / 1000000).toFixed(2) + ' M';
+}
+
 // Run the function on page load to set initial state
 window.onload = function() {
     toggleVendorEmployee();
@@ -114,18 +119,18 @@ window.onload = function() {
     
     
     {% if request.user.role == 'USER' %}
-    <div class="mb-4 p-4 bg-cyan-50 rounded-lg shadow-sm border border-cyan-100 animate-slideUp">
-        <h3 class="text-lg font-semibold text-cyan-800 mb-2">My Expense Summary</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-cyan-500">
+    <div class="mb-3 p-3 bg-cyan-50 rounded-lg shadow-sm border border-cyan-100 animate-slideUp">
+        <h3 class="text-base font-semibold text-cyan-800 mb-1">My Expense Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <div class="bg-white p-2 rounded-lg shadow-sm border-l-4 border-cyan-500">
                 <div class="text-sm text-gray-500">Total Expenses</div>
                 <div class="text-xl font-bold text-gray-800">{{ expenses|length }}</div>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-green-500">
+            <div class="bg-white p-2 rounded-lg shadow-sm border-l-4 border-green-500">
                 <div class="text-sm text-gray-500">Approved</div>
                 <div class="text-xl font-bold text-gray-800">{{ approved_count|default:"0" }}</div>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-yellow-500">
+            <div class="bg-white p-2 rounded-lg shadow-sm border-l-4 border-yellow-500">
                 <div class="text-sm text-gray-500">Pending</div>
                 <div class="text-xl font-bold text-gray-800">{{ pending_count|default:"0" }}</div>
             </div>
@@ -189,17 +194,22 @@ window.onload = function() {
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Payment Mode</th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
                     {% else %}
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Tax</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Payment Mode</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Wing/Division</th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Tax</th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
                     {% endif %}
@@ -216,17 +226,23 @@ window.onload = function() {
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700">
                                 <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
-                                <div class="text-xs text-gray-500">{{ expense.branch.name }}</div>
+                                <div class="text-xs text-gray-500">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</div>
                             </a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
                         </td>
-                        <td class="py-3 px-4 text-gray-800 font-medium">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }}</a>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
                         </td>
-                        <td class="py-3 px-4 text-gray-800 font-medium">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }}</a>
+                        <td class="py-3 px-4 text-gray-800">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 font-medium text-right">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 font-medium text-right">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
@@ -247,13 +263,22 @@ window.onload = function() {
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.amount }}</a>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">0.00</a>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.net_amount }}</a>
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 text-right">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 text-right">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ 0.00</a>
+                        </td>
+                        <td class="py-3 px-4 text-gray-800 text-right">
+                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
@@ -268,7 +293,7 @@ window.onload = function() {
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="{% if request.user.role == 'USER' %}7{% else %}12{% endif %}" class="py-6 text-center text-gray-500 italic bg-gray-50">No expenses found</td>
+                        <td colspan="{% if request.user.role == 'USER' %}9{% else %}11{% endif %}" class="py-6 text-center text-gray-500 italic bg-gray-50">No expenses found</td>
                     </tr>
                 {% endif %}
             </tbody>

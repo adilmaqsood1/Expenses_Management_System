@@ -11,7 +11,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <h4>Add New Expense:</h4>
-       
+        <div class="form-row">
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
                 <select id="head" name="sub_head">
@@ -20,7 +20,13 @@
                     {% endfor %}
                 </select>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="type"><span class="required">*</span>Type:</label>
+                <select id="type" name="type">
+                    <option value="Vendor">Vendor</option>
+                    <option value="Employee">Employee</option>
+                </select>
+            </div>
         {% comment %} <div class="form-row">
             <div class="form-group">
                 <label for="wing"><span class="required">*</span>Wing:</label>
@@ -37,18 +43,21 @@
             </div>
         </div>  {% endcomment %}
         <div class="form-row">
-            <div class="form-group">
-                <label for="type"><span class="required">*</span>Type:</label>
-                <select id="type" name="type">
-                    <option value="Vendor">Vendor</option>
-                    <option value="Employee">Employee</option>
+            <div class="form-group" id="vendor-field">
+                <label for="vendor_category"><span class="required">*</span>Vendor Category:</label>
+                <select id="vendor_category" name="vendor_category">
+                    <option value="General">General</option>
+                    <option value="Water">Water</option>
+                    <option value="Electricity">Electricity</option>
+                    <option value="Internet">Internet</option>
+                    <option value="Office Supplies">Office Supplies</option>
                 </select>
             </div>
-            <div class="form-group" id="vendor-field">
+            <div class="form-group" id="vendor-select-field">
                 <label for="vendor"><span class="required">*</span>Vendor:</label>
                 <select id="vendor" name="vendor">
                     {% for vendor in vendors %}
-                    <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                    <option value="{{ vendor.id }}" data-category="{{ vendor.category }}">{{ vendor.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -62,8 +71,8 @@
             </div>
         </div>
         
-        <div class="budget-info">
-            <table class="budget-table">
+        <div class="budget-info" style="max-width: 600px; margin: 15px auto;">
+            <table class="budget-table" style="width: 100%;">
                 <thead>
                     <tr>
                         <th>Budget</th>
@@ -72,6 +81,10 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="fiscal-year-row">
+                        <td>Fiscal Year</td>
+                        <td id="fiscal-year" colspan="2">{% now "Y" %}</td>
+                    </tr>
                     <tr class="total-budget-row">
                         <td>Total Head Budget</td>
                         <td id="total-budget">Loading...</td>
@@ -92,23 +105,15 @@
                         <td id="monthly-limit">Loading...</td>
                         <td id="monthly-limit-million">Loading...</td>
                     </tr>
+                    <tr class="budget-status-row">
+                        <td>Budget Status</td>
+                        <td id="budget-status" colspan="2">Pending</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         
         <div class="form-row">
-            <div class="form-group">
-                <label for="payment_mode"><span class="required">*</span>Payment Mode:</label>
-                <select id="payment_mode" name="payment_mode">
-                    {% for key, value in payment_modes.items %}
-                    <option value="{{ key }}">{{ value }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="amount"><span class="required">*</span>Amount:</label>
-                <input type="text" id="amount" name="amount">
-            </div>
             <div class="form-group">
                 <label for="invoice_no"><span class="required">*</span>Invoice No:</label>
                 <input type="text" id="invoice_no" name="invoice_no">
@@ -116,6 +121,18 @@
             <div class="form-group">
                 <label for="invoice_date"><span class="required">*</span>Invoice Date:</label>
                 <input type="date" id="invoice_date" name="invoice_date" required value="{% now 'Y-m-d' %}">
+            </div>
+            <div class="form-group">
+                <label for="amount"><span class="required">*</span>Amount:</label>
+                <input type="text" id="amount" name="amount">
+            </div>
+            <div class="form-group">
+                <label for="payment_mode"><span class="required">*</span>Payment Mode:</label>
+                <select id="payment_mode" name="payment_mode">
+                    {% for key, value in payment_modes.items %}
+                    <option value="{{ key }}">{{ value }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
         

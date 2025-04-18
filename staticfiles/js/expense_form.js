@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the vendor/employee toggle functionality
     initVendorEmployeeToggle();
     
+    // Initialize vendor category filtering
+    initVendorCategoryFilter();
+    
     // Initialize amount calculations
     initAmountCalculations();
     
@@ -12,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         console.log('Running delayed initialization');
         initVendorEmployeeToggle();
+        initVendorCategoryFilter();
     }, 1000);
 });
 
@@ -19,7 +23,59 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onload = function() {
     console.log('Window fully loaded - fallback initialization');
     initVendorEmployeeToggle();
+    initVendorCategoryFilter();
 };
+
+/**
+ * Initialize the vendor category filter functionality
+ */
+function initVendorCategoryFilter() {
+    const categorySelect = document.getElementById('vendor_category');
+    const vendorSelect = document.getElementById('vendor');
+    
+    if (!categorySelect || !vendorSelect) {
+        console.error('Category or vendor select elements not found');
+        return;
+    }
+    
+    console.log('Vendor category filter initialized');
+    
+    // Store all vendor options for later filtering
+    const allVendorOptions = Array.from(vendorSelect.options);
+    
+    // Function to filter vendors based on selected category
+    function filterVendorsByCategory() {
+        const selectedCategory = categorySelect.value;
+        console.log('Filtering vendors by category:', selectedCategory);
+        
+        // Clear current options
+        vendorSelect.innerHTML = '';
+        
+        // Filter and add matching vendors
+        allVendorOptions.forEach(option => {
+            const vendorCategory = option.getAttribute('data-category');
+            
+            // If category matches or is 'General' (when no specific category is selected)
+            if (selectedCategory === 'General' || vendorCategory === selectedCategory) {
+                vendorSelect.appendChild(option.cloneNode(true));
+            }
+        });
+        
+        // If no options were added, show a message
+        if (vendorSelect.options.length === 0) {
+            const noOption = document.createElement('option');
+            noOption.text = 'No vendors available for this category';
+            noOption.value = '';
+            vendorSelect.appendChild(noOption);
+        }
+    }
+    
+    // Run the filter function on page load
+    filterVendorsByCategory();
+    
+    // Add event listener for category changes
+    categorySelect.addEventListener('change', filterVendorsByCategory);
+}
 
 /**
  * Initialize the vendor/employee toggle functionality
@@ -50,22 +106,37 @@ function initVendorEmployeeToggle() {
     function toggleVendorEmployee() {
         console.log('Toggle function called with value:', typeSelect.value);
         
+        // Get both vendor-related fields directly using the correct IDs from the HTML
+        const vendorCategoryField = document.getElementById('vendor-field');
+        const vendorSelectField = document.getElementById('vendor-select-field');
+        
+        // Make sure we have all required elements
+        if (!vendorCategoryField || !vendorSelectField) {
+            console.error('Vendor category or select field not found');
+            return;
+        }
+        
         // Force display style to be a string value
         if (typeSelect.value === 'Employee') {
-            vendorField.style.display = 'none';
-            employeeField.style.display = 'block';
+            // Hide both vendor fields
+            vendorCategoryField.setAttribute('style', 'display: none !important');
+            vendorSelectField.setAttribute('style', 'display: none !important');
+            employeeField.setAttribute('style', 'display: block !important');
             // Update the form header to show the selected type
             updateFormHeader('Employee');
         } else {
-            vendorField.style.display = 'block';
-            employeeField.style.display = 'none';
+            // Show both vendor fields
+            vendorCategoryField.setAttribute('style', 'display: block !important');
+            vendorSelectField.setAttribute('style', 'display: block !important');
+            employeeField.setAttribute('style', 'display: none !important');
             // Update the form header to show the selected type
             updateFormHeader('Vendor');
         }
         
         // Log the current display states for debugging
         console.log('Current display states:', {
-            vendor: vendorField.style.display,
+            vendorCategory: vendorCategoryField.style.display,
+            vendorSelect: vendorSelectField.style.display,
             employee: employeeField.style.display,
             typeValue: typeSelect.value
         });
