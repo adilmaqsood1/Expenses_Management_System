@@ -19,7 +19,7 @@
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
                 <select id="head" name="sub_head">
-                    {% for gl_code in gl_codes %}
+                    {% for gl_code in GLCode %}
                     <option value="{{ gl_code.gl_code }}">{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
                     {% endfor %}
                 </select>

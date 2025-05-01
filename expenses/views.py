@@ -188,7 +188,6 @@ class DashboardView(LoginRequiredMixin, View):
         recent_expenses = Expense.objects.all().order_by('-created_date')[:5]
         expense_activities = [{
             'type': 'expense',
-            'title': f"{expense.sub_head.head.name} Expense",
             'description': f"Added on {expense.created_date.strftime('%B %d, %Y')}",
             'amount': expense.amount,
             'date': expense.created_date,
@@ -370,7 +369,7 @@ class ExpenseListView(LoginRequiredMixin, View):
             expenses_list = expenses_list.filter(head_id=head_filter)
         
         # GL Code filter (replacing sub_head filter)
-        gl_code_filter = request.GET.get('sub_head')  # Keep parameter name for backward compatibility
+        gl_code_filter = request.GET.get('gl_code')  # Keep parameter name for backward compatibility
         if gl_code_filter:
             expenses_list = expenses_list.filter(gl_code_id=gl_code_filter)
         
@@ -453,7 +452,6 @@ class AddExpenseView(LoginRequiredMixin, View):
         
         context = {
             'heads': heads,
-            'sub_heads': sub_heads,
             'vendors': vendors,
             'employees': employees,
             'payment_modes': payment_modes,
@@ -469,7 +467,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         print("Files received:", request.FILES)
         
         # Get form data
-        gl_code_value = request.POST.get('sub_head')  # Field name kept as 'sub_head' for backward compatibility
+        gl_code_value = request.POST.get('gl_code')  # Field name kept as 'sub_head' for backward compatibility
         expense_type = request.POST.get('type')  # Get the expense type (Vendor/Employee)
         vendor_id = request.POST.get('vendor')
         employee_id = request.POST.get('employee')
@@ -744,7 +742,7 @@ class AddTransactionView(LoginRequiredMixin, View):
         region_id = request.POST.get('region')
         # Branch ID removed
         head_id = request.POST.get('head')
-        sub_head_id = request.POST.get('sub_head')
+        sub_head_id = request.POST.get('gl_code')
         vendor_id = request.POST.get('vendor')
         payment_mode = request.POST.get('payment_mode')
         amount = request.POST.get('amount')
@@ -758,7 +756,7 @@ class AddTransactionView(LoginRequiredMixin, View):
         # Get model instances
         region = Region.objects.get(id=region_id) if region_id else None
         head = Head.objects.get(id=head_id) if head_id else None
-        sub_head = SubHead.objects.get(id=sub_head_id) if sub_head_id else None
+        sub_head = GLCode.objects.get(id=sub_head_id) if sub_head_id else None
         vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
         
         # Create and save the expense
