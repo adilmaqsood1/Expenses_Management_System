@@ -59,7 +59,7 @@ class MISDashboardView(LoginRequiredMixin, View):
         # Apply additional filters if provided
         if filters:
             if head_filter and head_filter != 'all':
-                expenses = expenses.filter(sub_head_id=head_filter)
+                expenses = expenses.filter(gl_code_id=head_filter)
             if vendor_filter and vendor_filter != 'all':
                 expenses = expenses.filter(vendor_id=vendor_filter)
             if status_filter and status_filter != 'all':
@@ -78,8 +78,8 @@ class MISDashboardView(LoginRequiredMixin, View):
         budget_utilization = int((utilized_budget / total_budget) * 100) if total_budget > 0 else 0
         
         # Get expense by head data
-        expenses_by_head = expenses.values('sub_head__name').annotate(total=Sum('amount')).order_by('-total')
-        head_labels = [item['sub_head__name'] for item in expenses_by_head]
+        expenses_by_head = expenses.values('gl_code__gl_description').annotate(total=Sum('amount')).order_by('-total')
+        head_labels = [item['gl_code__gl_description'] for item in expenses_by_head]
         head_values = [float(item['total']) for item in expenses_by_head]
         
         # Get expense trend data (last 12 months)
@@ -218,8 +218,8 @@ class MISDashboardDataAPIView(LoginRequiredMixin, View):
             'top_expenses': [
                 {
                     'invoice_no': expense.invoice_no,
-                    'head_name': expense.head.name,
-                    'vendor_name': expense.vendor.name,
+                    'head_name': expense.gl_code.gl_description if expense.gl_code else '',
+                    'vendor_name': expense.vendor.name if expense.vendor else '',
                     'invoice_date': expense.invoice_date.isoformat(),
                     'amount': float(expense.amount),
                     'status': expense.status

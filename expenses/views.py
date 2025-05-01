@@ -188,6 +188,7 @@ class DashboardView(LoginRequiredMixin, View):
         recent_expenses = Expense.objects.all().order_by('-created_date')[:5]
         expense_activities = [{
             'type': 'expense',
+            'title': f"{expense.sub_head.head.name} Expense",
             'description': f"Added on {expense.created_date.strftime('%B %d, %Y')}",
             'amount': expense.amount,
             'date': expense.created_date,
@@ -369,7 +370,7 @@ class ExpenseListView(LoginRequiredMixin, View):
             expenses_list = expenses_list.filter(head_id=head_filter)
         
         # GL Code filter (replacing sub_head filter)
-        gl_code_filter = request.GET.get('gl_code')  # Keep parameter name for backward compatibility
+        gl_code_filter = request.GET.get('sub_head')  # Keep parameter name for backward compatibility
         if gl_code_filter:
             expenses_list = expenses_list.filter(gl_code_id=gl_code_filter)
         
@@ -452,6 +453,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         
         context = {
             'heads': heads,
+            'sub_heads': sub_heads,
             'vendors': vendors,
             'employees': employees,
             'payment_modes': payment_modes,
@@ -467,7 +469,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         print("Files received:", request.FILES)
         
         # Get form data
-        gl_code_value = request.POST.get('gl_code')  # Field name kept as 'sub_head' for backward compatibility
+        gl_code_value = request.POST.get('sub_head')  # Field name kept as 'sub_head' for backward compatibility
         expense_type = request.POST.get('type')  # Get the expense type (Vendor/Employee)
         vendor_id = request.POST.get('vendor')
         employee_id = request.POST.get('employee')
@@ -742,7 +744,7 @@ class AddTransactionView(LoginRequiredMixin, View):
         region_id = request.POST.get('region')
         # Branch ID removed
         head_id = request.POST.get('head')
-        sub_head_id = request.POST.get('gl_code')
+        sub_head_id = request.POST.get('sub_head')
         vendor_id = request.POST.get('vendor')
         payment_mode = request.POST.get('payment_mode')
         amount = request.POST.get('amount')
@@ -756,7 +758,7 @@ class AddTransactionView(LoginRequiredMixin, View):
         # Get model instances
         region = Region.objects.get(id=region_id) if region_id else None
         head = Head.objects.get(id=head_id) if head_id else None
-        sub_head = GLCode.objects.get(id=sub_head_id) if sub_head_id else None
+        sub_head = SubHead.objects.get(id=sub_head_id) if sub_head_id else None
         vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
         
         # Create and save the expense
@@ -1009,139 +1011,86 @@ class EditVendorView(LoginRequiredMixin, View):
         return redirect('vendor_list')
 
 
+# Helper: Resolve GL code
+def resolve_gl_code(sub_head):
+    gl_code = None
+    gl_code_value = ''
+
+    if not sub_head:
+        return None, ''
+
+    try:
+        if sub_head.code:
+            gl_code = GLCode.objects.filter(gl_code=sub_head.code).first()
+
+        if not gl_code:
+            gl_code = GLCode.objects.filter(sub_head=sub_head).first()
+
+        if not gl_code and sub_head.code:
+            gl_code = GLCode.objects.filter(gl_code__contains=sub_head.code).first()
+
+        gl_code_value = gl_code.gl_code if gl_code else sub_head.code or ''
+    except Exception as e:
+        logger.exception("Error retrieving GL code")
+        gl_code_value = sub_head.code or ''
+
+    return gl_code, gl_code_value
+
+# Helper: Get budget limit
+def get_budget_limit(expense, gl_code):
+    if expense.sub_head and expense.sub_head.head and expense.sub_head.head.budget is not None:
+        return expense.sub_head.head.budget
+    if gl_code:
+        if getattr(gl_code, 'limit', None) is not None:
+            return gl_code.limit
+        if getattr(gl_code, 'limit_in_millions', None) is not None:
+            return Decimal(gl_code.limit_in_millions) * Decimal('1000000')
+    return Decimal('0.00')
+
+# Helper: Calculate utilized amount before this expense
+def get_utilized_before(expense):
+    query = Expense.objects.filter(
+        status='Approved',
+        created_date__year=timezone.now().year
+    ).exclude(id=expense.id)
+
+    if expense.sub_head:
+        query = query.filter(sub_head=expense.sub_head)
+
+    return query.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+
+# Helper: Generate PDF response
+def generate_pdf_response(template_name, context, filename):
+    template = get_template(template_name)
+    html = template.render(context)
+    result = io.BytesIO()
+    pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    return HttpResponse('Error generating PDF', status=400)
+
+# Main view
 @login_required
 def expenditure_claim_view(request, expense_id, *args, **kwargs):
-    # Get the expense object or return 404
     expense = get_object_or_404(Expense, id=expense_id)
-    
-    # Get current date for the report
     now = timezone.now().strftime('%Y')
-    
-    # Get GL code directly from the expense's sub_head
-    gl_code = None
-    gl_description = ''
-    gl_code_value = ''
-    
-    # Get the GL code associated with this expense's sub_head
-    if hasattr(expense, 'sub_head') and expense.sub_head:
-        try:
-            # First try to get exact match by sub_head's code
-            if expense.sub_head.code:
-                gl_code = GLCode.objects.filter(gl_code=expense.sub_head.code).first()
-                if gl_code:
-                    gl_code_value = gl_code.gl_code
-            
-            # If not found, try to get by sub_head's id
-            if not gl_code:
-                gl_code = GLCode.objects.filter(sub_head=expense.sub_head).first()
-                if gl_code:
-                    gl_code_value = gl_code.gl_code
-                    
-            # If still not found, try partial match
-            if not gl_code and expense.sub_head.code:
-                gl_code = GLCode.objects.filter(gl_code__contains=expense.sub_head.code).first()
-                if gl_code:
-                    gl_code_value = gl_code.gl_code
-                    
-            # If still no GL code but we have a sub_head code, use that
-            if not gl_code_value and expense.sub_head.code:
-                gl_code_value = expense.sub_head.code
-        except Exception as e:
-            print(f"Error retrieving GL code: {e}")
-            gl_code = None
-    
-    # Get GL description
-    if gl_code:
-        gl_description = gl_code.gl_description
-    elif hasattr(expense, 'sub_head') and expense.sub_head:
-        gl_description = expense.sub_head.name
-    
-    # Get budget limit directly from the expense's head first (prioritize this source)
-    budget_limit = Decimal('0.00')
-    if hasattr(expense, 'sub_head') and expense.sub_head and expense.sub_head.head:
-        head = expense.sub_head.head
-        if head and head.budget is not None:
-            budget_limit = head.budget
-    
-    # If no budget limit from head, try to get from GL code as fallback
-    if budget_limit == Decimal('0.00') and gl_code:
-        if hasattr(gl_code, 'limit') and gl_code.limit is not None:
-            budget_limit = gl_code.limit
-        elif hasattr(gl_code, 'limit_in_millions') and gl_code.limit_in_millions is not None:
-            budget_limit = Decimal(gl_code.limit_in_millions) * Decimal('1000000')
-    
-    # Calculate amount utilized before this expense
-    utilized_before = Decimal('0.00')
-    if gl_code:
-        # If GL code exists, filter expenses by this GL code
-        utilized_expenses = Expense.objects.filter(
-            status='Approved',
-            created_date__year=timezone.now().year
-        ).exclude(id=expense_id)
-        
-        # Filter by sub_head that matches this GL code
-        if hasattr(expense, 'sub_head') and expense.sub_head:
-            utilized_expenses = utilized_expenses.filter(sub_head=expense.sub_head)
-        
-        utilized_before = utilized_expenses.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-    elif hasattr(expense, 'sub_head') and expense.sub_head:
-        # Filter by sub_head if no GL code
-        utilized_before = Expense.objects.filter(
-            sub_head=expense.sub_head,
-            status='Approved',
-            created_date__year=timezone.now().year
-        ).exclude(id=expense_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-    
-    # Calculate available limit before this expense
+
+    gl_code, gl_code_value = resolve_gl_code(expense.sub_head)
+    gl_description = gl_code.gl_description if gl_code else (expense.sub_head.name if expense.sub_head else '')
+
+    budget_limit = get_budget_limit(expense, gl_code)
+    utilized_before = get_utilized_before(expense)
     available_limit = budget_limit - utilized_before
-    
-    # Calculate net utilized (total utilized including current expense)
     net_utilized = utilized_before + expense.amount
-    
-    # Calculate budget available after this expense
     budget_available = budget_limit - net_utilized
-    
-    # Get cost center number if available
-    cost_center_no = ''
-    if hasattr(expense, 'branch') and expense.branch:
-        cost_center_no = getattr(expense.branch, 'cost_center_no', '') or ''
-    
-    # Get contact information
-    contact_no = ''
-    contact_person = ''
-    if expense.vendor:
-        contact_no = expense.vendor.contact_number or ''
-        contact_person = expense.vendor.name or ''
-    
-    # Check if PDF format is requested
-    if request.GET.get('format') == 'pdf':
-        # Create a PDF response
-        template = get_template('expenses/expenditure_claim.html')
-        context = {
-            'expense': expense,
-            'now': now,
-            'gl_code': gl_code,
-            'gl_description': gl_description,
-            'budget_limit': budget_limit,
-            'utilized_before': utilized_before,
-            'available_limit': available_limit,
-            'net_utilized': net_utilized,
-            'budget_available': budget_available,
-            'cost_center_no': cost_center_no,
-            'contact_no': contact_no,
-            'contact_person': contact_person
-        }
-        html = template.render(context)
-        result = io.BytesIO()
-        pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
-        
-        if not pdf.err:
-            response = HttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="expenditure_claim_{expense_id}.pdf"'
-            return response
-        return HttpResponse('Error generating PDF', status=400)
-    
-    # Render the HTML template
+
+    cost_center_no = expense.branch.cost_center_no if expense.branch else ''
+    contact_no = expense.vendor.contact_number if expense.vendor else ''
+    contact_person = expense.vendor.name if expense.vendor else ''
+
     context = {
         'expense': expense,
         'now': now,
@@ -1157,5 +1106,8 @@ def expenditure_claim_view(request, expense_id, *args, **kwargs):
         'contact_person': contact_person,
         'enable_pdf_download': True
     }
-    
+
+    if request.GET.get('format') == 'pdf':
+        return generate_pdf_response('expenses/expenditure_claim.html', context, f'expenditure_claim_{expense_id}.pdf')
+
     return render(request, 'expenses/expenditure_claim.html', context)

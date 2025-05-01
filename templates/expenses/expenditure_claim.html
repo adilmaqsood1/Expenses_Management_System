@@ -225,42 +225,42 @@ document.addEventListener('DOMContentLoaded', function() {
             <tr>
                 <td class="sr-col">5</td>
                 <td>GL Code</td>
-                <td class="data-col">{{ gl_code.gl_code|default:"-" }}</td>
+                <td class="data-col">{{ expense.gl_code.gl_code|default:"-" }}</td>
             </tr>
             <tr>
                 <td class="sr-col">6</td>
                 <td>GL Description</td>
-                <td class="data-col">{{ gl_code.gl_description|default:"-" }}</td>
+                <td class="data-col">{{ expense.gl_code.gl_description|default:"-" }}</td>
             </tr>
             <tr>
                 <td class="sr-col">7</td>
                 <td>Budget Limit-{{ now }}</td>
-                <td class="data-col">{{ budget_limit|floatformat:2 }}</td>
+                <td class="data-col">{{ budget_limit }}</td>
             </tr>
             <tr>
                 <td class="sr-col">8</td>
                 <td>Amount Utilized before this bill</td>
-                <td class="data-col">{{ utilized_before|floatformat:2 }}</td>
+                <td class="data-col">{{ utilized_before }}</td>
             </tr>
             <tr>
                 <td class="sr-col">9</td>
                 <td>Available Limit (7-8)</td>
-                <td class="data-col">{{ available_limit|floatformat:2 }}</td>
+                <td class="data-col">{{ available_limit }}</td>
             </tr>
             <tr class="highlight-row">
                 <td class="sr-col">10</td>
                 <td>Amount of current bill</td>
-                <td class="data-col">{{ expense.amount|floatformat:2 }}</td>
+                <td class="data-col">{{ expense.amount}}</td>
             </tr>
             <tr>
                 <td class="sr-col">11</td>
                 <td>Net Utilized Limit (9-10)</td>
-                <td class="data-col">{{ net_utilized|floatformat:2 }}</td>
+                <td class="data-col">{{ net_utilized }}</td>
             </tr>
             <tr>
                 <td class="sr-col">12</td>
                 <td>Budget Available</td>
-                <td class="data-col">{{ budget_available|floatformat:2 }}</td>
+                <td class="data-col">{{ budget_available}}</td>
             </tr>
             <tr>
                 <td class="sr-col">13</td>
