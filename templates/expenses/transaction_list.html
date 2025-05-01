@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+    </svg>
+    <span>Transaction Management</span>
+</div>
+<div class="expense-content shadow-sm rounded-md">
+    <form method="get" action="{% url 'transaction_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+        <div class="form-group">
+            <label>GL Code:</label>
+            <select name="gl_code" class="border border-gray-300 rounded px-2 py-1">
+                <option value="">All</option>
+                {% for gl_code in gl_codes %}
+                <option value="{{ gl_code.gl_code }}" {% if request.GET.gl_code == gl_code.gl_code %}selected{% endif %}>{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Date From:</label>
+            <input type="date" name="date_from" value="{% if request.GET.date_from %}{{ request.GET.date_from }}{% else %}{% now 'Y-m-d' %}{% endif %}" class="border border-gray-300 rounded px-2 py-1">
+        </div>
+        <div class="form-group">
+            <label>Date To:</label>
+            <input type="date" name="date_to" value="{% if request.GET.date_to %}{{ request.GET.date_to }}{% else %}{% now 'Y-m-d' %}{% endif %}" class="border border-gray-300 rounded px-2 py-1">
+        </div>
+        <button type="submit" class="btn bg-cyan-600 text-white hover:bg-cyan-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            Search
+        </button>
+
+        <a href="{% url 'add_transaction' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add New Transaction
+        </a>
+    </form>
+    
+    <div class="flex items-center mb-4 text-sm">
+        <form id="showEntriesForm" method="get" action="{% url 'transaction_list' %}" class="flex items-center">
+            <label class="mr-2 text-gray-600">Show</label>
+            <select name="show" class="border border-gray-300 rounded px-2 py-1 w-16" onchange="this.form.submit()">
+                <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
+                <option value="10" {% if show == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if show == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if show == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if show == 100 %}selected{% endif %}>100</option>
+            </select>
+            <label class="ml-2">entries</label>
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="1">
+            {% endif %}
+            {% if request.GET.gl_code %}
+                <input type="hidden" name="gl_code" value="{{ request.GET.gl_code }}">
+            {% endif %}
+            {% if request.GET.date_from %}
+                <input type="hidden" name="date_from" value="{{ request.GET.date_from }}">
+            {% endif %}
+            {% if request.GET.date_to %}
+                <input type="hidden" name="date_to" value="{{ request.GET.date_to }}">
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto rounded-lg shadow">
+        <table class="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <thead>
+                <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">ID</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">GL Code</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Date</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Wing/Division</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Particulars</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Bill Amount</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Utilized Limit</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Remaining Limit</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                </tr>
+            </thead>
+        <tbody class="divide-y divide-gray-200 border-t border-gray-200">
+            {% if transactions %}
+                {% for transaction in transactions %}
+                <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                    <td class="py-3 px-4 text-gray-800 font-medium">{{ transaction.id }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.gl_code.gl_code }} - {{ transaction.gl_code.gl_description }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.date|date:"d M Y" }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.wing_division }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.particulars }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.bill_amount }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.utilized_limit }}</td>
+                    <td class="py-3 px-4 text-gray-800">{{ transaction.remaining_limit }}</td>
+                    <td class="py-3 px-4">
+                        <a href="{% url 'edit_transaction' transaction.id %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="py-6 text-center text-gray-500 italic bg-gray-50">No transactions found</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    </div>
+    
+    <div class="mt-4 flex flex-wrap justify-between items-center text-sm text-gray-600">
+        {% if show != '-1' %}
+            Showing {{ transactions|length }} of {{ total_count }} entries
+        {% else %}
+            Showing {{ transactions.count }} entries
+        {% endif %}
+        
+        {% if show != '-1' and total_pages > 1 %}
+        <div class="pagination flex space-x-2">
+            <a href="{% url 'transaction_list' %}?show={{ show }}&page=1{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L3.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                First
+            </a>
+            {% if transactions.has_previous %}
+                <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ transactions.previous_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </span>
+            {% endif %}
+            
+            {% if transactions.has_next %}
+                <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ transactions.next_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            {% endif %}
+            
+            <a href="{% url 'transaction_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                Last
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 00-1.414 1.414L8.586 10l-4.293 4.293a1 1 0 000 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12.293 15.707a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 00-1.414 1.414L16.586 10l-4.293 4.293a1 1 0 000 1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

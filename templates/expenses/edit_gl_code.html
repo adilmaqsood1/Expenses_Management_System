@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header">
+    GL Code Management
+</div>
+<div class="expense-content">
+    {% if error %}
+    <div style="background-color: #ffebee; color: #c62828; padding: 10px; margin-bottom: 15px; border-radius: 3px; border-left: 4px solid #c62828;">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <h4>Edit GL Code:</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="gl_code"><span class="required">*</span>GL Code:</label>
+                <input type="number" id="gl_code" name="gl_code" value="{{ gl_code.gl_code |default:''}}">
+            </div>
+            <div class="form-group">
+                <label for="gl_description"><span class="required">*</span>Description:</label>
+                <input type="text" id="gl_description" name="gl_description" value="{{ gl_code.gl_description }}" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="limit_in_millions">Limit (Millions):</label>
+                <input type="number" step="0.001" id="limit_in_millions" name="limit_in_millions" value="{{ gl_code.limit_in_millions }}">
+            </div>
+            <div class="form-group">
+                <label for="limit">Limit:</label>
+                <input type="number" step="0.01" id="limit" name="limit" value="{{ gl_code.limit }}">
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'gl_code_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

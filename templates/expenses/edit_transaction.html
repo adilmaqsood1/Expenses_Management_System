@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header">
+    Transaction Management
+</div>
+<div class="expense-content">
+    <form method="post">
+        {% csrf_token %}
+        <h4>Edit Transaction:</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="gl_code"><span class="required">*</span>GL Code:</label>
+                <select id="gl_code" name="gl_code" required>
+                    <option value="">Select GL Code</option>
+                    {% for gl_code in gl_codes %}
+                    <option value="{{ gl_code.gl_code }}" {% if transaction.gl_code.gl_code == gl_code.gl_code %}selected{% endif %}>{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date"><span class="required">*</span>Date:</label>
+                <input type="date" id="date" name="date" required value="{{ transaction.date|date:'Y-m-d' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="wing_division"><span class="required">*</span>Wing/Division:</label>
+                <input type="text" id="wing_division" name="wing_division" required value="{{ transaction.wing_division }}">
+            </div>
+            <div class="form-group">
+                <label for="particulars"><span class="required">*</span>Particulars:</label>
+                <input type="text" id="particulars" name="particulars" required value="{{ transaction.particulars }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="details"><span class="required">*</span>Details:</label>
+                <textarea id="details" name="details" rows="3" required>{{ transaction.details }}</textarea>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="bill_amount"><span class="required">*</span>Bill Amount:</label>
+                <input type="number" step="0.01" id="bill_amount" name="bill_amount" required value="{{ transaction.bill_amount }}">
+            </div>
+            <div class="form-group">
+                <label for="utilized_limit"><span class="required">*</span>Utilized Limit:</label>
+                <input type="number" step="0.01" id="utilized_limit" name="utilized_limit" required value="{{ transaction.utilized_limit }}">
+            </div>
+            <div class="form-group">
+                <label for="remaining_limit"><span class="required">*</span>Remaining Limit:</label>
+                <input type="number" step="0.01" id="remaining_limit" name="remaining_limit" required value="{{ transaction.remaining_limit }}">
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'transaction_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

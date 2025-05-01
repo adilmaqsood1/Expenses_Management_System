@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include the PDF generation JS files -->
+{% load static %}
+<script src="{% static 'js/html2pdf.js' %}"></script>
+<script src="{% static 'js/PDF.js' %}"></script>
+
+<!-- Initialize PDF download functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const downloadBtn = document.getElementById('download');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            const element = document.getElementById('invoice');
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'expenditure_claim.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        });
+    }
+});
+</script>
+
+<!-- Add PDF download button -->
+{% if request.GET.format != 'pdf' and expense.supervisor_approval == 'Approved' and expense.admin_approval == 'Approved' %}
+{% if enable_pdf_download %}
+<div class="flex justify-end mb-4">
+    <button id="download" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 px-4 py-2 rounded flex items-center">
+        <i class="fas fa-file-pdf mr-2"></i> Download PDF
+    </button>
+</div>
+{% endif %}
+{% endif %}
+
+<div id="invoice">
+<style>
+    .expenditure-claim {
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 5px;
+        font-size: 1em;
+    }
+    
+    @media print {
+        .expenditure-claim {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 2px 10px 2px 10px;
+            font-size: 1em;
+        }
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .bank-name {
+        font-size: 16pt;
+        font-weight: bold;
+        margin-bottom: 1px;
+    }
+
+    .operations-group,
+    .expenditure-title,
+    .highlight-row {
+        background-color: #FFFF00;
+        padding: 2px;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .date-section {
+        text-align: right;
+        margin-bottom: 3px;
+    }
+
+    .budget-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 5px;
+    }
+
+    .data-table th,
+    .data-table td {
+        border: 1px solid #000;
+        padding: 2px;
+        font-size: 0.9em;
+    }
+
+    .data-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .data-table .sr-col {
+        width: 30px;
+        text-align: center;
+    }
+
+    .data-table .description-col {
+        width: 45%;
+    }
+
+    .data-table .data-col {
+        width: 45%;
+        text-align: right;
+    }
+    
+    @media print {
+        .data-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+    }
+
+    .signature-section {
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    .approval-section {
+        margin-top: 5px;
+        border: 1px solid #000;
+        padding: 3px;
+    }
+
+    .approval-header {
+        font-weight: bold;
+        margin-bottom: 2px;
+        background-color: #f2f2f2;
+        padding: 2px;
+    }
+
+    .approval-details {
+        margin-left: 5px;
+        font-size: 0.9em;
+    }
+
+    .particulars-section,
+    .details-section,
+    .sub-group-section {
+        margin-top: 4px;
+        font-size: 0.9em;
+    }
+
+    .section-title {
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+
+    .office-copy {
+        text-align: right;
+        margin-top: 3px;
+        font-size: 0.8em;
+    }
+
+    .action-buttons {
+        display: block;
+    }
+</style>
+
+
+<div class="expenditure-claim">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="bank-name">EXPENSE MANAGEMENT SYSTEM</div>
+        <div class="operations-group">OPERATIONS GROUP</div>
+        <div class="expenditure-title">EXPENDITURE CLAIM</div>
+    </div>
+    
+    <!-- Date Section -->
+    <div class="date-section">
+        {{ expense.created_date|date:"d/m/Y" }}
+    </div>
+    
+    <!-- Budget Title -->
+    <div class="budget-title">PROPOSED BUDGET - {{ now }}</div>
+    
+    <!-- Main Data Table -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="sr-col">SR.#</th>
+                <th class="description-col">DESCRIPTION</th>
+                <th class="data-col">DATA SUBMISSION</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="sr-col">1</td>
+                <td>Name of Cost Centre</td>
+                <td class="data-col">{{ expense.branch.name|default:"Operations Group" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">2</td>
+                <td>Cost Centre No.</td>
+                <td class="data-col">{{ cost_center_no|default:"1H0900001" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">3</td>
+                <td>Vendor NTN No.</td>
+                <td class="data-col">{{ expense.vendor.ntn_number|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">4</td>
+                <td>Vendor A/C. No.</td>
+                <td class="data-col">{{ expense.vendor.account_number|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">5</td>
+                <td>GL Code</td>
+                <td class="data-col">{{ gl_code.gl_code|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">6</td>
+                <td>GL Description</td>
+                <td class="data-col">{{ gl_code.gl_description|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">7</td>
+                <td>Budget Limit-{{ now }}</td>
+                <td class="data-col">{{ budget_limit|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">8</td>
+                <td>Amount Utilized before this bill</td>
+                <td class="data-col">{{ utilized_before|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">9</td>
+                <td>Available Limit (7-8)</td>
+                <td class="data-col">{{ available_limit|floatformat:2 }}</td>
+            </tr>
+            <tr class="highlight-row">
+                <td class="sr-col">10</td>
+                <td>Amount of current bill</td>
+                <td class="data-col">{{ expense.amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">11</td>
+                <td>Net Utilized Limit (9-10)</td>
+                <td class="data-col">{{ net_utilized|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">12</td>
+                <td>Budget Available</td>
+                <td class="data-col">{{ budget_available|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">13</td>
+                <td>Contact No.</td>
+                <td class="data-col">{{ contact_no|default:expense.vendor.contact_number|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="sr-col">14</td>
+                <td>Name of Contact Person</td>
+                <td class="data-col">{{ contact_person|default:expense.vendor.name|default:"-" }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- Second Budget Title -->
+    <div style="text-align: center; margin: 5px 0;">
+        <select style="padding: 2px; margin: 1px; font-size: 1em;" id="budget-period-selector">
+            <option value="current">PROPOSED BUDGET - {{now}}</option>
+            <option value="previous">Previous BUDGET - {{one_year_ago}}</option>
+            <option value="posterior">Posterior BUDGET - {{now}}</option>
+        </select>
+    </div>
+    
+    <!-- Approval Information Section -->
+    <div class="approval-section">
+        <div class="approval-header">Approval Information</div>
+        
+        <!-- Supervisor Approval -->
+        <div class="approval-details">
+            <div><strong>Supervisor Approval:</strong> {{ expense.supervisor_approval }}</div>
+            {% if expense.supervisor %}
+            <div><strong>Approved By:</strong> {{ expense.supervisor.username }}</div>
+            {% endif %}
+            {% if expense.supervisor_date %}
+            <div><strong>Date:</strong> {{ expense.supervisor_date|date:"d/m/y" }}</div>
+            {% endif %}
+            {% if expense.supervisor_remarks %}
+            <div><strong>Remarks:</strong> {{ expense.supervisor_remarks }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Admin Approval -->
+        <div class="approval-details" style="margin-top: 3px;">
+            <div><strong>Admin Approval:</strong> {{ expense.admin_approval }}</div>
+            {% if expense.admin %}
+            <div><strong>Approved By:</strong> {{ expense.admin.username }}</div>
+            {% endif %}
+            {% if expense.admin_date %}
+            <div><strong>Date:</strong> {{ expense.admin_date|date:"d/m/y" }}</div>
+            {% endif %}
+            {% if expense.admin_remarks %}
+            <div><strong>Remarks:</strong> {{ expense.admin_remarks }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Signature Section -->
+    <div class="signature-section">
+        <div style="margin-bottom: 5px;">{{ expense.admin.get_full_name|upper|default:"" }}</div>
+        <div>AVP - Unit Head Budget</div>
+    </div>
+    <div class="mt-20">
+    <!-- Particulars Section -->
+    <div class="particulars-section">
+        <div class="section-title">Particulars</div>
+        <div>{{ expense.description|upper }} INVOICE NO {{ expense.invoice_no|default:"-" }} DT. {{ expense.invoice_date|date:"d.m.Y"|default:"-" }} M/I/O {{ expense.created_date|date:"M Y"|upper }}</div>
+    </div>
+    
+    <!-- Details Section -->
+    <div class="details-section">
+        <div class="section-title">Details</div>
+        <div>OFFICE NOTE NO PSG/BB/84 DT {{ expense.created_date|date:"d.m.Y" }}</div>
+    </div>
+    
+    <!-- Sub Group Section -->
+    <div class="sub-group-section">
+        <div class="section-title">Sub Group / Wing Division</div>
+        <div>{{ expense.division.name|default:"" }} / {{ expense.wing.name|default:"" }}</div>
+    </div>
+    
+    <!-- Print Button (only visible in HTML, not in PDF) -->
+    <div class="signature-section">
+        <p style="margin-bottom: 2px;">_________________________</p>
+        <p style="margin-bottom: 2px;">{{ expense.supervisor.get_full_name|default:"" }}</p>
+        <p style="margin-bottom: 2px;">{{ expense.supervisor.designation|default:"" }}</p>
+    </div>
+</div>
+
+    <!-- Office Copy -->
+    {% comment %} <div style="text-align: right; margin-top: 10px; font-size: 0.8em;">
+        Office Copy
+    </div> {% endcomment %}
+
+ </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listener for budget period selector
+        const budgetSelector = document.getElementById('budget-period-selector');
+        if (budgetSelector) {
+            budgetSelector.addEventListener('change', function() {
+                // You can add functionality here if needed
+                console.log('Budget period changed to:', this.value);
+            });
+        }
+    });
+</script>
+
+</div>
+</div>
+{% endblock %}

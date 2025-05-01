@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+       Register
+    </div>
+    <div class="login-form">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                <p>Please correct the errors below:</p>
+                {{ form.errors }}
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="id_username">Username:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <small class="text-red-500">{{ form.username.errors }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_email">Email:</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <small class="text-red-500">{{ form.email.errors }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password1">Password:</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <small class="text-red-500">{{ form.password1.errors }}</small>
+                {% endif %}
+                {% if form.password1.help_text %}
+                <small class="text-gray-500">{{ form.password1.help_text|safe }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password2">Confirm Password:</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <small class="text-red-500">{{ form.password2.errors }}</small>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <div class="forgot-password">
+            <a href="{% url 'login' %}">Already have an account? Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

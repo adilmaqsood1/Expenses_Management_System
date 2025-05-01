@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if not request.user.role == "MAKERS" %}
+
+<!-- Editor Dashboard -->
+{% include "expenses/editor_dashboard.html" %}
+
+{% else %}
+<!--Makers Dashboard-->
+<div class="expense-header animate-fadeIn">
+    dashboard
+</div>
+<h3 class="text-xl text-center font-bold text-gray-800 mb-2">Welcome to Expense Management </h3>
+<div class="expense-content">
+    <!-- Allowance Request Status Cards -->    
+    <div class="mb-6 animate-slideInBottom">
+        <h4 class="text-lg font-bold text-gray-800 mb-4">Your Allowance Request Status</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Pending Requests Card -->            
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-yellow-50 p-4 border-b border-yellow-100">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h5 class="font-medium text-gray-800">Pending Requests</h5>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="text-center">
+                        <span class="text-3xl font-bold text-yellow-600">{{ pending_requests_count }}</span>
+                        <p class="text-sm text-gray-500 mt-1">Awaiting approval</p>
+                    </div>
+                    {% if pending_requests_count > 0 %}
+                    <div class="mt-4">
+                        <a href="{% url 'allowance_request_list' %}" class="text-sm text-yellow-600 hover:text-yellow-800 flex items-center justify-center">
+                            <span>View details</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Approved Requests Card -->            
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-green-50 p-4 border-b border-green-100">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 p-2 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h5 class="font-medium text-gray-800">Approved Requests</h5>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="text-center">
+                        <span class="text-3xl font-bold text-green-600">{{ approved_requests_count }}</span>
+                        <p class="text-sm text-gray-500 mt-1">Successfully approved</p>
+                    </div>
+                    {% if approved_requests_count > 0 %}
+                    <div class="mt-4">
+                        <a href="{% url 'allowance_request_list' %}" class="text-sm text-green-600 hover:text-green-800 flex items-center justify-center">
+                            <span>View details</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Rejected Requests Card -->            
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-red-50 p-4 border-b border-red-100">
+                    <div class="flex items-center">
+                        <div class="bg-red-100 p-2 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                        <h5 class="font-medium text-gray-800">Rejected Requests</h5>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="text-center">
+                        <span class="text-3xl font-bold text-red-600">{{ rejected_requests_count }}</span>
+                        <p class="text-sm text-gray-500 mt-1">Not approved</p>
+                    </div>
+                    {% if rejected_requests_count > 0 %}
+                    <div class="mt-4">
+                        <a href="{% url 'allowance_request_list' %}" class="text-sm text-red-600 hover:text-red-800 flex items-center justify-center">
+                            <span>View details</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Quick Links Section -->    
+        <div class="mb-6 animate-slideInBottom" style="animation-delay: 0.4s;">
+            <h4 class="text-lg font-bold text-gray-800 mb-4">Quick Links</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'expense_list' %}" class="dashboard-card group">
+                    <div class="bg-blue-50 p-4 flex items-center">
+                        <div class="dashboard-icon bg-blue-100 p-3 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">View Expenses</h5>
+                            <p class="text-sm text-gray-500">Review all expense records</p>
+                        </div>
+                    </div>
+                </a>
+                <a href="{% url 'add_expense' %}" class="dashboard-card group">
+                    <div class="bg-green-50 p-4 flex items-center">
+                        <div class="dashboard-icon bg-green-100 p-3 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-800 group-hover:text-green-700 transition-colors">Add New Expense</h5>
+                            <p class="text-sm text-gray-500">Create a new expense entry</p>
+                        </div>
+                    </div>
+                </a>
+                <a href="{% url 'allowance_request_list' %}" class="dashboard-card group">
+                    <div class="bg-cyan-50 p-4 flex items-center">
+                        <div class="dashboard-icon bg-cyan-100 p-3 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-800 group-hover:text-cyan-700 transition-colors">Allowance Requests</h5>
+                            <p class="text-sm text-gray-500">Manage your allowance requests</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    <!-- Recent Allowance Requests -->    
+    <div class="mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
+        <h4 class="text-lg font-bold text-gray-800 mb-4">Recent Allowance Requests</h4>
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="divide-y divide-gray-200">
+                {% for request in user_allowance_requests|slice:':5' %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-gray-800">Rs{{ request.amount|floatformat:2 }}</p>
+                            <p class="text-sm text-gray-500">{{ request.purpose|truncatechars:50 }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ request.requested_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                            {% if request.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                            {% elif request.status == 'APPROVED' %}bg-green-100 text-green-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ request.get_status_display }}
+                        </span>
+                    </div>
+                    {% if request.status == 'REJECTED' and request.rejection_reason %}
+                    
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-center items-center">
+                        <p class="text-gray-500">No allowance requests found</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="p-3 bg-gray-50 border-t border-gray-200 text-center">
+                <a href="{% url 'allowance_request_list' %}" class="text-sm text-cyan-600 hover:text-cyan-800 flex items-center justify-center">
+                    <span>View all requests</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mb-6 animate-slideInLeft">
+
+       
+    </div>
+{% endif %}
+{% endblock %}

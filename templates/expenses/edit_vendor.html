@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header">
+    Vendor Management
+</div>
+<div class="expense-content">
+    <form method="post">
+        {% csrf_token %}
+        <h4>Edit Vendor:</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name"><span class="required">*</span>Name:</label>
+                <input type="text" id="name" name="name" value="{{ vendor.name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="cnic">CNIC:</label>
+                <input type="number" id="cnic" name="cnic" value="{{ vendor.cnic|default:'' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select id="type" name="type">
+                    <option value="">Select Type</option>
+                    <option value="Individual" {% if vendor.type == 'Individual' %}selected{% endif %}>Individual</option>
+                    <option value="Company" {% if vendor.type == 'Company' %}selected{% endif %}>Company</option>
+                    <option value="Government" {% if vendor.type == 'Government' %}selected{% endif %}>Government</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="Active" {% if vendor.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if vendor.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="disabled">Disabled:</label>
+                <select id="disabled" name="disabled">
+                    <option value="False" {% if not vendor.disabled %}selected{% endif %}>No</option>
+                    <option value="True" {% if vendor.disabled %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'vendor_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

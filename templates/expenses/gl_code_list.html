@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="expense-header flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+    </svg>
+    <span>GL Code Management</span>
+</div>
+<div class="expense-content shadow-sm rounded-md">
+    <form method="get" action="{% url 'gl_code_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+        <div class="form-group">
+            <label>GL Code:</label>
+            <input type="text" name="gl_code" value="{{ request.GET.gl_code|default:'' }}">
+        </div>
+        <div class="form-group">
+            <label>Description:</label>
+            <input type="text" name="description" value="{{ request.GET.description|default:'' }}">
+        </div>
+        <button type="submit" class="btn bg-cyan-600 text-white hover:bg-cyan-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            Search
+        </button>
+        <a href="{% url 'add_gl_code' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add New GL Code
+        </a>
+    </form>
+    
+    <div class="flex items-center mb-4 text-sm">
+        <form id="showEntriesForm" method="get" action="{% url 'gl_code_list' %}" class="flex items-center">
+            <label class="mr-2 text-gray-600">Show</label>
+            <select name="show" class="border border-gray-300 rounded px-2 py-1 w-16" onchange="this.form.submit()">
+                <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
+                <option value="10" {% if show == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if show == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if show == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if show == 100 %}selected{% endif %}>100</option>
+            </select>
+            <label>entries</label>
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="1">
+            {% endif %}
+            {% if request.GET.gl_code %}
+                <input type="hidden" name="gl_code" value="{{ request.GET.gl_code }}">
+            {% endif %}
+            {% if request.GET.description %}
+                <input type="hidden" name="description" value="{{ request.GET.description }}">
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto rounded-lg shadow">
+        <table class="w-full border-collapse bg-white">
+            <thead>
+                <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">
+                        <a href="?sort_by=gl_code&order={% if sort_by == 'gl_code' and order == 'asc' %}desc{% else %}asc{% endif %}&gl_code={{ request.GET.gl_code|default:'' }}&description={{ request.GET.description|default:'' }}" class="flex items-center">
+                            GL Code
+                            {% if sort_by == "gl_code" %}
+                                {% if order == "asc" %}
+                                    🔼
+                                {% else %}
+                                    🔽
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">
+                        <a href="?sort_by=gl_description&order={% if sort_by == 'gl_description' and order == 'asc' %}desc{% else %}asc{% endif %}&gl_code={{ request.GET.gl_code|default:'' }}&description={{ request.GET.description|default:'' }}" class="flex items-center">
+                            Description
+                            {% if sort_by == "gl_description" %}
+                                {% if order == "asc" %}
+                                    🔼
+                                {% else %}
+                                    🔽
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit (Millions)</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit Utilized</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Balance Available</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                </tr>
+            </thead>
+            
+            <tbody class="divide-y divide-gray-200">
+                {% if gl_codes %}
+                    {% for gl_code in gl_codes %}
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
+                        <td class="py-3 px-4 text-gray-800 font-medium">{{ gl_code.gl_code }}</td>
+                        <td class="py-3 px-4 text-gray-800">{{ gl_code.gl_description }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right limit-in-millions">{{ gl_code.limit_in_millions }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right limit-value">{{ gl_code.limit }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.limit_utilized }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.balance_available }}</td>
+                        <td class="py-3 px-4">
+                            <a href="{% url 'edit_gl_code' gl_code.gl_code %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="py-6 text-center text-gray-500 italic bg-gray-50">No GL codes found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4 flex flex-wrap justify-between items-center text-sm text-gray-600">
+        <div>
+            {% if show != '-1' %}
+                Showing {{ gl_codes|length }} of {{ total_count }} entries
+            {% else %}
+                Showing {{ gl_codes.count }} entries
+            {% endif %}
+        </div>
+        
+        {% if show != '-1' and total_pages > 1 %}
+        <div class="pagination flex space-x-2">
+            <a href="{% url 'gl_code_list' %}?show={{ show }}&page=1{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.description %}&description={{ request.GET.description }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L3.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                First
+            </a>
+            {% if gl_codes.has_previous %}
+                <a href="{% url 'gl_code_list' %}?show={{ show }}&page={{ gl_codes.previous_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.description %}&description={{ request.GET.description }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Previous
+                </span>
+            {% endif %}
+            
+            {% if gl_codes.has_next %}
+                <a href="{% url 'gl_code_list' %}?show={{ show }}&page={{ gl_codes.next_page_number }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.description %}&description={{ request.GET.description }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% else %}
+                <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded flex items-center cursor-not-allowed">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            {% endif %}
+            <a href="{% url 'gl_code_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.gl_code %}&gl_code={{ request.GET.gl_code }}{% endif %}{% if request.GET.description %}&description={{ request.GET.description }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                Last
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 6.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12.293 15.707a1 1 0 010-1.414L16.586 10l-4.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+        {% else %}
+        <div class="pagination">
+            <a href="#" style="color: #ccc;">First</a>
+            <a href="#" style="color: #ccc;">Previous</a>
+            <a href="#" style="color: #ccc;">Next</a>
+            <a href="#" style="color: #ccc;">Last</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to convert regular limit to millions
+    function convertToMillions(value) {
+        if (!value || value === '') return '';
+        return (parseFloat(value) / 1000000).toFixed(3);
+    }
+    
+    // Function to format currency with rupee symbol and millions in parentheses
+    function formatCurrency(value) {
+        if (!value || value === '') return '';
+        const numValue = parseFloat(value.toString().replace(/[^0-9.-]+/g, ''));
+        if (isNaN(numValue)) return 'None';
+        const millionsValue = (numValue / 1000000).toFixed(2);
+        return `₨ ${numValue.toFixed(2)} (${millionsValue} M)`;
+    }
+    
+    // Function to ensure limit values are properly displayed
+    function updateLimitDisplay() {
+        // For each row in the table
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const limitCell = row.querySelector('.limit-value');
+            const millionsCell = row.querySelector('.limit-in-millions');
+            const limitUtilizedCell = row.querySelector('td:nth-child(5)');
+            const balanceAvailableCell = row.querySelector('td:nth-child(6)');
+            
+            if (limitCell && millionsCell) {
+                // Format the limit value with rupee symbol and millions
+                if (limitCell.textContent.trim() !== '') {
+                    const originalValue = limitCell.textContent.trim();
+                    limitCell.textContent = formatCurrency(originalValue);
+                    // We don't need to display millions separately anymore
+                    millionsCell.textContent = '';
+                }
+                
+                // Format limit utilized and balance available
+                if (limitUtilizedCell && limitUtilizedCell.textContent.trim() !== '') {
+                    limitUtilizedCell.textContent = formatCurrency(limitUtilizedCell.textContent.trim());
+                }
+                
+                if (balanceAvailableCell && balanceAvailableCell.textContent.trim() !== '') {
+                    balanceAvailableCell.textContent = formatCurrency(balanceAvailableCell.textContent.trim());
+                }
+            }
+        });
+    }
+    
+    // Run the function when the page loads
+    updateLimitDisplay();
+});
+</script>
+
+{% endblock %}

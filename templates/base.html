@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  </title>
+    <!-- Favicon -->
+    <link rel="icon" href="/static/images/favicon.svg" type="image/svg+xml">
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Enhanced button styles -->
+    <link rel="stylesheet" href="/static/css/enhanced-buttons.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Page specific styles -->
+    {% if request.path == '/expenses/' or request.path == '/expenses/list/' %}
+    <link rel="stylesheet" href="/static/css/expense_list.css">
+    {% endif %}
+    
+    {% if request.path == '/mis-dashboard/' %}
+    <link rel="stylesheet" href="/static/css/mis_dashboard.css">
+    {% endif %}
+    
+    {% if request.path == '/mis-dashboard/' %}
+    <link rel="stylesheet" href="/static/css/mis_dashboard.css">
+    {% endif %}
+    
+    <!-- User role specific styles -->
+    {% if request.user.role == 'MAKERS' %}
+    <link rel="stylesheet" href="/static/css/user_role.css">
+    {% endif %}
+    <!-- Custom JavaScript -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/budget.js"></script>
+    <script src="/static/js/validation.js"></script>
+    <script src="/static/js/gl_code_conversion.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #004d66;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(to right, #004d66, #006080);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .header-info {
+            font-size: 14px;
+        }
+        .header-info a {
+            color: white;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        .nav-menu {
+            background: linear-gradient(to right, #006080, #0077a3);
+            display: flex;
+            flex-wrap: wrap;
+            padding: 5px;
+        }
+        .nav-item {
+            background: linear-gradient(to bottom, #004d66, #003d52);
+            color: white;
+            margin: 2px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .content {
+            background-color: white;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .expense-header {
+            background-color: #004d66;
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-radius: 3px 3px 0 0;
+        }
+        .expense-content {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .budget-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .budget-item {
+            text-align: center;
+        }
+        .budget-label {
+            font-weight: bold;
+            color: #004d66;
+        }
+        .budget-value {
+            font-weight: bold;
+        }
+        .btn {
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #e5e5e5;
+        }
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .search-form .form-group {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            font-weight: bold;
+        }
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .pagination a {
+            margin: 0 5px;
+            color: #004d66;
+            text-decoration: none;
+        }
+        .required {
+            color: red;
+        }
+        .login-container {
+            max-width: 380px;
+            margin: 50px auto;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .login-header {
+            background-color: #004d66;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .login-form {
+            padding: 20px;
+        }
+        .login-form .form-group {
+            margin-bottom: 15px;
+        }
+        .login-form .btn {
+            width: 100%;
+            background-color: #004d66;
+            color: white;
+            border: none;
+            padding: 10px;
+        }
+        .login-form .btn:hover {
+            background-color: #006080;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .forgot-password a {
+            color: #004d66;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    {% if not request.user.role == 'MAKERS' %}
+    <div class="header shadow-md">
+        <div class="header-title">
+            <a href="{% url 'dashboard' %}" class="logo-container animate-fadeIn">
+                <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
+            </a>
+        </div>
+        
+        <div class="header-info">
+            {% if user.is_authenticated %}
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-cyan-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ user.username }}</span>
+                </span>
+                <a href="{% url 'password_change' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                    Change Password
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 12.586V8z" clip-rule="evenodd" />
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <a href="{% url 'admin:index' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+                </svg>
+                login as an Admin
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% if request.path != '/login/' and request.path != '/register/' %}
+    <div class="nav-menu shadow-md relative z-10">
+        <div class="container mx-auto flex flex-wrap items-center justify-start space-x-2 px-2">
+            {% if request.user.is_mis %}
+            
+            <!-- MIS Analytics Dashboard link - only visible to MIS users -->
+            <a href="{% url 'mis_dashboard' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/mis-dashboard/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    <span>MIS Analytics</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            {% else %}
+            <!-- Show all menu items for non-MIS users -->
+            <a href="{% url 'dashboard' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+
+            <a href="{% url 'gl_code_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/gl-codes/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    <span>GL Code</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+
+            <a href="{% url 'expense_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>EPS Expense</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+
+            <a href="{% url 'vendor_list' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/vendors/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+                        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+                    </svg>
+                    <span>Vendor List</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            <a href="{% url 'employee_list' %}" class="nav-item relative overflow-hidden group
+            {% if request.path == '/employees/' %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Employee List</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            <a href="{% url 'transaction_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/transactions/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 4a1 1 0 000 2h1a1 1 0 000-2H7zm3 6a1 1 0 100-2h3a1 1 0 100 2h-3zm-3 2a1 1 0 100 2h7a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    <span>GL Transaction</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            <a href="{% url 'allowance_request_list' %}" class="nav-item relative overflow-hidden group
+            {% if '/allowance-requests/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Allowance Requests</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!--User Navbar-->
+    {% else %}
+    <div class="header shadow-md bg-gradient-to-r from-cyan-700 to-cyan-600">
+        <div class="header-title">
+            <a href="{% url 'expense_list' %}" class="logo-container animate-fadeIn">
+                <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
+                <span class="ml-2 text-white font-semibold">Expense Management</span>
+            </a>
+        </div>
+        
+        <div class="header-info">
+            {% if user.is_authenticated %}
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-cyan-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ user.username }}</span>
+                </span>
+                <a href="{% url 'password_change' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                    Change Password
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 12.586V8z" clip-rule="evenodd" />
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="nav-menu shadow-md relative z-10 bg-gradient-to-r from-cyan-600 to-cyan-500">
+        <div class="container mx-auto flex flex-wrap items-center justify-start space-x-2 px-2">
+            <a href="{% url 'dashboard' %}" class="nav-item relative overflow-hidden group
+                {% if '/expenses/allowance/list/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-list-alt mr-2"></i>
+                    <span>Dashboard</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            
+            <a href="{% url 'expense_list' %}" class="nav-item relative overflow-hidden group
+                {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-file-invoice-dollar mr-2"></i>
+                    <span>My Expenses</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            <a href="{% url 'add_expense' %}" class="nav-item relative overflow-hidden group
+                {% if '/expenses/add/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    <span>Add New Expense</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            <a href="{% url 'create_allowance_request' %}" class="nav-item relative overflow-hidden group
+                {% if '/expenses/allowance/create/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-hand-holding-usd mr-2"></i>
+                    <span>Request Allowance</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+            <a href="{% url 'allowance_request_list' %}" class="nav-item relative overflow-hidden group
+                {% if '/expenses/allowance/list/' in request.path %}active{% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-list-alt mr-2"></i>
+                    <span>My Allowance Requests</span>
+                </span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="content" 
+    {% if request.path == '/login/' or request.path == '/register/' %}
+        style="height: auto; overflow: hidden;"
+    {% else %}
+        style="height: calc(100vh - 120px); overflow-y: auto;"
+    {% endif %}>        
+    {% block content %}{% endblock %}
+</div>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
