@@ -171,9 +171,9 @@ USE_TZ = True
 
 
 
-FORCE_SCRIPT_NAME = '/expance'
-STATIC_URL = '/expance/static/'
-MEDIA_URL = '/expance/media/'
+FORCE_SCRIPT_NAME = '/expense'
+STATIC_URL = '/expense/static/'
+MEDIA_URL = '/expense/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
