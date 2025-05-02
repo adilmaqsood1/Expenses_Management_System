@@ -21,34 +21,42 @@ class Region(models.Model):
         return self.name
 
 class Head(models.Model):
-    code = models.CharField(max_length=20)
-    name = models.CharField(max_length=100)
+    code = models.ForeignKey(GLCode, on_delete=models.CASCADE, related_name='head_codes', null=True)
+    name = models.CharField(max_length=255, blank=True)
     fiscal_year = models.CharField(max_length=20, blank=True, null=True)
     budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     utilized_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     remaining_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     
     def save(self, *args, **kwargs):
+        # Auto-populate name field with GL code description if empty
+        if not self.name and self.code:
+            self.name = self.code.gl_description
+            
         # Calculate remaining budget before saving
         self.remaining_budget = self.budget - self.utilized_budget
         super().save(*args, **kwargs)
     
     def update_budget_utilization(self):
-        # Calculate utilized budget from approved expenses
+        # Calculate utilized budget from expenses that have both supervisor and admin approval
         from django.db.models import Sum
         from decimal import Decimal
         
         utilized = Expense.objects.filter(
             head=self,
-            status='Approved'
+            supervisor_approval='Approved',
+            admin_approval='Approved'
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
         
         self.utilized_budget = utilized
         self.remaining_budget = self.budget - self.utilized_budget
         self.save(update_fields=['utilized_budget', 'remaining_budget'])
+        
+        # Log the update for debugging
+        print(f"Updated budget for {self.name}: Budget={self.budget}, Utilized={self.utilized_budget}, Remaining={self.remaining_budget}")
     
     def __str__(self):
-        return f"{self.code}-{self.name}"
+        return f"{self.code.gl_code} - {self.name}"
 
 
 class Vendor(models.Model):
@@ -135,6 +143,20 @@ class Expense(models.Model):
     def __str__(self):
         return f"{self.invoice_no} - {self.amount}"
 
+# Signal to update Head budget utilization when expense status changes
+@receiver(post_save, sender=Expense)
+def update_head_budget_on_expense_change(sender, instance, **kwargs):
+    # Update the head's budget utilization only when approval status changes
+    if instance.head:
+        instance.head.update_budget_utilization()
+
+# Signal to update Head budget utilization when expense is deleted
+@receiver(post_delete, sender=Expense)
+def update_head_budget_on_expense_delete(sender, instance, **kwargs):
+    # Update the head's budget utilization if the expense had both approvals
+    if instance.head and instance.supervisor_approval == 'Approved' and instance.admin_approval == 'Approved':
+        instance.head.update_budget_utilization()
+
 class Transaction(models.Model):
     gl_code = models.ForeignKey(GLCode, on_delete=models.CASCADE, related_name='transactions')
     date = models.DateField()
@@ -205,15 +227,5 @@ class Employee(models.Model):
     def __str__(self):
         return self.name
 
-# Signal handlers to update Head budget fields when expenses change
-@receiver(post_save, sender=Expense)
-def update_head_budget_on_expense_change(sender, instance, **kwargs):
-    """Update the head's budget utilization when an expense is created or updated"""
-    if instance.head:
-        instance.head.update_budget_utilization()
-
-@receiver(post_delete, sender=Expense)
-def update_head_budget_on_expense_delete(sender, instance, **kwargs):
-    """Update the head's budget utilization when an expense is deleted"""
-    if instance.head:
-        instance.head.update_budget_utilization()
+# These signal handlers are duplicates of the ones above and can be removed
+# The handlers at lines ~140-150 are already handling these events

@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+import cloudinary
+import dotenv
+dotenv.load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hih92ntze!^&$j@w&ih!bw@+*t++g4ji!%sjt4zxr#_h6ylqsg'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv("DEBUG", "False").lower() == "True"
 
-ALLOWED_HOSTS = ['*', '.vercel.app/']
+ALLOWED_HOSTS = ['.vercel.app', os.getenv("DATABASE_URL", " localhost")]
 
 
 
@@ -49,8 +53,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+]
+
+if os.getenv("DATABASE_NAME"):
+    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+
+MIDDLEWARE += [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,18 +95,42 @@ WSGI_APPLICATION = 'expense_management.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv("PRO_DATABASE_ENGINE"),
+#         'NAME': os.getenv("PRO_DATABASE_NAME"),
+#         'USER': os.getenv("PRO_DATABASE_USER"),
+#         'PASSWORD': os.getenv("PRO_DATABASE_PASSWORD"),
+#         'HOST': os.getenv("PRO_DATABASE_HOST"),
+#         'PORT': os.getenv("PRO_DATABASE_PORT"),
+#     }
+# }
+
+if os.getenv("DATABASE_URL"):
+    
 # Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_SLYbF6hf2ETr',
-        'HOST': 'ep-sweet-resonance-a156qzl4-pooler.ap-southeast-1.aws.neon.tech',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'neondb',
+            'USER': 'neondb_owner',
+            'PASSWORD': 'npg_SLYbF6hf2ETr',
+            'HOST': os.getenv("DATABASE_URL"),
+            'PORT': '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+            }
         }
+    }
+else:
+    DATABASES = {
+    'default': {
+        'ENGINE': os.getenv("PRO_DATABASE_ENGINE"),
+        'NAME': os.getenv("PRO_DATABASE_NAME"),
+        'USER': os.getenv("PRO_DATABASE_USER"),
+        'PASSWORD': os.getenv("PRO_DATABASE_PASSWORD"),
+        'HOST': os.getenv("PRO_DATABASE_HOST"),
+        'PORT': os.getenv("PRO_DATABASE_PORT"),
     }
 }
 
@@ -135,12 +169,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+FORCE_SCRIPT_NAME = '/expance'
+STATIC_URL = '/expance/static/'
+MEDIA_URL = '/expance/media/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if os.getenv("DATABASE_URL"):
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -323,3 +362,11 @@ JAZZMIN_SETTINGS = {
 # Authentication settings
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name=os.getenv("cloud_name"),
+    api_key=os.getenv("api_key"),
+    api_secret=os.getenv("api_secret"),
+    secure=True  
+)

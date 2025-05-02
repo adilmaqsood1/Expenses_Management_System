@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
 <link rel="stylesheet" href="/static/css/expense_form.css">
 <!-- Select2 CSS for enhanced dropdown search -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -19,7 +27,7 @@
             <div class="form-group">
                 <label for="sub_head"><span class="required">*</span>Sub-Head:</label>
                 <select id="head" name="sub_head">
-                    {% for gl_code in gl_code %}
+                    {% for gl_code in GLCode %}
                     <option value="{{ gl_code.gl_code }}">{{ gl_code.gl_code }} - {{ gl_code.gl_description }}</option>
                     {% endfor %}
                 </select>

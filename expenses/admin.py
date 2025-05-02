@@ -48,16 +48,52 @@ class EmployeeTypeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 class HeadAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'subhead_count')
-    search_fields = ('code', 'name')
+    list_display = ('code', 'budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'gl_code_count')
+    search_fields = ('code__gl_code',)
     readonly_fields = ('utilized_budget', 'available_budget')
+    fieldsets = (
+        (None, {
+            "fields": (
+                'code', 'budget', 'fiscal_year'
+            ),
+        }),
+    )
+    
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Add JavaScript to auto-populate name field with GL code description
+        if 'code' in form.base_fields:
+            form.base_fields['code'].widget.attrs['onchange'] = 'updateNameField(this.value)'
+            
+            # Add the JavaScript function to the page
+            from django.forms.widgets import Media
+            form.Media = Media(js=('js/head_admin.js',))
+            
+        return form
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "code":
+            # Display only GL code without description
+            from django.forms.models import ModelChoiceField
+            from .models import GLCode
+            
+            class GLCodeModelChoiceField(ModelChoiceField):
+                def label_from_instance(self, obj):
+                    return f"{obj.gl_code} - {obj.gl_description}"
+            
+            kwargs["queryset"] = GLCode.objects.all().order_by('gl_code')
+            kwargs["form_class"] = GLCodeModelChoiceField
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def utilized_budget(self, obj):
         from django.db.models import Sum
         from decimal import Decimal
         utilized = Expense.objects.filter(
-            sub_head__head=obj,
-            status='Approved'
+            head=obj,
+            supervisor_approval='Approved',
+            admin_approval='Approved'
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
         return format_html("Rs{}", "{:.2f}".format(utilized))
     utilized_budget.short_description = 'Utilized Budget'
@@ -66,8 +102,9 @@ class HeadAdmin(admin.ModelAdmin):
         from django.db.models import Sum
         from decimal import Decimal
         utilized = Expense.objects.filter(
-            sub_head__head=obj,
-            status='Approved'
+            head=obj,
+            supervisor_approval='Approved',
+            admin_approval='Approved'
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
         available = obj.budget - utilized
         return format_html("Rs{}", "{:.2f}".format(available))
@@ -77,8 +114,9 @@ class HeadAdmin(admin.ModelAdmin):
         from django.db.models import Sum
         from decimal import Decimal
         utilized = Expense.objects.filter(
-            sub_head__head=obj,
-            status='Approved'
+            head=obj,
+            supervisor_approval='Approved',
+            admin_approval='Approved'
         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
         
         if obj.budget and obj.budget > 0:
@@ -97,9 +135,10 @@ class HeadAdmin(admin.ModelAdmin):
         return "N/A"
     utilization_percentage.short_description = 'Utilization'
     
-    def subhead_count(self, obj):
-        return obj.subhead_set.count()
-    subhead_count.short_description = 'Number of Sub-Heads'
+    def gl_code_count(self, obj):
+        # Count related GL codes through expenses
+        return Expense.objects.filter(head=obj).values('gl_code').distinct().count()
+    gl_code_count.short_description = 'Number of GL Codes'
 
 class VendorTypeFilter(admin.SimpleListFilter):
     title = 'Vendor Type'
@@ -157,7 +196,7 @@ class ExpenseAdmin(admin.ModelAdmin):
     fieldsets = (
     ('Expense Details', {
         'fields': (
-            'vendor', 'wing', 'division', 'payment_mode',
+            'vendor', 'head', 'gl_code', 'wing', 'division', 'payment_mode',
             'amount', 'net_amount', 'invoice_no', 'invoice_date',
             'description',
         )
@@ -170,9 +209,9 @@ class ExpenseAdmin(admin.ModelAdmin):
 )
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "sub_head":
+        if db_field.name == "gl_code":
             # Display GL code and description together
-            kwargs["queryset"] = SubHead.objects.all().order_by('code')
+            kwargs["queryset"] = GLCode.objects.all().order_by('gl_code')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def budget_info(self, obj):

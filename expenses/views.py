@@ -188,7 +188,7 @@ class DashboardView(LoginRequiredMixin, View):
         recent_expenses = Expense.objects.all().order_by('-created_date')[:5]
         expense_activities = [{
             'type': 'expense',
-            'title': f"{expense.sub_head.head.name} Expense",
+            # 'title': f"{expense.sub_head.head.name} Expense",
             'description': f"Added on {expense.created_date.strftime('%B %d, %Y')}",
             'amount': expense.amount,
             'date': expense.created_date,
@@ -369,8 +369,8 @@ class ExpenseListView(LoginRequiredMixin, View):
         if head_filter:
             expenses_list = expenses_list.filter(head_id=head_filter)
         
-        # GL Code filter (replacing sub_head filter)
-        gl_code_filter = request.GET.get('sub_head')  # Keep parameter name for backward compatibility
+        # GL Code filter
+        gl_code_filter = request.GET.get('gl_code')  # Use proper parameter name
         if gl_code_filter:
             expenses_list = expenses_list.filter(gl_code_id=gl_code_filter)
         
@@ -411,7 +411,7 @@ class ExpenseListView(LoginRequiredMixin, View):
             # Branches removed from context
             'vendors': vendors,
             'heads': heads,
-            'gl_codes': GLCode.objects.all(),  # Replace sub_heads with gl_codes
+            'gl_codes': GLCode.objects.all(),
             'employees': employees,
             'payment_modes': payment_modes,
             'status_choices': status_choices,
@@ -453,7 +453,6 @@ class AddExpenseView(LoginRequiredMixin, View):
         
         context = {
             'heads': heads,
-            'sub_heads': sub_heads,
             'vendors': vendors,
             'employees': employees,
             'payment_modes': payment_modes,
@@ -508,8 +507,8 @@ class AddExpenseView(LoginRequiredMixin, View):
             
             # Get or create a default Head for the expense
             default_head, _ = Head.objects.get_or_create(
-                code='DEFAULT',
-                defaults={'name': 'Default Head', 'budget': 0}
+                code=gl_code_obj,
+                defaults={'name': gl_code_obj.gl_description, 'budget': 0}
             )
             
             # Set the head to the default head
@@ -744,7 +743,7 @@ class AddTransactionView(LoginRequiredMixin, View):
         region_id = request.POST.get('region')
         # Branch ID removed
         head_id = request.POST.get('head')
-        sub_head_id = request.POST.get('sub_head')
+        gl_code_id = request.POST.get('gl_code')
         vendor_id = request.POST.get('vendor')
         payment_mode = request.POST.get('payment_mode')
         amount = request.POST.get('amount')
@@ -758,14 +757,14 @@ class AddTransactionView(LoginRequiredMixin, View):
         # Get model instances
         region = Region.objects.get(id=region_id) if region_id else None
         head = Head.objects.get(id=head_id) if head_id else None
-        sub_head = SubHead.objects.get(id=sub_head_id) if sub_head_id else None
+        gl_code = GLCode.objects.get(gl_code=gl_code_id) if gl_code_id else None
         vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
         
         # Create and save the expense
         expense = Expense(
             # Only include fields that are actually defined in the model
 
-            sub_head=sub_head,
+            gl_code=gl_code,
             vendor=vendor,
             payment_mode=payment_mode,
             amount=amount,
@@ -1011,51 +1010,61 @@ class EditVendorView(LoginRequiredMixin, View):
         return redirect('vendor_list')
 
 
-# Helper: Resolve GL code
-def resolve_gl_code(sub_head):
+# Helper: Get GL code details
+def get_gl_code_details(gl_code_id):
     gl_code = None
     gl_code_value = ''
 
-    if not sub_head:
+    if not gl_code_id:
         return None, ''
 
     try:
-        if sub_head.code:
-            gl_code = GLCode.objects.filter(gl_code=sub_head.code).first()
-
-        if not gl_code:
-            gl_code = GLCode.objects.filter(sub_head=sub_head).first()
-
-        if not gl_code and sub_head.code:
-            gl_code = GLCode.objects.filter(gl_code__contains=sub_head.code).first()
-
-        gl_code_value = gl_code.gl_code if gl_code else sub_head.code or ''
+        gl_code = GLCode.objects.filter(gl_code=gl_code_id).first()
+        gl_code_value = gl_code.gl_code if gl_code else ''
     except Exception as e:
         logger.exception("Error retrieving GL code")
-        gl_code_value = sub_head.code or ''
+        gl_code_value = ''
 
     return gl_code, gl_code_value
 
 # Helper: Get budget limit
 def get_budget_limit(expense, gl_code):
-    if expense.sub_head and expense.sub_head.head and expense.sub_head.head.budget is not None:
-        return expense.sub_head.head.budget
+    # First try to get budget from Head model associated with this GL code
     if gl_code:
+        try:
+            head = Head.objects.filter(code=gl_code).first()
+            if head and head.budget:
+                return head.budget
+        except Exception as e:
+            print(f"Error fetching head budget: {e}")
+            
+        # Fallback to GL code's limit fields
         if getattr(gl_code, 'limit', None) is not None:
             return gl_code.limit
         if getattr(gl_code, 'limit_in_millions', None) is not None:
             return Decimal(gl_code.limit_in_millions) * Decimal('1000000')
+    
     return Decimal('0.00')
 
 # Helper: Calculate utilized amount before this expense
 def get_utilized_before(expense):
+    # First try to get utilized budget from Head model
+    if expense.gl_code:
+        try:
+            head = Head.objects.filter(code=expense.gl_code).first()
+            if head:
+                return head.utilized_budget
+        except Exception as e:
+            print(f"Error fetching head utilized budget: {e}")
+    
+    # Fallback to calculating from expenses
     query = Expense.objects.filter(
         status='Approved',
         created_date__year=timezone.now().year
     ).exclude(id=expense.id)
 
-    if expense.sub_head:
-        query = query.filter(sub_head=expense.sub_head)
+    if expense.gl_code:
+        query = query.filter(gl_code=expense.gl_code)
 
     return query.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
 
@@ -1077,25 +1086,33 @@ def generate_pdf_response(template_name, context, filename):
 def expenditure_claim_view(request, expense_id, *args, **kwargs):
     expense = get_object_or_404(Expense, id=expense_id)
     now = timezone.now().strftime('%Y')
+    one_year_ago = str(int(now) - 1)
 
-    gl_code, gl_code_value = resolve_gl_code(expense.sub_head)
-    gl_description = gl_code.gl_description if gl_code else (expense.sub_head.name if expense.sub_head else '')
-
-    budget_limit = get_budget_limit(expense, gl_code)
+    gl_code = expense.gl_code
+    gl_description = gl_code.gl_description if gl_code else ''
+    
+    # Get budget information based on GL code
+    head = None
+    if gl_code:
+        head = Head.objects.filter(code=gl_code).first()
+    
+    # Get budget values
+    budget_limit = get_budget_limit(expense, expense.gl_code)
     utilized_before = get_utilized_before(expense)
     available_limit = budget_limit - utilized_before
     net_utilized = utilized_before + expense.amount
     budget_available = budget_limit - net_utilized
 
-    cost_center_no = expense.branch.cost_center_no if expense.branch else ''
+    # Additional information
+    cost_center_no = ''  # Branch field no longer exists in Expense model
     contact_no = expense.vendor.contact_number if expense.vendor else ''
     contact_person = expense.vendor.name if expense.vendor else ''
 
     context = {
         'expense': expense,
         'now': now,
-        'gl_code': gl_code,
-        'gl_description': gl_description,
+        'one_year_ago': one_year_ago,
+        'head': head,
         'budget_limit': budget_limit,
         'utilized_before': utilized_before,
         'available_limit': available_limit,
