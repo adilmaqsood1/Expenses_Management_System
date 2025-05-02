@@ -165,7 +165,8 @@ FORCE_SCRIPT_NAME = '/expense'
 STATIC_URL = '/expense/static/'
 MEDIA_URL = '/expense/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [BASE_DIR / 'static']  # if your static files are in a 'static/' folder
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if os.getenv("DATABASE_URL"):
