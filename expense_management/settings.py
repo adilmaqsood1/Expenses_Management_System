@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 ]
 
-if os.getenv("DATABASE_NAME"):
+if os.getenv("DATABASE_URL"):
     MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 
 MIDDLEWARE += [
@@ -95,16 +95,6 @@ WSGI_APPLICATION = 'expense_management.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv("PRO_DATABASE_ENGINE"),
-#         'NAME': os.getenv("PRO_DATABASE_NAME"),
-#         'USER': os.getenv("PRO_DATABASE_USER"),
-#         'PASSWORD': os.getenv("PRO_DATABASE_PASSWORD"),
-#         'HOST': os.getenv("PRO_DATABASE_HOST"),
-#         'PORT': os.getenv("PRO_DATABASE_PORT"),
-#     }
-# }
 
 if os.getenv("DATABASE_URL"):
     
