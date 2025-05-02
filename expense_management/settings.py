@@ -161,18 +161,25 @@ USE_TZ = True
 
 
 
+# Static files (CSS, JavaScript, Images)
 FORCE_SCRIPT_NAME = '/expense'
 STATIC_URL = '/expense/static/'
 MEDIA_URL = '/expense/media/'
 
-STATICFILES_DIRS = [BASE_DIR / 'static']  # if your static files are in a 'static/' folder
+# Make sure these directories exist
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Whitenoise configuration for production
 if os.getenv("DATABASE_URL"):
-    # Use a more lenient storage class that doesn't validate file references
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    # Use the simplest storage class without manifest validation
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     
+    # Configure whitenoise
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_ROOT = STATIC_ROOT
+    WHITENOISE_INDEX_FILE = True
     # Add static files finders to help locate files
     STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
