@@ -4,13 +4,13 @@
 {% if request.user.is_mis %}
 <div class="expense-header animate-fadeIn" style="background: linear-gradient(to right, #004d66, #006080); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <i class="fas fa-chart-line mr-2 text-yellow-300 pulse-icon"></i> MIS Analytics Dashboard
-    <span class="text-sm ml-2 font-normal opacity-75">Comprehensive expense analysis and reporting</span>
+    <span class="text-sm ml-2 font-normal opacity-75 hidden md:inline">Comprehensive expense analysis and reporting</span>
     <div class="header-actions float-right">
         <button id="refresh-dashboard" class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded transition-colors">
-            <i class="fas fa-sync-alt mr-1"></i> Refresh Data
+            <i class="fas fa-sync-alt mr-1"></i> <span class="hidden sm:inline">Refresh</span>
         </button>
         <button id="export-dashboard" class="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded transition-colors ml-2">
-            <i class="fas fa-file-export mr-1"></i> Export
+            <i class="fas fa-file-export mr-1"></i> <span class="hidden sm:inline">Export</span>
         </button>
     </div>
 </div>
@@ -29,6 +29,10 @@
             <button type="button" id="toggle-filters" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
                 <i class="fas fa-chevron-down mr-1"></i> <span id="toggle-text">Collapse</span>
             </button>
+        </div>
+        <div id="filter-loading" class="hidden w-full flex justify-center items-center py-4">
+            <div class="loading-spinner"></div>
+            <span class="ml-2 text-gray-600">Loading filters...</span>
         </div>
         <form id="filter-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 filter-container">
             <div class="form-group">
@@ -90,7 +94,7 @@
     </div>
     
     <!-- Summary Cards - Enhanced with icons and better visual indicators -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
         <div class="stats-card p-4 rounded shadow" style="background: linear-gradient(135deg, #ffffff, #f0f7ff); border-left: 4px solid #3b82f6;">
             <div class="flex justify-between items-start">
                 <div>
@@ -163,7 +167,7 @@
     </div>
     
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-slideInBottom" style="animation-delay: 0.3s;">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-slideInBottom" style="animation-delay: 0.3s;" id="charts-container">
         <!-- Expense by Category Chart -->
         <div class="p-4 rounded shadow" style="background: linear-gradient(135deg, #ffffff, #f0f7ff);">
             <h4 class="text-lg font-bold text-gray-800 mb-4">Expenses by Head</h4>
@@ -180,7 +184,13 @@
             </div>
         </div>
         
-        
+        <!-- Budget vs Actual Chart -->
+        <div class="p-4 rounded shadow" style="background: linear-gradient(135deg, #ffffff, #fff8e1);">
+            <h4 class="text-lg font-bold text-gray-800 mb-4">Budget vs Actual</h4>
+            <div class="chart-container" style="position: relative; height:300px;">
+                <canvas id="budget-vs-actual-chart"></canvas>
+            </div>
+        </div>
         
         <!-- Expense by Status Chart -->
         <div class="p-4 rounded shadow" style="background: linear-gradient(135deg, #ffffff, #f8f0ff);">
@@ -232,7 +242,7 @@
     </div>
     
     <!-- Vendor/Employee Analysis -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-slideInBottom" style="animation-delay: 0.5s;">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-slideInBottom" style="animation-delay: 0.5s;" id="vendor-charts-container">
         <!-- Top Vendors -->
         <div class="p-4 rounded shadow" style="background: linear-gradient(135deg, #ffffff, #fff1f2);">
             <h4 class="text-lg font-bold text-gray-800 mb-4">Top Vendors</h4>
@@ -251,10 +261,23 @@
     </div>
 </div>
 
-<!-- Include Chart.js -->
+{% load static %}
+<!-- Include Chart.js and other dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src= {% static "js/budget_new.js" %}></script>
+<script src= {% static 'js/mis_dashboard.js'%}></script>
 
-<!-- MIS Dashboard JavaScript -->
+<!-- Add loading overlay -->
+<div id="dashboard-loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+        <div class="loading-spinner mb-4"></div>
+        <p class="text-gray-800 font-medium">Loading dashboard data...</p>
+    </div>
+</div>
+
+<!-- MIS Dashboard JavaScript - Chart Initialization -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Create gradient colors for charts
@@ -265,7 +288,7 @@
             return gradient;
         }
         
-        // Sample data - in a real implementation, this would come from the backend
+        // Chart data from backend
         const expenseByHeadData = {
             labels: {{ head_labels|safe }},
             datasets: [{
@@ -638,23 +661,12 @@
             }
         );
         
-        // Handle date range selection
-        const dateRangeSelect = document.getElementById('date-range');
-        const customDateRange = document.getElementById('custom-date-range');
-        
-        dateRangeSelect.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                customDateRange.classList.remove('hidden');
-            } else {
-                customDateRange.classList.add('hidden');
-            }
-        });
-        
-        // Handle filter application
-        document.getElementById('apply-filters').addEventListener('click', function() {
-            // In a real implementation, this would make an AJAX call to get filtered data
-            alert('Filters would be applied here. In a real implementation, this would update the charts with filtered data.');
-        });
+        // Note: Event handlers for buttons and filters are now managed in mis_dashboard.js
+        // This includes:
+        // - Date range selection
+        // - Filter application
+        // - Dashboard refresh
+        // - Dashboard export
     });
 </script>
 {% else %}
