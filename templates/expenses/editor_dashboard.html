@@ -36,7 +36,7 @@
     <div class="mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
         <h4 class="text-lg font-bold text-gray-800 mb-4">Quick Links</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href="{% url 'editor_allowance_list' %}" class="dashboard-card group">
+            <a href="{% url 'budget:editor_allowance_list' %}" class="dashboard-card group">
                 <div class="bg-blue-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-blue-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,7 +49,7 @@
                     </div>
                 </div>
             </a>
-            <a href="{% url 'editor_expense_list' %}" class="dashboard-card group">
+            <a href="{% url 'budget:editor_expense_list' %}" class="dashboard-card group">
                 <div class="bg-yellow-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-yellow-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,7 +62,7 @@
                     </div>
                 </div>
             </a>
-            <a href="{% url 'employee_list' %}" class="dashboard-card group">
+            <a href="{% url 'budget:employee_list' %}" class="dashboard-card group">
                 <div class="bg-green-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-green-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,7 +75,7 @@
                     </div>
                 </div>
             </a>
-            <a href="{% url 'vendor_list' %}" class="dashboard-card group">
+            <a href="{% url 'budget:vendor_list' %}" class="dashboard-card group">
                 <div class="bg-purple-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-purple-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

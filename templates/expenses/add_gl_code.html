@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% load static %}
 <div class="expense-header">
     GL Code Management
 </div>
@@ -36,10 +37,10 @@
         
         <div style="margin-top: 20px;">
             <button type="submit" class="btn">Save</button>
-            <a href="{% url 'gl_code_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
+            <a href="{% url 'budget:gl_code_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
         </div>
         
-        <script src="/static/js/gl_code_conversion.js"></script>
+        <script src={% static 'js/gl_code_conversion.js'%}></script>
     </form>
 </div>
 {% endblock %}

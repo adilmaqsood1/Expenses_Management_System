@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
-<link rel="stylesheet" href="/static/css/expense_list_enhanced.css">
+{% load static %}
+<link rel="stylesheet" href={% static 'css/expense_list_enhanced.css'%}>
 <script>
 function toggleVendorEmployee() {
     var typeSelect = document.getElementById('expenseType');
@@ -46,7 +48,7 @@ window.onload = function() {
 </div>
 <div class="expense-content shadow-sm rounded-md">
     {% comment %} {% if request.user.role == 'USER' %} {% endcomment %}
-    <form method="get" action="{% url 'expense_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+    <form method="get" action="{% url 'budget:expense_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
         <div class="form-group">
             <label>Start Date:</label>
             <input type="date" name="start_date" value="{% now 'Y-m-d' %}">
@@ -107,7 +109,7 @@ window.onload = function() {
             Search
         </button>
         {% if request.user.role == 'USER' %}
-        <a href="{% url 'add_expense' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
+        <a href="{% url 'budget:add_expense' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
@@ -143,7 +145,7 @@ window.onload = function() {
     {% endif %}
 
     <div class="flex items-center mb-4 text-sm">
-        <form id="showEntriesForm" method="get" action="{% url 'expense_list' %}" class="flex items-center">
+        <form id="showEntriesForm" method="get" action="{% url 'budget:expense_list' %}" class="flex items-center">
             <label class="mr-2 text-gray-600">Show</label>
             <select name="show" class="border border-gray-300 rounded px-2 py-1 w-16" onchange="this.form.submit()">
                 <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
@@ -218,13 +220,13 @@ window.onload = function() {
             <tbody class="divide-y divide-gray-200">
                 {% if expenses %}
                     {% for expense in expenses %}
-                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150 cursor-pointer" onclick="window.location='{% url 'expenditure_claim' expense.id %}'">
+                    <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150 cursor-pointer" onclick="window.location='{% url 'budget:expenditure_claim' expense.id %}'">
                         {% if request.user.role == 'USER' %}
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700">
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700">
                                 <div class="font-medium">{{ expense.description|default:'-'|truncatechars:30 }}</div>
                                 <div class="text-xs text-gray-500">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</div>
                             </a>
@@ -233,58 +235,58 @@ window.onload = function() {
                             <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 font-medium text-right">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 font-medium text-right">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expense_detail' expense.id %}" class="block">
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="block">
                                 <span class="status-badge {% if expense.status == 'Approved' %}status-approved{% elif expense.status == 'Pending' %}status-pending{% elif expense.status == 'Rejected' %}status-rejected{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
                             </a>
                         </td>
                         {% else %}
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.description|default:'-'|truncatechars:30 }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.description|default:'-'|truncatechars:30 }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ 0.00</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ 0.00</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'expenditure_claim' expense.id %}" class="block">
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="block">
                                 <span class="px-2 py-1 text-xs rounded-full {% if expense.status == 'Approved' %}bg-green-100 text-green-800{% elif expense.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif expense.status == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
                             </a>
                         </td>
@@ -311,7 +313,7 @@ window.onload = function() {
         
         {% if show != '-1' and total_pages > 1 %}
         <div class="pagination flex space-x-2">
-            <a href="{% url 'expense_list' %}?show={{ show }}&page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+            <a href="{% url 'budget:expense_list' %}?show={{ show }}&page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                     <path fill-rule="evenodd" d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L3.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
@@ -319,7 +321,7 @@ window.onload = function() {
                 First
             </a>
             {% if expenses.has_previous %}
-                <a href="{% url 'expense_list' %}?show={{ show }}&page={{ expenses.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <a href="{% url 'budget:expense_list' %}?show={{ show }}&page={{ expenses.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
@@ -335,7 +337,7 @@ window.onload = function() {
             {% endif %}
             
             {% if expenses.has_next %}
-                <a href="{% url 'expense_list' %}?show={{ show }}&page={{ expenses.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <a href="{% url 'budget:expense_list' %}?show={{ show }}&page={{ expenses.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                     Next
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -349,7 +351,7 @@ window.onload = function() {
                     </svg>
                 </span>
             {% endif %}
-            <a href="{% url 'expense_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+            <a href="{% url 'budget:expense_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.vendor %}&vendor={{ request.GET.vendor }}{% endif %}{% if request.GET.employee %}&employee={{ request.GET.employee }}{% endif %}{% if request.GET.head %}&head={{ request.GET.head }}{% endif %}{% if request.GET.sub_head %}&sub_head={{ request.GET.sub_head }}{% endif %}{% if request.GET.region %}&region={{ request.GET.region }}{% endif %}{% if request.GET.branch %}&branch={{ request.GET.branch }}{% endif %}{% if request.GET.cost_center %}&cost_center={{ request.GET.cost_center }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                 Last
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 6.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />

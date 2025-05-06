@@ -5,7 +5,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Allowance Requests</h1>
         {% if user.is_subhead %}
-        <a href="{% url 'create_allowance_request' %}" class="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 shadow-md flex items-center">
+        <a href="{% url 'budget:create_allowance_request' %}" class="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 shadow-md flex items-center">
             <span>New Request</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -66,9 +66,9 @@
                         {{ request.requested_date|date:"M d, Y" }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{% url 'allowance_request_detail' request.id %}" class="text-blue-600 hover:text-blue-900 mr-3">View Details</a>
+                        <a href="{% url 'budget:allowance_request_detail' request.id %}" class="text-blue-600 hover:text-blue-900 mr-3">View Details</a>
                         {% if request.status == 'PENDING' and user.is_editor or user.is_admin %}
-                        <a href="{% url 'process_allowance_request' request.id %}" class="text-cyan-600 hover:text-cyan-900">Process</a>
+                        <a href="{% url 'budget:process_allowance_request' request.id %}" class="text-cyan-600 hover:text-cyan-900">Process</a>
                         {% endif %}
                     </td>
                 </tr>

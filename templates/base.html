@@ -1,41 +1,42 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>  </title>
     <!-- Favicon -->
-    <link rel="icon" href="/static/images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href={% static 'images/favicon.svg' %} type="image/svg+xml">
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Custom styles -->
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href= {% static 'css/styles.css' %}>
     <!-- Enhanced button styles -->
-    <link rel="stylesheet" href="/static/css/enhanced-buttons.css">
+    <link rel="stylesheet" href= {% static 'css/enhanced-buttons.css' %} >
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Page specific styles -->
     {% if request.path == '/expenses/' or request.path == '/expenses/list/' %}
-    <link rel="stylesheet" href="/static/css/expense_list.css">
+    <link rel="stylesheet" href={% static 'css/expense_list.css'%}>
     {% endif %}
     
     {% if request.path == '/mis-dashboard/' %}
-    <link rel="stylesheet" href="/static/css/mis_dashboard.css">
+    <link rel="stylesheet" href={% static 'css/mis_dashboard.css'%}>
     {% endif %}
     
     {% if request.path == '/mis-dashboard/' %}
-    <link rel="stylesheet" href="/static/css/mis_dashboard.css">
+    <link rel="stylesheet" href={% static 'css/mis_dashboard.css' %}>
     {% endif %}
     
     <!-- User role specific styles -->
     {% if request.user.role == 'MAKERS' %}
-    <link rel="stylesheet" href="/static/css/user_role.css">
+    <link rel="stylesheet" href={% static 'css/user_role.css'%}>
     {% endif %}
     <!-- Custom JavaScript -->
-    <script src="/static/js/main.js"></script>
-    <script src="/static/js/budget.js"></script>
-    <script src="/static/js/validation.js"></script>
-    <script src="/static/js/gl_code_conversion.js"></script>
+    <script src={% static 'js/main.js'%}></script>
+    <script src={% static 'js/budget.js' %}></script>
+    <script src={% static 'js/validation.js'%}></script>
+    <script src={% static 'js/gl_code_conversion.js'%}></script>
     <style>
         body {
             margin: 0;
@@ -235,8 +236,8 @@
     {% if not request.user.role == 'MAKERS' %}
     <div class="header shadow-md">
         <div class="header-title">
-            <a href="{% url 'dashboard' %}" class="logo-container animate-fadeIn">
-                <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
+            <a href="{% url 'budget:dashboard' %}" class="logo-container animate-fadeIn">
+                <img src={% static 'images/logo.svg'%} alt="Expense Management Logo" class="logo-image">
             </a>
         </div>
         
@@ -249,12 +250,12 @@
                     </svg>
                     <span class="font-medium">{{ user.username }}</span>
                 </span>
-                <a href="{% url 'password_change' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+                {% comment %} <a href="{% url 'budget:password_change' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                     </svg>
                     Change Password
-                </a>
+                </a> {% endcomment %}
                 <form method="post" action="{% url 'logout' %}" class="inline-block">
                     {% csrf_token %}
                     <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
@@ -266,7 +267,7 @@
                 </form>
             </div>
             {% else %}
-            <a href="{% url 'admin:index' %}" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+            <a href="/admin/login/" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
                 </svg>
@@ -275,13 +276,13 @@
             {% endif %}
         </div>
     </div>
-    {% if request.path != '/login/' and request.path != '/register/' %}
+    {% if user.is_authenticated %}
     <div class="nav-menu shadow-md relative z-10">
         <div class="container mx-auto flex flex-wrap items-center justify-start space-x-2 px-2">
             {% if request.user.is_mis %}
             
             <!-- MIS Analytics Dashboard link - only visible to MIS users -->
-            <a href="{% url 'mis_dashboard' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:mis_dashboard' %}" class="nav-item relative overflow-hidden group
             {% if request.path == '/mis-dashboard/' %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -294,7 +295,7 @@
             
             {% else %}
             <!-- Show all menu items for non-MIS users -->
-            <a href="{% url 'dashboard' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:dashboard' %}" class="nav-item relative overflow-hidden group
             {% if request.path == '/' %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -305,7 +306,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
 
-            <a href="{% url 'gl_code_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:gl_code_list' %}" class="nav-item relative overflow-hidden group
             {% if '/gl-codes/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -316,7 +317,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
 
-            <a href="{% url 'expense_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:expense_list' %}" class="nav-item relative overflow-hidden group
             {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -327,7 +328,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
 
-            <a href="{% url 'vendor_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:vendor_list' %}" class="nav-item relative overflow-hidden group
             {% if request.path == '/vendors/' %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -339,7 +340,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
             
-            <a href="{% url 'employee_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:employee_list' %}" class="nav-item relative overflow-hidden group
             {% if request.path == '/employees/' %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -350,7 +351,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
             
-            <a href="{% url 'transaction_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:transaction_list' %}" class="nav-item relative overflow-hidden group
             {% if '/transactions/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -361,7 +362,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
             
-            <a href="{% url 'allowance_request_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:allowance_request_list' %}" class="nav-item relative overflow-hidden group
             {% if '/allowance-requests/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -380,8 +381,8 @@
     {% else %}
     <div class="header shadow-md bg-gradient-to-r from-cyan-700 to-cyan-600">
         <div class="header-title">
-            <a href="{% url 'expense_list' %}" class="logo-container animate-fadeIn">
-                <img src="/static/images/logo.svg" alt="Expense Management Logo" class="logo-image">
+            <a href="{% url 'budget:expense_list' %}" class="logo-container animate-fadeIn">
+                <img src={% static 'images/logo.svg'%} alt="Expense Management Logo" class="logo-image">
                 <span class="ml-2 text-white font-semibold">Expense Management</span>
             </a>
         </div>
@@ -417,7 +418,7 @@
     
     <div class="nav-menu shadow-md relative z-10 bg-gradient-to-r from-cyan-600 to-cyan-500">
         <div class="container mx-auto flex flex-wrap items-center justify-start space-x-2 px-2">
-            <a href="{% url 'dashboard' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:dashboard' %}" class="nav-item relative overflow-hidden group
                 {% if '/expenses/allowance/list/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <i class="fas fa-list-alt mr-2"></i>
@@ -426,7 +427,7 @@
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
             
-            <a href="{% url 'expense_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:expense_list' %}" class="nav-item relative overflow-hidden group
                 {% if '/expenses/' in request.path and '/vendors/' not in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <i class="fas fa-file-invoice-dollar mr-2"></i>
@@ -434,7 +435,7 @@
                 </span>
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
-            <a href="{% url 'add_expense' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:add_expense' %}" class="nav-item relative overflow-hidden group
                 {% if '/expenses/add/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <i class="fas fa-plus-circle mr-2"></i>
@@ -442,7 +443,7 @@
                 </span>
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
-            <a href="{% url 'create_allowance_request' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:create_allowance_request' %}" class="nav-item relative overflow-hidden group
                 {% if '/expenses/allowance/create/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <i class="fas fa-hand-holding-usd mr-2"></i>
@@ -450,7 +451,7 @@
                 </span>
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </a>
-            <a href="{% url 'allowance_request_list' %}" class="nav-item relative overflow-hidden group
+            <a href="{% url 'budget:allowance_request_list' %}" class="nav-item relative overflow-hidden group
                 {% if '/expenses/allowance/list/' in request.path %}active{% endif %}">
                 <span class="flex items-center">
                     <i class="fas fa-list-alt mr-2"></i>

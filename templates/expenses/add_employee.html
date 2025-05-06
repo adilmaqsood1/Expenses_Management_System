@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="expense-header">
@@ -63,7 +64,7 @@
         
         <div style="margin-top: 20px;">
             <button type="submit" class="btn">Save</button>
-            <a href="{% url 'employee_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
+            <a href="{% url 'budget:employee_list' %}" class="btn" style="margin-left: 10px;">Cancel</a>
         </div>
     </form>
 </div>

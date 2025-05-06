@@ -72,7 +72,7 @@
         <div class="border-t border-gray-200 pt-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4">Process This Expense</h3>
             
-            <form method="post" action="{% url 'process_expense' expense.id %}">
+            <form method="post" action="{% url 'budget:process_expense' expense.id %}">
                 {% csrf_token %}
                 <div class="grid grid-cols-1 gap-6">
                     <div class="mb-4">
@@ -102,7 +102,7 @@
                 </div>
                 
                 <div class="flex justify-end space-x-3 mt-6">
-                    <a href="{% url 'editor_expense_list' %}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancel</a>
+                    <a href="{% url 'budget:editor_expense_list' %}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancel</a>
                     <button type="submit" class="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 transition-colors duration-200">Submit Decision</button>
                 </div>
             </form>
@@ -111,7 +111,7 @@
         <div class="border-t border-gray-200 pt-6">
             <div class="bg-gray-50 p-4 rounded-md">
                 <p class="text-gray-700">This expense has already been processed and is currently <span class="font-medium">{{ expense.status }}</span>.</p>
-                <a href="{% url 'editor_expense_list' %}" class="mt-4 inline-block px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 transition-colors duration-200">Back to Expense List</a>
+                <a href="{% url 'budget:editor_expense_list' %}" class="mt-4 inline-block px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 transition-colors duration-200">Back to Expense List</a>
             </div>
         </div>
         {% endif %}

@@ -270,7 +270,7 @@ class UserAdmin(admin.ModelAdmin):
             'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
         }),
         ('Account Details', {
-            'fields': ('account_name', 'account_number', 'account_type')
+            'fields': ('account_number', 'account_type')
         }),
     )
 

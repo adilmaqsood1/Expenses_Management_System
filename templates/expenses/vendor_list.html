@@ -9,7 +9,7 @@
     <span>Vendor Management</span>
 </div>
 <div class="expense-content shadow-sm rounded-md">
-    <form method="get" action="{% url 'vendor_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
+    <form method="get" action="{% url 'budget:vendor_list' %}" class="search-form bg-gray-50 rounded-md shadow-sm">
         <div class="form-group">
             <label>Name:</label>
             <input type="text" name="name" value="{{ request.GET.name|default:'' }}">
@@ -39,7 +39,7 @@
             Search
         </button>
 
-        <a href="{% url 'add_vendor' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
+        <a href="{% url 'budget:add_vendor' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
@@ -48,7 +48,7 @@
     </form>
     
     <div class="flex items-center mb-4 text-sm">
-        <form id="showEntriesForm" method="get" action="{% url 'vendor_list' %}" class="flex items-center">
+        <form id="showEntriesForm" method="get" action="{% url 'budget:vendor_list' %}" class="flex items-center">
             <label class="mr-2 text-gray-600">Show</label>
             <select name="show" class="border border-gray-300 rounded px-2 py-1 w-16" onchange="this.form.submit()">
                 <option value="-1" {% if show == '-1' %}selected{% endif %}>All</option>
@@ -101,7 +101,7 @@
                         </td>
                         <td class="py-3 px-4 text-gray-800">{{ vendor.created_date|date:"d M Y" }}</td>
                         <td class="py-3 px-4">
-                            <a href="{% url 'edit_vendor' vendor.id %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
+                            <a href="{% url 'budget:edit_vendor' vendor.id %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
@@ -130,7 +130,7 @@
         
         {% if show != '-1' and total_pages > 1 %}
         <div class="pagination flex space-x-2">
-            <a href="{% url 'vendor_list' %}?show={{ show }}&page=1{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+            <a href="{% url 'budget:vendor_list' %}?show={{ show }}&page=1{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                     <path fill-rule="evenodd" d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L3.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
@@ -138,7 +138,7 @@
                 First
             </a>
             {% if vendors.has_previous %}
-                <a href="{% url 'vendor_list' %}?show={{ show }}&page={{ vendors.previous_page_number }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <a href="{% url 'budget:vendor_list' %}?show={{ show }}&page={{ vendors.previous_page_number }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
@@ -154,7 +154,7 @@
             {% endif %}
             
             {% if vendors.has_next %}
-                <a href="{% url 'vendor_list' %}?show={{ show }}&page={{ vendors.next_page_number }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+                <a href="{% url 'budget:vendor_list' %}?show={{ show }}&page={{ vendors.next_page_number }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                     Next
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -168,7 +168,7 @@
                     </svg>
                 </span>
             {% endif %}
-            <a href="{% url 'vendor_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
+            <a href="{% url 'budget:vendor_list' %}?show={{ show }}&page={{ total_pages }}{% if request.GET.name %}&name={{ request.GET.name }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 flex items-center">
                 Last
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 6.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />

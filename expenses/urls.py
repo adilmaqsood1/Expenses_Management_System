@@ -1,9 +1,13 @@
 from django.urls import path
 from . import views, api, views_allowance, views_mis, views_editor
+from django.contrib.auth import views as auth_views
+
+app_name = 'budget'
 
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('admin-login/', auth_views.LoginView.as_view(template_name='admin/login.html', next_page='/admin/'), name='admin_login'),
     path('expenses/', views.ExpenseListView.as_view(), name='expense_list'),
     path('expenses/detail/<int:expense_id>/', views.ExpenseDetailView.as_view(), name='expense_detail'),
     path('expenses/add/', views.AddExpenseView.as_view(), name='add_expense'),

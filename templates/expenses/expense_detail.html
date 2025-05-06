@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<link rel="stylesheet" href="/static/css/expense_list_enhanced.css">
+{% load static %}
+<link rel="stylesheet" href={% static 'css/expense_list_enhanced.css'%}>
 
 <div class="expense-header flex items-center animate-fadeIn">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -13,7 +14,7 @@
 
 <div class="expense-content shadow-sm rounded-md">
     <div class="mb-4 flex justify-between items-center">
-        <a href="{% url 'expense_list' %}" class="btn bg-gray-500 text-white hover:bg-gray-600 transition-colors duration-200">
+        <a href="{% url 'budget:expense_list' %}" class="btn bg-gray-500 text-white hover:bg-gray-600 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
             </svg>
@@ -125,7 +126,7 @@
             
             {% if expense.supervisor_approval == 'Approved' and expense.admin_approval == 'Approved' %}
             <div class="mt-4 text-center">
-                <a href="{% url 'expenditure_claim' expense.id %}?format=pdf" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200">
+                <a href="{% url 'budget:expenditure_claim' expense.id %}?format=pdf" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
                     </svg>

@@ -43,7 +43,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='USER')
     # branch field has been removed
-    account_name = models.CharField(max_length=255, blank=True, null=True)
     account_number = models.CharField(max_length=255, blank=True, null=True)
     account_type = models.CharField(max_length=100, blank=True, null=True)
     

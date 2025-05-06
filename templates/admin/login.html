@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extrastyle %}
-<link rel="stylesheet" href="{% static 'css/admin-login.css' %}">
+<link rel="stylesheet" href={% static 'css/admin-login.css' %}>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@
     <div class="admin-login-card">
         <div class="admin-login-header">
             <div class="header-accent"></div>
-            <img src="{% static 'images/logo.svg' %}" alt="Logo" class="admin-logo">
+            <img src={% static 'images/logo.svg' %} alt="Logo" class="admin-logo">
             <h2 class="admin-title">Administrator Login</h2>
         </div>
         

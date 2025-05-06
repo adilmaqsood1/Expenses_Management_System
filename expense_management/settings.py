@@ -30,6 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = ['*','.vercel.app', os.getenv("ALLOW_HOST", " localhost")]
 
@@ -101,15 +102,8 @@ if os.getenv("DATABASE_URL"):
 # Database configuration
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'neondb',
-            'USER': 'neondb_owner',
-            'PASSWORD': 'npg_SLYbF6hf2ETr',
-            'HOST': os.getenv("DATABASE_URL"),
-            'PORT': '5432',
-            'OPTIONS': {
-                'sslmode': 'require',
-            }
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 else:
@@ -365,8 +359,8 @@ JAZZMIN_SETTINGS = {
 }
 
 # Authentication settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_URL = '/expense/login/'
+LOGIN_REDIRECT_URL = '/expense/dashboard/'
 
 # Cloudinary configuration
 cloudinary.config(
