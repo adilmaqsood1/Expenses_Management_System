@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const userId = getCurrentUserId();
             if (userId) {
-                userProfileUrl = `/admin/expenses/user/${userId}/change/`;
+                userProfileUrl = `/expense/admin/expenses/user/${userId}/change/`;
             }
             
             userProfileButton.innerHTML = `
