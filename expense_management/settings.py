@@ -242,7 +242,7 @@ JAZZMIN_SETTINGS = {
         {"name": "Support", "url": "https://github.com/yourusername/expense_management", "new_window": True},
         {"name": "User Guide", "url": "#", "new_window": True},
         {"name": "Profile", "url": "#", "new_window": False},
-        {"name": "Logout", "url": "expense:logouts", "new_window": False, "icon": "fas fa-sign-out-alt"},
+        {"name": "Logout", "url": "/expense/admin/logout/", "new_window": False, "icon": "fas fa-sign-out-alt"},
     ],
     #############
     # Side Menu #
@@ -361,6 +361,7 @@ JAZZMIN_SETTINGS = {
 # Authentication settings
 LOGIN_URL = '/expense/login/'
 LOGIN_REDIRECT_URL = '/expense/dashboard/'
+LOGOUT_REDIRECT_URL = '/expense/login/'  # Add this line to ensure logout redirects to login page
 
 # Cloudinary configuration
 cloudinary.config(
