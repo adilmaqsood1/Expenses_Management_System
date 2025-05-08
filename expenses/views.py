@@ -29,12 +29,12 @@ class CustomLoginView(LoginView):
         if not redirect_to:
             # If no redirect URL is provided, redirect based on user role
             if self.request.user.is_admin:
-                redirect_to = '/admin/'
+                redirect_to = '/expense/admin/'
             
             elif self.request.user.is_supervisor:
-                redirect_to = '/'
+                redirect_to = '/expense/'
             elif self.request.user.is_maker:
-                redirect_to = '/'
+                redirect_to = '/expense/'
             else:
                 redirect_to = '/mis-dashboard/'
         return redirect_to 
