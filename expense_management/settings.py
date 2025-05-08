@@ -241,8 +241,8 @@ JAZZMIN_SETTINGS = {
     "usermenu_links": [
         {"name": "Support", "url": "https://github.com/yourusername/expense_management", "new_window": True},
         {"name": "User Guide", "url": "#", "new_window": True},
-        {"name": "Profile", "url": "admin:expenses_user_change", "new_window": False},
-        {"name": "Logout", "url": "admin:logout", "new_window": False, "icon": "fas fa-sign-out-alt"},
+        {"name": "Profile", "url": "#", "new_window": False},
+        {"name": "Logout", "url": "expense:logouts", "new_window": False, "icon": "fas fa-sign-out-alt"},
     ],
     #############
     # Side Menu #

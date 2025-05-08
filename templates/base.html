@@ -256,7 +256,7 @@
                     </svg>
                     Change Password
                 </a> {% endcomment %}
-                <form method="post" action="{% url 'logout' %}" class="inline-block">
+                <form method="post" action="{% url 'logouts' %}" class="inline-block">
                     {% csrf_token %}
                     <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -267,7 +267,7 @@
                 </form>
             </div>
             {% else %}
-            <a href="/admin/login/" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
+            <a href="/expenses/admin/login/" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
                 </svg>
@@ -402,7 +402,7 @@
                     </svg>
                     Change Password
                 </a>
-                <form method="post" action="{% url 'logout' %}" class="inline-block">
+                <form method="post" action="{% url 'logouts' %}" class="inline-block">
                     {% csrf_token %}
                     <button type="submit" class="flex items-center hover:bg-cyan-700 px-3 py-1 rounded transition-all duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">

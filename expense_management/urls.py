@@ -24,5 +24,5 @@ urlpatterns = [
     path('', include('expenses.urls')),
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='expenses/password_change.html'), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='expenses/password_change_done.html'), name='password_change_done'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='budget:login'), name='logout'),
+    path('logouts/', auth_views.LogoutView.as_view(next_page='budget:login'), name='logouts'),
 ]

@@ -1,11 +1,11 @@
 {% extends "admin/base.html" %}
 
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
-
 {% block extrastyle %}
+{% load static %}
 {{ block.super }}
-<link rel="stylesheet" href="/static/css/enhanced-buttons.css">
-<link rel="stylesheet" href="/static/css/jazzmin-hide-elements.css">
+<link rel="stylesheet" href={% static "css/enhanced-buttons.css" %}>
+<link rel="stylesheet" href={% static "css/jazzmin-hide-elements.css" %}>
 
 {% endblock %}
 
