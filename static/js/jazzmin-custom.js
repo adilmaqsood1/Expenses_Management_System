@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const logoutButton = document.createElement('li');
             logoutButton.className = 'nav-item';
             logoutButton.innerHTML = `
-                <a href="/admin/logout/" class="nav-link" title="Logout" style="color: #fff; padding: 0.5rem 1rem; display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; margin-left: 10px; font-weight: 500;">
+                <a href="/expense/admin/logout/" class="nav-link" title="Logout" style="color: #fff; padding: 0.5rem 1rem; display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; margin-left: 10px; font-weight: 500;">
                     <i class="fas fa-sign-out-alt" style="font-size: 1.2rem; margin-right: 0.5rem;"></i>
                     <span class="d-none d-md-inline">Logout</span>
                 </a>
