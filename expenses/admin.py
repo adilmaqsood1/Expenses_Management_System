@@ -29,6 +29,15 @@ class GLCodeAdmin(ImportExportModelAdmin):
             )
         return "N/A"
     utilization_percentage.short_description = 'Utilization'
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class RegionAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -38,23 +47,50 @@ class RegionAdmin(admin.ModelAdmin):
     # def branch_count(self, obj):
     #     return obj.branch_set.count()
     # branch_count.short_description = 'Number of Branches'
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class CadreAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class EmployeeTypeAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class HeadAdmin(admin.ModelAdmin):
-    list_display = ('code', 'budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'gl_code_count')
+    list_display = ('code', 'name','budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'gl_code_count')
     search_fields = ('code__gl_code',)
     readonly_fields = ('utilized_budget', 'available_budget')
     fieldsets = (
         (None, {
             "fields": (
-                'code', 'budget', 'fiscal_year'
+                'code', 'name','budget', 'fiscal_year'
             ),
         }),
     )
@@ -139,7 +175,16 @@ class HeadAdmin(admin.ModelAdmin):
         # Count related GL codes through expenses
         return Expense.objects.filter(head=obj).values('gl_code').distinct().count()
     gl_code_count.short_description = 'Number of GL Codes'
-
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
+    
 class VendorTypeFilter(admin.SimpleListFilter):
     title = 'Vendor Type'
     parameter_name = 'type'
@@ -151,6 +196,15 @@ class VendorTypeFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.filter(type=self.value())
         return queryset
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class VendorStatusFilter(admin.SimpleListFilter):
     title = 'Vendor Status'
@@ -163,6 +217,15 @@ class VendorStatusFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.filter(status=self.value())
         return queryset
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class VendorAdmin(ImportExportModelAdmin):
     list_display = ('name', 'cnic', 'type', 'status', 'disabled', 'created_date', 'total_expenses')
@@ -187,6 +250,15 @@ class VendorAdmin(ImportExportModelAdmin):
         total = Expense.objects.filter(vendor=obj).aggregate(total=Sum('amount'))['total']
         return "Rs{:.2f}".format(total) if total else "Rs0.00"
     total_expenses.short_description = 'Total Expenses'
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class ExpenseAdmin(admin.ModelAdmin):
     list_display = ['invoice_no', 'vendor', 'amount', 'net_amount', 'payment_mode', 'created_date', 'status']
@@ -251,12 +323,30 @@ class ExpenseAdmin(admin.ModelAdmin):
             colors.get(obj.status, 'gray'), obj.status
         )
     status_badge.short_description = 'Status'
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
         
 class TransactionAdmin(ImportExportModelAdmin):
     list_display = ('gl_code', 'date', 'wing_division', 'particulars', 'bill_amount')
     list_filter = ('date', 'gl_code')
     search_fields = ('description', 'wing_division')
     date_hierarchy = 'date'
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
@@ -273,6 +363,15 @@ class UserAdmin(admin.ModelAdmin):
             'fields': ('account_number', 'account_type')
         }),
     )
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class AllowanceRequestAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'purpose', 'status', 'requested_date', 'processed_date', 'processed_by')
@@ -290,18 +389,27 @@ class AllowanceRequestAdmin(admin.ModelAdmin):
             'fields': ('processed_by', 'processed_date', 'requested_date')
         }),
     )
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('sap_id', 'name', 'designation', 'email', 'phone_no', 'created_date')
+    list_display = ('sap_id', 'name', 'designation', 'email', 'phone_no', 'head', 'wing', 'division', 'cadre')
     list_filter = ('designation', 'created_date')
     search_fields = ('sap_id', 'name', 'email', 'phone_no')
     readonly_fields = ('created_date', 'updated_date')
     fieldsets = (
         ('Employee Information', {
-            'fields': ('sap_id', 'name', 'designation','head', 'address', 'email', 'phone_no', 'branch', 'wing', 'division', 'cadre', 'employee_type')
+            'fields': ('sap_id', 'name', 'designation','head', 'address', 'email', 'phone_no', 'wing', 'division', 'cadre', 'employee_type')
         }),
         ('Account Details', {
-            'fields': ('account_name', 'account_number', 'account_type', 'account', 'pls', 'current')
+            'fields': ( 'pls', 'current')
         }),
         # ('Timestamps', {
         #     'fields': ('created_date', 'updated_date'),
@@ -309,11 +417,39 @@ class EmployeeAdmin(ImportExportModelAdmin):
         # }),
     )
     
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
+    
 class DivisionAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
 
 class WingAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
+    
+    def get_list_display(self, request):
+        self.request = request
+        return ('get_serial_number',) + self.list_display
+    
+    def get_serial_number(self, obj):
+        """Return the row number in the admin list view."""
+        return list(self.get_queryset(self.request)).index(obj) + 1
+    get_serial_number.short_description = 'sr.no'
+    
 # Register models with custom admin classes
 admin.site.register(GLCode, GLCodeAdmin)
 admin.site.register(Region, RegionAdmin)

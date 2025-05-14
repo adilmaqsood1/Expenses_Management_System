@@ -21,8 +21,8 @@ class Region(models.Model):
         return self.name
 
 class Head(models.Model):
-    code = models.ForeignKey(GLCode, on_delete=models.CASCADE, related_name='head_codes', null=True)
     name = models.CharField(max_length=255, blank=True)
+    code = models.ForeignKey(GLCode, on_delete=models.CASCADE, related_name='head_codes', null=True)
     fiscal_year = models.CharField(max_length=20, blank=True, null=True)
     budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     utilized_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -36,6 +36,10 @@ class Head(models.Model):
         # Calculate remaining budget before saving
         self.remaining_budget = self.budget - self.utilized_budget
         super().save(*args, **kwargs)
+        
+    def __str__(self):
+        # Changed to return only the name instead of code and name
+        return self.name
     
     def update_budget_utilization(self):
         # Calculate utilized budget from expenses that have both supervisor and admin approval
@@ -55,8 +59,8 @@ class Head(models.Model):
         # Log the update for debugging
         print(f"Updated budget for {self.name}: Budget={self.budget}, Utilized={self.utilized_budget}, Remaining={self.remaining_budget}")
     
-    def __str__(self):
-        return f"{self.code.gl_code} - {self.name}"
+    # def __str__(self):
+    #     return f"{self.code.gl_code} - {self.name}"
 
 
 class Vendor(models.Model):
