@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
-from .models_user import User, AllowanceRequest
+from .models_user import User
 
 class GLCode(models.Model):
     gl_code = models.CharField(max_length=20, primary_key=True )
@@ -79,7 +79,7 @@ class Vendor(models.Model):
     ]
     
     name = models.CharField(max_length=255)
-    cnic = models.CharField(max_length=15, blank=True, null=True)
+    ntn = models.CharField(max_length=15, blank=True, null=True)
     type = models.CharField(max_length=50, choices=VENDOR_TYPES, blank=True, null=True)
     category = models.CharField(max_length=50, choices=VENDOR_CATEGORIES, default='General')
     account_number = models.CharField(max_length=255, blank=True, null=True)
@@ -97,6 +97,64 @@ class Vendor(models.Model):
     
     def __str__(self):
         return self.name
+        
+    @classmethod
+    def check_duplicate(cls, name):
+        """Check if a vendor with the same name already exists"""
+        return cls.objects.filter(name__iexact=name).exists()
+        
+    @classmethod
+    def import_from_excel(cls, excel_file):
+        """Import vendors from Excel file"""
+        import pandas as pd
+        
+        df = pd.read_excel(excel_file)
+        created_count = 0
+        duplicate_count = 0
+        error_count = 0
+        results = {
+            'created': [],
+            'duplicates': [],
+            'errors': []
+        }
+        
+        for _, row in df.iterrows():
+            try:
+                # Check required fields
+                if 'name' not in row or pd.isna(row['name']):
+                    results['errors'].append(f"Row {_ + 2}: Missing vendor name")
+                    error_count += 1
+                    continue
+                    
+                # Check for duplicates
+                if cls.check_duplicate(row['name']):
+                    results['duplicates'].append(row['name'])
+                    duplicate_count += 1
+                    continue
+                    
+                # Create new vendor
+                vendor = cls(
+                    name=row['name'],
+                    ntn=row.get('ntn', None) if not pd.isna(row.get('ntn', None)) else None,
+                    type=row.get('type', None) if not pd.isna(row.get('type', None)) else None,
+                    category=row.get('category', 'General') if not pd.isna(row.get('category', 'General')) else 'General',
+                    account_number=row.get('account_number', None) if not pd.isna(row.get('account_number', None)) else None,
+                    contact_number=row.get('contact_number', None) if not pd.isna(row.get('contact_number', None)) else None,
+                    status=row.get('status', 'Active') if not pd.isna(row.get('status', 'Active')) else 'Active'
+                )
+                vendor.save()
+                results['created'].append(row['name'])
+                created_count += 1
+            except Exception as e:
+                results['errors'].append(f"Row {_ + 2}: {str(e)}")
+                error_count += 1
+                
+        return {
+            'created_count': created_count,
+            'duplicate_count': duplicate_count,
+            'error_count': error_count,
+            'results': results
+        }
 
 class Branch(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -161,15 +219,7 @@ def update_head_budget_on_expense_delete(sender, instance, **kwargs):
     if instance.head and instance.supervisor_approval == 'Approved' and instance.admin_approval == 'Approved':
         instance.head.update_budget_utilization()
 
-class Transaction(models.Model):
-    gl_code = models.ForeignKey(GLCode, on_delete=models.CASCADE, related_name='transactions')
-    date = models.DateField()
-    wing_division = models.CharField(max_length=100)
-    particulars = models.CharField(max_length=255)
-    details = models.TextField()
-    bill_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    utilized_limit = models.DecimalField(max_digits=15, decimal_places=2)
-    remaining_limit = models.DecimalField(max_digits=15, decimal_places=2)
+
 
     def __str__(self):
         return f"{self.date} - {self.particulars} - {self.bill_amount}"
@@ -192,16 +242,18 @@ class EmployeeType(models.Model):
         verbose_name = "Employee Type"
         verbose_name_plural = " Employee Types"
         
-class Wing(models.Model):
+
+class Division(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-class Division(models.Model):
+class Wing(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='wings', null=True)
 
     def __str__(self):
         return self.name
@@ -215,7 +267,6 @@ class Employee(models.Model):
     email = models.EmailField()
     cadre = models.ForeignKey(Cadre, on_delete=models.CASCADE, null=True, blank=True)
     employee_type = models.ForeignKey(EmployeeType, on_delete=models.CASCADE, null=True, blank=True)
-    head = models.ForeignKey(Head, on_delete=models.CASCADE)
     wing = models.ForeignKey(Wing, on_delete=models.CASCADE, null=True, blank=True)
     division = models.ForeignKey(Division, on_delete=models.CASCADE, null=True, blank=True)
     phone_no = models.CharField(max_length=15)
@@ -228,6 +279,3 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.name
-
-# These signal handlers are duplicates of the ones above and can be removed
-# The handlers at lines ~140-150 are already handling these events

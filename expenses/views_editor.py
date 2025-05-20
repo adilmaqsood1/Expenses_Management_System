@@ -8,11 +8,10 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.core.paginator import Paginator
 import json
 import datetime
-
 from .models import Vendor, Employee, Expense
-from .models_user import AllowanceRequest, User
+from .models_user import User
 from django.utils.timezone import now
-import datetime
+
 
 # Custom decorator for editor role check
 def editor_required(view_func):
@@ -34,8 +33,6 @@ class EditorRequiredMixin:
 class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
     """Dashboard view for editors"""
     def get(self, request):
-        # Get pending allowance requests count
-        pending_allowances = AllowanceRequest.objects.filter(status='PENDING').count()
         
         # Get recently processed expenses
         recent_processed = Expense.objects.filter(
@@ -49,20 +46,7 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         # Get total employees and vendors count
         employee_count = Employee.objects.count()
         vendor_count = Vendor.objects.filter(disabled=False).count()
-        
-        # Get recent activities
-        recent_allowances = AllowanceRequest.objects.filter(
-            processed_by=request.user
-        ).order_by('-processed_date')[:5]
-        
-        allowance_activities = [{
-            'type': 'allowance',
-            'title': f"Allowance Request {allowance.id}",
-            'description': f"Processed for {allowance.user.username} on {allowance.processed_date.strftime('%B %d, %Y')}",
-            'amount': allowance.amount,
-            'date': allowance.processed_date,
-            'status': allowance.status
-        } for allowance in recent_allowances]
+
         
         # Get recent employees added/updated
         recent_employees = Employee.objects.all().order_by('-updated_date')[:5]
@@ -87,11 +71,10 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         } for vendor in recent_vendors]
         
         # Combine all activities and sort by date
-        all_activities = allowance_activities + employee_activities + vendor_activities
+        all_activities =  employee_activities + vendor_activities
         recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
         
         context = {
-            'pending_allowances': pending_allowances,
             'pending_expenses': pending_expenses,
             'employee_count': employee_count,
             'vendor_count': vendor_count,
@@ -100,79 +83,6 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         }
         
         return render(request, 'expenses/editor_dashboard.html', context)
-
-class AllowanceRequestProcessView(LoginRequiredMixin, EditorRequiredMixin, View):
-    """View for processing allowance requests with approval/rejection reasons"""
-    def get(self, request, request_id):
-        allowance_request = get_object_or_404(AllowanceRequest, id=request_id)
-        
-        context = {
-            'allowance_request': allowance_request
-        }
-        return render(request, 'expenses/process_allowance_request.html', context)
-    
-    def post(self, request, request_id):
-        allowance_request = get_object_or_404(AllowanceRequest, id=request_id)
-        
-        # Process the request
-        action = request.POST.get('action')
-        if action == 'approve':
-            allowance_request.status = 'APPROVED'
-            approval_reason = request.POST.get('approval_reason', '')
-            allowance_request.approval_reason = approval_reason
-            messages.success(request, "Allowance request approved successfully.")
-        elif action == 'reject':
-            allowance_request.status = 'REJECTED'
-            rejection_reason = request.POST.get('rejection_reason', '')
-            if not rejection_reason:
-                messages.error(request, "Please provide a reason for rejection.")
-                return redirect('process_allowance_request', request_id=request_id)
-            allowance_request.rejection_reason = rejection_reason
-            messages.success(request, "Allowance request rejected successfully.")
-        
-        # Update processed information
-        allowance_request.processed_date = timezone.now()
-        allowance_request.processed_by = request.user
-        allowance_request.save()
-        
-        return redirect('editor_allowance_list')
-
-class EditorAllowanceListView(LoginRequiredMixin, EditorRequiredMixin, View):
-    """View for listing allowance requests for editors"""
-    def get(self, request):
-        # Get filters from request
-        status_filter = request.GET.get('status', 'PENDING')
-        date_from = request.GET.get('date_from')
-        date_to = request.GET.get('date_to')
-        
-        # Base queryset
-        allowance_requests = AllowanceRequest.objects.all().order_by('-requested_date')
-        
-        # Apply filters
-        if status_filter and status_filter != 'all':
-            allowance_requests = allowance_requests.filter(status=status_filter)
-        
-        if date_from:
-            date_from = datetime.datetime.strptime(date_from, '%Y-%m-%d').date()
-            allowance_requests = allowance_requests.filter(requested_date__date__gte=date_from)
-        
-        if date_to:
-            date_to = datetime.datetime.strptime(date_to, '%Y-%m-%d').date()
-            allowance_requests = allowance_requests.filter(requested_date__date__lte=date_to)
-        
-        # Pagination
-        paginator = Paginator(allowance_requests, 10)
-        page = request.GET.get('page', 1)
-        allowance_requests = paginator.get_page(page)
-        
-        context = {
-            'allowance_requests': allowance_requests,
-            'status_filter': status_filter,
-            'date_from': date_from.strftime('%Y-%m-%d') if date_from else '',
-            'date_to': date_to.strftime('%Y-%m-%d') if date_to else ''
-        }
-        
-        return render(request, 'expenses/editor_allowance_list.html', context)
 
 class EditorEmployeeListView(LoginRequiredMixin, EditorRequiredMixin, View):
     """View for listing employees for editors"""

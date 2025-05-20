@@ -316,6 +316,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to format numbers properly
+    function formatNumber(value) {
+        // Check if the value is a number or can be converted to one
+        if (value === null || value === undefined || isNaN(Number(value))) {
+            return value; // Return as is if not a number
+        }
+        
+        // Remove currency symbols if present
+        let numValue = value.toString().replace(/[$£€]/g, '');
+        
+        // Convert to number
+        numValue = parseFloat(numValue);
+        
+        // Format with commas, no decimals
+        return numValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
+    
+    // Apply number formatting to table cells
+    function formatTableNumbers() {
+        // Find all table cells that contain numeric data - expanded selector to catch more numeric cells
+        const numericCells = document.querySelectorAll('td.text-right, td[class*="amount"], td.numeric, td[class*="price"], td[class*="cost"], td[class*="value"], td:not([class]):not(:empty), td.sr-col');
+        
+        numericCells.forEach(cell => {
+            const originalValue = cell.textContent.trim();
+            // Check if the cell contains a numeric value (possibly with currency symbols)
+            if (originalValue && !isNaN(parseFloat(originalValue.replace(/[$,€£]/g, '')))) {
+                // Format the number
+                const formattedValue = formatNumber(originalValue);
+                
+                // Set the formatted value and ensure right alignment
+                cell.textContent = formattedValue;
+                cell.style.textAlign = 'right';
+                
+                // Add a class for consistent styling
+                cell.classList.add('numeric-cell');
+            }
+        });
+        
+        // Specifically target cells in the expense table shown in the screenshot
+        const expenseCells = document.querySelectorAll('table tr td:nth-child(4), table tr td:nth-child(5), table tr td:nth-child(6)');
+        expenseCells.forEach(cell => {
+            const originalValue = cell.textContent.trim();
+            if (originalValue && !isNaN(parseFloat(originalValue.replace(/[$,€£]/g, '')))) {
+                // Format the number
+                const formattedValue = formatNumber(originalValue);
+                
+                // Set the formatted value and ensure right alignment
+                cell.textContent = formattedValue;
+                cell.style.textAlign = 'right';
+                cell.classList.add('numeric-cell');
+            }
+        });
+    }
+    
+    // Call the formatting function when the page loads
+    formatTableNumbers();
+    
     // Add dashboard stats summary if on index page
     if (window.location.pathname.endsWith('/admin/')) {
         const contentContainer = document.querySelector('#content');
@@ -334,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-money-bill fa-2x"></i>
                             </div>
                         </div>
-                        <h3 class="mt-3 mb-0">Loading...</h3>
+                        <h3 class="mt-3 mb-0" style="text-align: right;">Loading...</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -348,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-clock fa-2x"></i>
                             </div>
                         </div>
-                        <h3 class="mt-3 mb-0">Loading...</h3>
+                        <h3 class="mt-3 mb-0" style="text-align: right;">Loading...</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -362,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-building fa-2x"></i>
                             </div>
                         </div>
-                        <h3 class="mt-3 mb-0">Loading...</h3>
+                        <h3 class="mt-3 mb-0" style="text-align: right;">Loading...</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -376,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-chart-pie fa-2x"></i>
                             </div>
                         </div>
-                        <h3 class="mt-3 mb-0">Loading...</h3>
+                        <h3 class="mt-3 mb-0" style="text-align: right;">Loading...</h3>
                     </div>
                 </div>
             `;
@@ -391,11 +451,47 @@ document.addEventListener('DOMContentLoaded', function() {
             // Simulate loading data (in a real app, this would be an API call)
             setTimeout(() => {
                 document.querySelectorAll('.dashboard-widget h3').forEach((el, index) => {
-                    const values = ['$124,568.00', '12', '24', '68%'];
-                    el.textContent = values[index];
+                    // Raw values without formatting
+                    const rawValues = ['124568', '12', '24', '68%'];
+                    
+                    // Format monetary values but leave others as is
+                    let displayValue = rawValues[index];
+                    if (index === 0) {
+                        // Format the monetary value with $ sign and commas
+                        displayValue = '$' + formatNumber(displayValue);
+                    }
+                    
+                    el.textContent = displayValue;
                     el.style.animation = 'fadeIn 0.5s ease-out forwards';
                 });
             }, 1000);
         }
     }
+    
+    // Add event listener to format numbers when DOM content changes
+    // This helps format numbers in tables that load dynamically
+    const observer = new MutationObserver(function(mutations) {
+        formatTableNumbers();
+    });
+    
+    // Start observing the document with the configured parameters
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Add CSS for numeric cells
+    const style = document.createElement('style');
+    style.textContent = `
+        .numeric-cell, td.text-right, td[class*="amount"], td.numeric, td[class*="price"], td[class*="cost"], td[class*="value"] {
+            text-align: right !important;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+        
+        /* Target specific columns in the expense table */
+        table tr td:nth-child(4), table tr td:nth-child(5), table tr td:nth-child(6) {
+            text-align: right !important;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+    `;
+    document.head.appendChild(style);
 });

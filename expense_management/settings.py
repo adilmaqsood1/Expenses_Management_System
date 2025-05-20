@@ -225,14 +225,14 @@ JAZZMIN_SETTINGS = {
         # App with dropdown menu to all its models pages
         {"app": "expenses"},
         # External url that opens in new window (Permissions can be added)
-        {"name": "Dashboard", "url": "dashboard", "new_window": False},
+        # {"name": "Dashboard", "url": "dashboard", "new_window": False},
         # Separator for the menu
         {"name": "---"},
         # Custom link with dropdown menu
-        {"name": "Reports", "url": "#", "children": [
-            {"name": "Expense Summary", "url": "admin:expenses_expense_changelist"},
-            {"name": "Vendor Analysis", "url": "admin:expenses_vendor_changelist"},
-        ]},
+        # {"name": "Reports", "url": "#", "children": [
+        #     {"name": "Expense Summary", "url": "admin:expenses_expense_changelist"},
+        #     {"name": "Vendor Analysis", "url": "admin:expenses_vendor_changelist"},
+        # ]},
     ],
     #############
     # User Menu #
@@ -256,26 +256,27 @@ JAZZMIN_SETTINGS = {
     # Hide these models when generating side menu (e.g auth.user)
     "hide_models": [],
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["expenses", "expenses.Expense", "expenses.Vendor", "expenses.GLCode", "expenses.Transaction", "expenses.AllowanceRequest", "auth"],
+    "order_with_respect_to": ["expenses", "expenses.User", "expenses.Expense", 
+                              "expenses.GLCode","expenses.Head", "expenses.Vendor","expenses.Employee",
+                              "expenses.EmployeeType","expenses.Cadre",
+                              "expenses.Region", "expenses.Wing","expenses.Division","auth"],
+    
     # Custom icons for side menu apps/models
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
         "expenses.Expense": "fas fa-money-bill",
-        "expenses.Vendor": "fas fa-building",
         "expenses.GLCode": "fas fa-file-invoice-dollar",
+        "expenses.Vendor": "fas fa-building",
+        "expenses.Employee": "fas fa-id-badge",
         "expenses.Region": "fas fa-globe",
-        "expenses.Branch": "fas fa-code-branch",
+        "expenses.Wing": "fas fa-layer-group",
         "expenses.Cadre": "fas fa-calculator",
         "expenses.Division": "fas fa-sitemap",
-        "epxenses.Wing": "fas fa-sitemap",
         "expenses.EmployeeType": "fas fa-id-card",
         "expenses.Head": "fas fa-heading",
-        "expenses.SubHead": "fas fa-list",
-        "expenses.Transaction": "fas fa-exchange-alt",
         "expenses.User": "fas fa-user-tie",
-        "expenses.AllowanceRequest": "fas fa-hand-holding-usd",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-folder",
@@ -329,7 +330,6 @@ JAZZMIN_SETTINGS = {
         "expenses.Expense": "horizontal_tabs",
         "expenses.Vendor": "vertical_tabs",
         "expenses.GLCode": "collapsible",
-        "expenses.Transaction": "carousel",
     },
     # Custom admin dashboard
     "custom_links": {

@@ -352,7 +352,7 @@
 }
 
 .table thead th {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--text-color), var(--text-color));
     color: var(--light-text);
     border-bottom: none;
     font-weight: 600;
@@ -361,6 +361,9 @@
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
+    /* Enhanced for visibility */
+    background-blend-mode: multiply;
+    box-shadow: 0 2px 8px hsla(128, 85.10%, 42.20%, 0.12);
 }
 
 .table thead th::after {
@@ -403,6 +406,8 @@
     vertical-align: middle;
     transition: all 0.2s ease;
     border-right: 1px solid rgba(0, 0, 0, 0.03);
+    background: #f4faff;
+    color: var(--text-color);
 }
 
 .table tbody td:last-child {
@@ -411,6 +416,7 @@
 
 .table tbody tr:hover td {
     color: var(--primary-color);
+    background: #e6f9ff;
 }
 
 /* Striped table effect */

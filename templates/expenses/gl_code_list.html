@@ -23,12 +23,12 @@
             </svg>
             Search
         </button>
-        <a href="{% url 'budget:add_gl_code' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
+        {% comment %} <a href="{% url 'budget:add_gl_code' %}" class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
             Add New GL Code
-        </a>
+        </a> {% endcomment %}
     </form>
     
     <div class="flex items-center mb-4 text-sm">
@@ -86,7 +86,7 @@
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Limit Utilized</th>
                     <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Balance Available</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th>
+                    {% comment %} <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Actions</th> {% endcomment %}
                 </tr>
             </thead>
             
@@ -96,18 +96,18 @@
                     <tr class="{% cycle 'bg-white' 'bg-gray-50' %} hover:bg-cyan-50 transition-colors duration-150">
                         <td class="py-3 px-4 text-gray-800 font-medium">{{ gl_code.gl_code }}</td>
                         <td class="py-3 px-4 text-gray-800">{{ gl_code.gl_description }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right limit-in-millions">{{ gl_code.limit_in_millions }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right limit-value">{{ gl_code.limit }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.limit_utilized }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-right">{{ gl_code.balance_available }}</td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 text-gray-800 text-left limit-in-millions">{{ gl_code.limit_in_millions }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-left limit-value">{{ gl_code.limit }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-left">{{ gl_code.limit_utilized }}</td>
+                        <td class="py-3 px-4 text-gray-800 text-left">{{ gl_code.balance_available }}</td>
+                        {% comment %} <td class="py-3 px-4">
                             <a href="{% url 'budget:edit_gl_code' gl_code.gl_code %}" class="btn bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 text-xs px-3 py-1 rounded shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
                                 Edit
                             </a>
-                        </td>
+                        </td> {% endcomment %}
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -192,16 +192,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to convert regular limit to millions
     function convertToMillions(value) {
         if (!value || value === '') return '';
-        return (parseFloat(value) / 1000000).toFixed(3);
+        return (parseFloat(value) / 1000000).toFixed();
     }
     
-    // Function to format currency with rupee symbol and millions in parentheses
+    // Function to format currency with rupee symbol
     function formatCurrency(value) {
         if (!value || value === '') return '';
         const numValue = parseFloat(value.toString().replace(/[^0-9.-]+/g, ''));
         if (isNaN(numValue)) return 'None';
-        const millionsValue = (numValue / 1000000).toFixed(2);
-        return `₨ ${numValue.toFixed(2)} (${millionsValue} M)`;
+        return `₨ ${numValue.toFixed(2)}`;
     }
     
     // Function to ensure limit values are properly displayed
@@ -216,21 +215,42 @@ document.addEventListener('DOMContentLoaded', function() {
             const balanceAvailableCell = row.querySelector('td:nth-child(6)');
             
             if (limitCell && millionsCell) {
-                // Format the limit value with rupee symbol and millions
+                // Format the limit value with rupee symbol
                 if (limitCell.textContent.trim() !== '') {
                     const originalValue = limitCell.textContent.trim();
-                    limitCell.textContent = formatCurrency(originalValue);
-                    // We don't need to display millions separately anymore
-                    millionsCell.textContent = '';
+                    const numValue = parseFloat(originalValue.replace(/[^0-9.-]+/g, ''));
+                    
+                    // Display millions in the millions column
+                    if (!isNaN(numValue)) {
+                        // Format millions with proper alignment
+                        millionsCell.textContent = (numValue / 1000000).toFixed() + ' M';
+                        millionsCell.style.textAlign = 'left';
+                        
+                        // Format limit with proper alignment and rupee symbol
+                        limitCell.textContent = '₨ ' + numValue.toFixed();
+                        limitCell.style.textAlign = 'left';
+                    } else {
+                        millionsCell.textContent = 'None';
+                        limitCell.textContent = 'None';
+                    }
+                } else {
+                    millionsCell.textContent = 'None';
+                    limitCell.textContent = 'None';
                 }
                 
                 // Format limit utilized and balance available
                 if (limitUtilizedCell && limitUtilizedCell.textContent.trim() !== '') {
-                    limitUtilizedCell.textContent = formatCurrency(limitUtilizedCell.textContent.trim());
+                    const utilizedValue = limitUtilizedCell.textContent.trim();
+                    const numUtilized = parseFloat(utilizedValue.replace(/[^0-9.-]+/g, ''));
+                    limitUtilizedCell.textContent = !isNaN(numUtilized) ? '₨ ' + numUtilized.toFixed(2) : 'None';
+                    limitUtilizedCell.style.textAlign = 'left';
                 }
                 
                 if (balanceAvailableCell && balanceAvailableCell.textContent.trim() !== '') {
-                    balanceAvailableCell.textContent = formatCurrency(balanceAvailableCell.textContent.trim());
+                    const balanceValue = balanceAvailableCell.textContent.trim();
+                    const numBalance = parseFloat(balanceValue.replace(/[^0-9.-]+/g, ''));
+                    balanceAvailableCell.textContent = !isNaN(numBalance) ? '₨ ' + numBalance.toFixed(2) : 'None';
+                    balanceAvailableCell.style.textAlign = 'left';
                 }
             }
         });

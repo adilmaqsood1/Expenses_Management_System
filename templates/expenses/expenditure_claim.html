@@ -235,32 +235,32 @@ document.addEventListener('DOMContentLoaded', function() {
             <tr>
                 <td class="sr-col">7</td>
                 <td>Budget Limit-{{ now }}</td>
-                <td class="data-col">{{ budget_limit|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ budget_limit|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr>
                 <td class="sr-col">8</td>
                 <td>Amount Utilized before this bill</td>
-                <td class="data-col">{{ utilized_before|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ utilized_before|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr>
                 <td class="sr-col">9</td>
                 <td>Available Limit (7-8)</td>
-                <td class="data-col">{{ available_limit|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ available_limit|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr class="highlight-row">
                 <td class="sr-col">10</td>
                 <td>Amount of current bill</td>
-                <td class="data-col">{{ expense.amount|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ expense.amount|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr>
                 <td class="sr-col">11</td>
                 <td>Net Utilized Limit (8+10)</td>
-                <td class="data-col">{{ net_utilized|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ net_utilized|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr>
                 <td class="sr-col">12</td>
                 <td>Budget Available</td>
-                <td class="data-col">{{ budget_available|default:"0.00"|floatformat:2 }}</td>
+                <td class="data-col">{{ budget_available|default:"0"|floatformat:0 }}</td>
             </tr>
             <tr>
                 <td class="sr-col">13</td>

@@ -30,9 +30,94 @@ function convertToMillions(amount) {
     return (parseFloat(amount) / 1000000).toFixed(2) + ' M';
 }
 
+// Function to format numbers with commas
+function formatNumberWithCommas(number) {
+    return parseFloat(number).toLocaleString('en-IN');
+}
+
+// Function to handle sorting
+function sortTable(columnIndex, tableId) {
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Get the current sort direction from the table header
+    const th = table.querySelectorAll('th')[columnIndex];
+    const currentDirection = th.getAttribute('data-sort') || 'asc';
+    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+    
+    // Reset all headers
+    table.querySelectorAll('th').forEach(header => {
+        header.setAttribute('data-sort', '');
+        header.querySelector('.sort-icon')?.remove();
+    });
+    
+    // Set the new sort direction and add sort icon
+    th.setAttribute('data-sort', newDirection);
+    const sortIcon = document.createElement('span');
+    sortIcon.className = 'sort-icon ml-1';
+    sortIcon.innerHTML = newDirection === 'asc' ? '↑' : '↓';
+    th.appendChild(sortIcon);
+    
+    // Sort the rows
+    rows.sort((a, b) => {
+        let aValue = a.querySelectorAll('td')[columnIndex].textContent.trim();
+        let bValue = b.querySelectorAll('td')[columnIndex].textContent.trim();
+        
+        // Check if the column contains dates
+        if (aValue.match(/\d{1,2}\s[A-Za-z]{3}\s\d{4}/)) {
+            aValue = new Date(aValue);
+            bValue = new Date(bValue);
+        }
+        // Check if the column contains currency values
+        else if (aValue.includes('₨')) {
+            aValue = parseFloat(aValue.replace(/[^\d.-]/g, ''));
+            bValue = parseFloat(bValue.replace(/[^\d.-]/g, ''));
+        }
+        
+        if (aValue < bValue) return newDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return newDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    // Reappend the sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Check for duplicate vendor
+function checkDuplicateVendor() {
+    const vendorName = document.getElementById('vendorName').value.trim();
+    if (!vendorName) return;
+    
+    // Make an AJAX request to check if vendor exists
+    fetch(`/check-duplicate-vendor/?name=${encodeURIComponent(vendorName)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                if (confirm(`Vendor "${vendorName}" already exists. Do you want to add it again?`)) {
+                    // Proceed with form submission
+                    document.getElementById('vendorForm').submit();
+                }
+            } else {
+                // No duplicate, proceed normally
+                document.getElementById('vendorForm').submit();
+            }
+        });
+    
+    return false; // Prevent form submission until AJAX completes
+}
+
 // Run the function on page load to set initial state
 window.onload = function() {
     toggleVendorEmployee();
+    
+    // Add click event listeners to sortable headers
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const columnIndex = Array.from(this.parentNode.children).indexOf(this);
+            sortTable(columnIndex, 'expenseTable');
+        });
+    });
 };
 </script>
 <div class="expense-header flex items-center animate-fadeIn">
@@ -189,31 +274,31 @@ window.onload = function() {
     </div>
     
     <div class="overflow-x-auto rounded-lg shadow">
-        <table class="w-full border-collapse bg-white">
+        <table id="expenseTable" class="w-full border-collapse bg-white">
             <thead>
                 <tr class="bg-gradient-to-r from-cyan-700 to-cyan-600 text-white">
                     {% if request.user.role == 'USER' %}
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice Date</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Payment Mode</th>
-                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
-                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Invoice No <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Description <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Vendor/Employee <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Invoice Date <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Payment Mode <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Amount <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Net Amount <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Created Date <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Status <span class="sort-icon"></span></th>
                     {% else %}
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice No</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Description</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Vendor/Employee</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Invoice Date</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Payment Mode</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Wing/Division</th>
-                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Amount</th>
-                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Tax</th>
-                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800">Net Amount</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Created Date</th>
-                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800">Status</th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Invoice No <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Description <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Vendor/Employee <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Invoice Date <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Payment Mode <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Wing/Division <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Amount <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Tax <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-right font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Net Amount <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Created Date <span class="sort-icon"></span></th>
+                    <th class="py-3 px-4 text-left font-semibold tracking-wider border-b-2 border-cyan-800 sortable cursor-pointer">Status <span class="sort-icon"></span></th>
                     {% endif %}
                 </tr>
             </thead>
@@ -241,10 +326,10 @@ window.onload = function() {
                             <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 font-medium text-right">
-                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.amount }}));</script> (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 font-medium text-right">
-                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.net_amount }}));</script> (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
@@ -274,13 +359,13 @@ window.onload = function() {
                             <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.amount }} (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.amount }}));</script> (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ 0.00</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas(0.00));</script></a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ {{ expense.net_amount }} (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
+                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.net_amount }}));</script> (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
                             <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>

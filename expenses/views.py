@@ -1,8 +1,8 @@
 from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Region, Head, Vendor, Expense, GLCode, Transaction, Employee
-from .models_user import User, AllowanceRequest
+from .models import Region, Head, Vendor, Expense, GLCode, Employee
+from .models_user import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
@@ -154,12 +154,6 @@ class DashboardView(LoginRequiredMixin, View):
         # Get total expenses
         total_expenses = Expense.objects.aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Get pending approvals count
-        from .models_user import AllowanceRequest
-        expense_pending = Expense.objects.filter(status='Pending').count()
-        allowance_pending = AllowanceRequest.objects.filter(status='PENDING').count()
-        pending_approvals = expense_pending + allowance_pending
-        
         # Calculate budget utilization
         total_budget = Head.objects.aggregate(Sum('budget'))['budget__sum'] or Decimal('1')
         utilized_budget = Expense.objects.filter(status='Approved').aggregate(Sum('amount'))['amount__sum'] or 0
@@ -195,28 +189,6 @@ class DashboardView(LoginRequiredMixin, View):
             'status': expense.status
         } for expense in recent_expenses]
         
-        # Recent transactions
-        recent_transactions = Transaction.objects.all().order_by('-date')[:5]
-        transaction_activities = [{
-            'type': 'transaction',
-            'title': transaction.particulars,
-            'description': f"Transaction on {transaction.date.strftime('%B %d, %Y')}",
-            'amount': transaction.bill_amount,
-            'date': transaction.date,
-            'status': 'Completed'
-        } for transaction in recent_transactions]
-        
-        # Recent allowance requests
-        from .models_user import AllowanceRequest
-        recent_allowances = AllowanceRequest.objects.all().order_by('-requested_date')[:5]
-        allowance_activities = [{
-            'type': 'allowance',
-            'title': f"Allowance Request",
-            'description': f"Requested by {allowance.user.username} on {allowance.requested_date.strftime('%B %d, %Y')}",
-            'amount': allowance.amount,
-            'date': allowance.requested_date,
-            'status': allowance.status
-        } for allowance in recent_allowances]
         
         # Recent vendors
         recent_vendors = Vendor.objects.all().order_by('-created_date')[:5]
@@ -235,25 +207,9 @@ class DashboardView(LoginRequiredMixin, View):
             if isinstance(activity['date'], datetime.datetime):
                 activity['date'] = activity['date'].date()
                 
-        all_activities = expense_activities + transaction_activities + vendor_activities
+        all_activities = expense_activities + vendor_activities
         recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
-        
-        # Get user's allowance requests for dashboard updates
-        user_allowance_requests = []
-        pending_requests_count = 0
-        approved_requests_count = 0
-        rejected_requests_count = 0
-        
-        if request.user.is_maker:
-            user_allowance_requests = AllowanceRequest.objects.filter(user=request.user).order_by('-requested_date')
-            pending_requests_count = user_allowance_requests.filter(status='PENDING').count()
-            approved_requests_count = user_allowance_requests.filter(status='APPROVED').count()
-            rejected_requests_count = user_allowance_requests.filter(status='REJECTED').count()
-        
-        
-            """Dashboard view for editors"""
-        pending_allowances = AllowanceRequest.objects.filter(status='PENDING').count()
-        
+
         # Get recently processed expenses
         recent_processed = Expense.objects.filter(
             status__in=['Pending', 'Approved', 'Rejected'],
@@ -304,22 +260,16 @@ class DashboardView(LoginRequiredMixin, View):
         } for vendor in recent_vendors]
         
         # Combine all activities and sort by date
-        all_activities = allowance_activities + employee_activities + vendor_activities
+        all_activities = employee_activities + vendor_activities
         recent_activities = sorted(all_activities, key=lambda x: x['date'], reverse=True)[:5]
        
        
         context = {
             'total_expenses': total_expenses,
-            'pending_approvals': pending_approvals,
             'budget_utilization': budget_utilization,
             'month_change_percentage': month_change_percentage,
             'month_change_direction': 'up' if month_change_percentage >= 0 else 'down',
             'recent_activities': recent_activities,
-            'user_allowance_requests': user_allowance_requests,
-            'pending_requests_count': pending_requests_count,
-            'approved_requests_count': approved_requests_count,
-            'rejected_requests_count': rejected_requests_count,
-            'pending_allowances': pending_allowances,
             'pending_expenses': pending_expenses,
             'employee_count': employee_count,
             'vendor_count': vendor_count,
@@ -331,7 +281,17 @@ class DashboardView(LoginRequiredMixin, View):
 
 class ExpenseListView(LoginRequiredMixin, View):
     def get(self, request):
-        expenses_list = Expense.objects.all()
+        # Filter expenses based on user role
+        if request.user.is_maker:
+            # Makers can only see expenses from their division
+            if request.user.division:
+                division_name = request.user.division.name
+                expenses_list = Expense.objects.filter(division=division_name)
+            else:
+                expenses_list = Expense.objects.none()
+        else:
+            # Supervisors and Admins can see all expenses
+            expenses_list = Expense.objects.all()
         regions = Region.objects.all()
         # Branches removed
         vendors = Vendor.objects.all()
@@ -445,8 +405,18 @@ class AddExpenseView(LoginRequiredMixin, View):
         employees = Employee.objects.all()
         payment_modes = dict(Expense.PAYMENT_MODES)
         
-        # Get GL Codes for the sub-head dropdown
-        gl_codes = GLCode.objects.all()
+        # Filter GL Codes based on user role and division
+        if request.user.is_maker:
+            # Makers can only see GL codes for their division
+            if request.user.division:
+                # Here you would implement division-specific GL code filtering
+                # This is a placeholder - you would need to add a relation between GLCode and Division
+                gl_codes = GLCode.objects.all()
+            else:
+                gl_codes = GLCode.objects.none()
+        else:
+            # Supervisors and Admins can see all GL codes
+            gl_codes = GLCode.objects.all()
         
         # Get vendor categories for the dropdown
         vendor_categories = dict(Vendor.VENDOR_CATEGORIES)
@@ -458,6 +428,8 @@ class AddExpenseView(LoginRequiredMixin, View):
             'payment_modes': payment_modes,
             'GLCode': gl_codes,
             'vendor_categories': vendor_categories,
+            'user_division': request.user.division.name if request.user.division else None,
+            'is_maker': request.user.is_maker
         }
         
         return render(request, 'expenses/add_expense.html', context)
@@ -499,6 +471,26 @@ class AddExpenseView(LoginRequiredMixin, View):
         elif expense_type == 'Employee' and not employee_id:
             messages.error(request, "Please select an employee.")
             return redirect('add_expense')
+        
+        # Role-based validation
+        if request.user.is_maker:
+            # Check if user has a division assigned
+            if not request.user.division:
+                messages.error(request, "You don't have a division assigned. Please contact an administrator.")
+                return redirect('add_expense')
+                
+            # Validate that the GL code is allowed for this user's division
+            try:
+                gl_code_obj = GLCode.objects.get(gl_code=gl_code_value)
+                # Here you would implement division-specific GL code validation
+                # This is a placeholder - you would need to add a relation between GLCode and Division
+                # or implement a permission system
+                
+                # For now, we'll assume all GL codes are valid for demonstration purposes
+                # In a real implementation, you would check if this GL code is allowed for the user's division
+            except GLCode.DoesNotExist:
+                messages.error(request, f"GL Code {gl_code_value} does not exist or is not allowed for your division.")
+                return redirect('add_expense')
         
         
         try:
@@ -566,7 +558,10 @@ class AddExpenseView(LoginRequiredMixin, View):
                 net_amount=net_amount_decimal,
                 invoice_no=invoice_no,
                 invoice_date=invoice_date,
-                description=description
+                description=description,
+                # Store the user's division and wing information
+                division=request.user.division.name if request.user.division else None,
+                wing=request.user.wing.name if request.user.wing else None
             )
             
             # Save the expense
@@ -575,7 +570,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             # Add success message and redirect to expenditure claim view
             messages.success(request, 'Expense added successfully! Viewing Expenditure Claim...')
             # Redirect to the expenditure claim view for the newly created expense
-            return redirect('expenditure_claim', expense_id=expense.pk)
+            return redirect('budget:expenditure_claim', expense_id=expense.pk)
         except Exception as e:
             # Provide detailed error message
             messages.error(request, f"Error saving expense: {str(e)}")
@@ -691,195 +686,6 @@ class EditGLCodeView(LoginRequiredMixin, View):
         gl_code.save()
         
         return redirect('gl_code_list')
-
-# New views for Transaction
-class TransactionListView(LoginRequiredMixin, View):
-    def get(self, request):
-        transactions_list = Transaction.objects.all()
-        gl_codes = GLCode.objects.all()
-        
-        # Filter by GL Code (not implemented yet)
-        gl_code_filter = request.GET.get('gl_code')
-        
-        # Filter by date range (not implemented yet)
-        date_from = request.GET.get('date_from')
-        date_to = request.GET.get('date_to')
-        
-        # Get the show parameter from the request, default to showing all entries
-        show = request.GET.get('show', '-1')
-        
-        # If show is not 'All' (-1), paginate the results
-        if show != '-1':
-            show = int(show)
-            paginator = Paginator(transactions_list, show)
-            page = request.GET.get('page', 1)
-            transactions = paginator.get_page(page)
-            total_pages = paginator.num_pages
-        else:
-            # If showing all, no pagination needed
-            transactions = transactions_list
-            total_pages = 1
-        
-        context = {
-            'transactions': transactions,
-            'gl_codes': gl_codes,
-            'show': show,
-            'total_pages': total_pages,
-            'current_page': int(request.GET.get('page', 1)),
-            'total_count': transactions_list.count()
-        }
-        return render(request, 'expenses/transaction_list.html', context)
-
-class AddTransactionView(LoginRequiredMixin, View):
-    def get(self, request):
-        gl_codes = GLCode.objects.all()
-        context = {
-            'gl_codes': gl_codes
-        }
-        return render(request, 'expenses/add_transaction.html', context)
-    
-    def post(self, request):
-        # Get form data
-        region_id = request.POST.get('region')
-        # Branch ID removed
-        head_id = request.POST.get('head')
-        gl_code_id = request.POST.get('gl_code')
-        vendor_id = request.POST.get('vendor')
-        payment_mode = request.POST.get('payment_mode')
-        amount = request.POST.get('amount')
-        withholding_sales_tax = request.POST.get('withholding_sales_tax', 0)
-        withholding_income_tax = request.POST.get('withholding_income_tax', 0)
-        net_amount = request.POST.get('net_amount')
-        invoice_no = request.POST.get('invoice_no')
-        invoice_date = request.POST.get('invoice_date')
-        description = request.POST.get('description')
-        
-        # Get model instances
-        region = Region.objects.get(id=region_id) if region_id else None
-        head = Head.objects.get(id=head_id) if head_id else None
-        gl_code = GLCode.objects.get(gl_code=gl_code_id) if gl_code_id else None
-        vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
-        
-        # Create and save the expense
-        expense = Expense(
-            # Only include fields that are actually defined in the model
-
-            gl_code=gl_code,
-            vendor=vendor,
-            payment_mode=payment_mode,
-            amount=amount,
-            withholding_sales_tax=withholding_sales_tax,
-            withholding_income_tax=withholding_income_tax,
-            net_amount=net_amount,
-            invoice_no=invoice_no,
-            invoice_date=invoice_date,
-            description=description
-        )
-        expense.save()
-        
-        return redirect('expense_list')
-
-class EditTransactionView(LoginRequiredMixin, View):
-    def get(self, request, transaction_id):
-        try:
-            transaction = Transaction.objects.get(id=transaction_id)
-        except Transaction.DoesNotExist:
-            return redirect('transaction_list')
-        
-        gl_codes = GLCode.objects.all()
-        context = {
-            'transaction': transaction,
-            'gl_codes': gl_codes
-        }
-        
-        return render(request, 'expenses/edit_transaction.html', context)
-    
-    def post(self, request, transaction_id):
-        try:
-            transaction = Transaction.objects.get(id=transaction_id)
-        except Transaction.DoesNotExist:
-            return redirect('transaction_list')
-        
-        # Handle form submission
-        gl_code_id = request.POST.get('gl_code')
-        date = request.POST.get('date')
-        wing_division = request.POST.get('wing_division')
-        particulars = request.POST.get('particulars')
-        details = request.POST.get('details')
-        bill_amount = request.POST.get('bill_amount')
-        utilized_limit = request.POST.get('utilized_limit')
-        remaining_limit = request.POST.get('remaining_limit')
-        
-        gl_code = GLCode.objects.get(gl_code=gl_code_id)
-        
-        transaction.gl_code = gl_code
-        transaction.date = date
-        transaction.wing_division = wing_division
-        transaction.particulars = particulars
-        transaction.details = details
-        transaction.bill_amount = bill_amount
-        transaction.utilized_limit = utilized_limit
-        transaction.remaining_limit = remaining_limit
-        
-        transaction.save()
-        
-        return redirect('transaction_list')
-
-# New views for Vendor
-# @login_required
-# def expenditure_claim_view(request, expense_id, *args, **kwargs):
-#     # Get the expense object or return 404
-#     expense = get_object_or_404(Expense, id=expense_id)
-    
-#     # Get current date for the report
-#     now = timezone.now().strftime('%Y')
-    
-#     # Get GL code directly from the expense
-#     gl_code_value = ''
-#     gl_description = ''
-#     if expense.gl_code:
-#         gl_code_value = expense.gl_code.gl_code
-#         gl_description = expense.gl_code.gl_description
-    
-#     # Get Head information
-#     head_name = ''
-#     head_code = ''
-#     if expense.head:
-#         head_name = expense.head.name
-#         head_code = expense.head.code
-
-#     # Prepare context for the template
-#     context = {
-#         'expense': expense,
-#         'now': now,
-#         'gl_code': gl_code_value,
-#         'gl_description': gl_description,
-#         'head_name': head_name,
-#         'head_code': head_code,
-#         # Add other necessary context variables here
-#     }
-    
-#     # Render the PDF template
-#     template_path = 'expenses/expenditure_claim.html'
-#     template = get_template(template_path)
-#     html = template.render(context)
-    
-#     # Create a PDF
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="expenditure_claim_{expense_id}.pdf"'
-    
-#     # Create PDF from HTML
-#     buffer = io.BytesIO()
-#     pisa_status = pisa.CreatePDF(
-#         html, dest=response, link_callback=None
-#     )
-    
-#     # If error, show error message
-#     if pisa_status.err:
-#         messages.error(request, 'Error generating PDF.')
-#         return redirect('expense_detail', expense_id=expense_id)
-        
-#     return response
 
 class VendorListView(LoginRequiredMixin, View):
     def get(self, request):
