@@ -296,6 +296,7 @@ JAZZMIN_SETTINGS = {
     # Relative paths to custom CSS/JS scripts (must be present in static files)
     "custom_css": "css/jazzmin-custom.css",
     "custom_js": "js/jazzmin-custom.js",
+    # "custom_js": "js/admin-keyboard-navigation.js",
     # Whether to show the UI customizer on the sidebar
     "show_ui_builder": False,
     
