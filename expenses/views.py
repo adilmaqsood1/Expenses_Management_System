@@ -412,6 +412,7 @@ class AddExpenseView(LoginRequiredMixin, View):
                 # Here you would implement division-specific GL code filtering
                 # This is a placeholder - you would need to add a relation between GLCode and Division
                 gl_codes = GLCode.objects.all()
+                print("KOKO", gl_codes)
             else:
                 gl_codes = GLCode.objects.none()
         else:
