@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('budget-status').textContent = 'Loading...';
         
         // Fetch budget information from the server
-        fetch(`/expense/api/head-budget/${headId}/`)
+        fetch(`/api/head-budget/${headId}/`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+
+                console.log('Received data:', data);
                 // Update the budget information in the UI
                 document.getElementById('total-budget').textContent = formatCurrency(data.total_budget);
                 document.getElementById('utilized-budget').textContent = formatCurrency(data.utilized_budget);
