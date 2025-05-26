@@ -77,30 +77,39 @@
                 
                 <!-- Employee fields -->
                 <div id="employee-fields-container">
-                    <div class="form-group" id="employee-head-field" style="display: none;">
-                        <label for="employee_head"><span class="required">*</span>Head:</label>
-                        <select id="employee_head" name="employee_head">
-                            <option value="">Select Head</option>
-                            {% for head in heads %}
-                            <option value="{{ head.name }}">{{ head.name }}</option>
+                    <div class="form-group" id="employee-division-field" style="display: none;">
+                        <label for="employee_division"><span class="required">*</span>Division:</label>
+                        <select id="employee_division" name="division">
+                            <option value="">Select Division</option>
+                            {% for div in division %}
+                            <option value="{{ div.id }}">{{ div.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group" id="employee-wing-field" style="display: none;">
                         <label for="employee_wing"><span class="required">*</span>Wing:</label>
-                        <select id="employee_wing" name="employee_wing">
+                        <select id="employee_wing" name="wing">
                             <option value="">Select Wing</option>
-                            {% for wing in wings %}
-                            <option value="{{ wing }}">{{ wing }}</option>
+                            {% for wing in wing %}
+                            <option value="{{ wing.id }}">{{ wing.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+                    <div class="form-group" id="employee-cadre-field" style="display: none;">
+                        <label for="employee_cadre"><span class="required">*</span>Cadre:</label>
+                        <select id="employee_cadre" name="cadre">
+                            <option value="">Select Cadre</option>
+                            {% for cadre in cadre %}
+                            <option value="{{ cadre.id }}">{{ cadre.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group" id="employee-division-field" style="display: none;">
-                        <label for="employee_division"><span class="required">*</span>Division:</label>
-                        <select id="employee_division" name="employee_division">
-                            <option value="">Select Division</option>
-                            {% for division in divisions %}
-                            <option value="{{ division }}">{{ division }}</option>
+                    <div class="form-group" id="employee-type-field" style="display: none;">
+                        <label for="employee_type"><span class="required">*</span>Employee Type:</label>
+                        <select id="employee_type" name="employee_type">
+                            <option value="">Select Employee Type</option>
+                            {% for emp_type in employee_type %}
+                            <option value="{{ emp_type.id }}">{{ emp_type.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -170,9 +179,7 @@
                 <div class="form-group">
                     <label for="payment_mode"><span class="required">*</span>Payment Mode:</label>
                     <select id="payment_mode" name="payment_mode">
-                        {% for key, value in payment_modes.items %}
-                        <option value="{{ key }}">{{ value }}</option>
-                        {% endfor %}
+                        <option value="cash">Cash</option>
                     </select>
                 </div>
              </div>

@@ -1,7 +1,7 @@
 from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Region, Head, Vendor, Expense, GLCode, Employee
+from .models import Region, Head, Vendor, Expense, GLCode, Employee, Division, Wing, Cadre, EmployeeType
 from .models_user import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -404,6 +404,10 @@ class AddExpenseView(LoginRequiredMixin, View):
         vendors = Vendor.objects.all()
         employees = Employee.objects.all()
         payment_modes = dict(Expense.PAYMENT_MODES)
+        divisions = Division.objects.all()
+        wings = Wing.objects.all()
+        cadre = Cadre.objects.all()
+        employee_types = EmployeeType.objects.all()
         
         # Filter GL Codes based on user role and division
         if request.user.is_maker:
@@ -430,7 +434,11 @@ class AddExpenseView(LoginRequiredMixin, View):
             'GLCode': gl_codes,
             'vendor_categories': vendor_categories,
             'user_division': request.user.division.name if request.user.division else None,
-            'is_maker': request.user.is_maker
+            'is_maker': request.user.is_maker,
+            'division': divisions,
+            'wing': wings,
+            'cadre': cadre,
+            'employee_type': employee_types
         }
         
         return render(request, 'expenses/add_expense.html', context)
@@ -463,22 +471,22 @@ class AddExpenseView(LoginRequiredMixin, View):
         
         if missing_fields:
             messages.error(request, f"Please fill in all required fields: {', '.join(missing_fields)}")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
             
         # Validate expense type and related fields
         if expense_type == 'Vendor' and not vendor_id:
             messages.error(request, "Please select a vendor.")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
         elif expense_type == 'Employee' and not employee_id:
             messages.error(request, "Please select an employee.")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
         
         # Role-based validation
         if request.user.is_maker:
             # Check if user has a division assigned
             if not request.user.division:
                 messages.error(request, "You don't have a division assigned. Please contact an administrator.")
-                return redirect('add_expense')
+                return redirect('budget:add_expense')
                 
             # Validate that the GL code is allowed for this user's division
             try:
@@ -491,7 +499,7 @@ class AddExpenseView(LoginRequiredMixin, View):
                 # In a real implementation, you would check if this GL code is allowed for the user's division
             except GLCode.DoesNotExist:
                 messages.error(request, f"GL Code {gl_code_value} does not exist or is not allowed for your division.")
-                return redirect('add_expense')
+                return redirect('budget:add_expense')
         
         
         try:
@@ -510,11 +518,11 @@ class AddExpenseView(LoginRequiredMixin, View):
         except GLCode.DoesNotExist:
             # If GL Code doesn't exist, redirect back with an error message
             messages.error(request, f"GL Code {gl_code_value} does not exist.")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
         except Exception as e:
             # If there's an error, redirect back with an error message
             messages.error(request, f"Error processing GL Code: {str(e)}")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
         
         # Get vendor based on expense type
         vendor = None
@@ -523,10 +531,10 @@ class AddExpenseView(LoginRequiredMixin, View):
                 vendor = Vendor.objects.get(id=vendor_id) if vendor_id else None
                 if not vendor:
                     messages.error(request, "Selected vendor does not exist.")
-                    return redirect('add_expense')
+                    return redirect('budget:add_expense')
             except Vendor.DoesNotExist:
                 messages.error(request, "Selected vendor does not exist.")
-                return redirect('add_expense')
+                return redirect('budget:add_expense')
         else:
             # For Employee type expenses, use a default vendor
             vendor, _ = Vendor.objects.get_or_create(
@@ -540,7 +548,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             net_amount_decimal = Decimal(net_amount)
         except Exception as e:
             messages.error(request, f"Invalid amount format: {str(e)}")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
         
         # Create and save the expense
         try:
@@ -548,6 +556,12 @@ class AddExpenseView(LoginRequiredMixin, View):
             if not invoice_date:
                 invoice_date = None
                 
+            # Get form data for division, wing, cadre, and employee_type
+            division_id = request.POST.get('division')
+            wing_id = request.POST.get('wing')
+            cadre_id = request.POST.get('cadre')
+            employee_type_id = request.POST.get('employee_type')
+            
             # Create the expense object
             expense = Expense(
                 # Only include fields that are in the model
@@ -560,10 +574,66 @@ class AddExpenseView(LoginRequiredMixin, View):
                 invoice_no=invoice_no,
                 invoice_date=invoice_date,
                 description=description,
-                # Store the user's division and wing information
                 division=request.user.division.name if request.user.division else None,
                 wing=request.user.wing.name if request.user.wing else None
             )
+            
+            # Set optional fields if provided
+            if division_id:
+                try:
+                    # Try to get division by ID first
+                    try:
+                        division_obj = Division.objects.get(id=division_id)
+                        expense.division = division_obj.name
+                    except (Division.DoesNotExist, ValueError):
+                        # If ID lookup fails, try by name
+                        division_obj = Division.objects.get(name=division_id)
+                        expense.division = division_obj.name
+                except Division.DoesNotExist:
+                    # If both lookups fail, use the value as is
+                    expense.division = division_id
+                    
+            if wing_id:
+                try:
+                    # Try to get wing by ID first
+                    try:
+                        wing_obj = Wing.objects.get(id=wing_id)
+                        expense.wing = wing_obj.name
+                    except (Wing.DoesNotExist, ValueError):
+                        # If ID lookup fails, try by name
+                        wing_obj = Wing.objects.get(name=wing_id)
+                        expense.wing = wing_obj.name
+                except Wing.DoesNotExist:
+                    # If both lookups fail, use the value as is
+                    expense.wing = wing_id
+                    
+            if cadre_id:
+                try:
+                    # Try to get cadre by ID first
+                    try:
+                        cadre_obj = Cadre.objects.get(id=cadre_id)
+                        expense.cadre = cadre_obj.name
+                    except (Cadre.DoesNotExist, ValueError):
+                        # If ID lookup fails, try by name
+                        cadre_obj = Cadre.objects.get(name=cadre_id)
+                        expense.cadre = cadre_obj.name
+                except Cadre.DoesNotExist:
+                    # If both lookups fail, use the value as is
+                    expense.cadre = cadre_id
+                    
+            if employee_type_id:
+                try:
+                    # Try to get employee_type by ID first
+                    try:
+                        employee_type_obj = EmployeeType.objects.get(id=employee_type_id)
+                        expense.employee_type = employee_type_obj.name
+                    except (EmployeeType.DoesNotExist, ValueError):
+                        # If ID lookup fails, try by name
+                        employee_type_obj = EmployeeType.objects.get(name=employee_type_id)
+                        expense.employee_type = employee_type_obj.name
+                except EmployeeType.DoesNotExist:
+                    # If both lookups fail, use the value as is
+                    expense.employee_type = employee_type_id
             
             # Save the expense
             expense.save()
@@ -575,7 +645,7 @@ class AddExpenseView(LoginRequiredMixin, View):
         except Exception as e:
             # Provide detailed error message
             messages.error(request, f"Error saving expense: {str(e)}")
-            return redirect('add_expense')
+            return redirect('budget:add_expense')
 
 
 # New views for GLCode

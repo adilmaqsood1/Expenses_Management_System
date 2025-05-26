@@ -98,12 +98,16 @@ function initVendorEmployeeToggle() {
     const employeeHeadField = document.getElementById('employee-head-field');
     const employeeWingField = document.getElementById('employee-wing-field');
     const employeeDivisionField = document.getElementById('employee-division-field');
+    const employeeCadreField = document.getElementById('employee-cadre-field');
+    const employeeTypeField = document.getElementById('employee-type-field');
     
     // Initialize employee data fields when employee is selected
     let employeeSelect = document.getElementById('employee');
     let employeeHeadSelect = document.getElementById('employee_head');
     let employeeWingSelect = document.getElementById('employee_wing');
     let employeeDivisionSelect = document.getElementById('employee_division');
+    let employeeCadreSelect = document.getElementById('employee_cadre');
+    let employeeTypeSelect = document.getElementById('employee_type');
     
     if (employeeSelect) {
         console.log('Employee select element found');
@@ -118,7 +122,9 @@ function initVendorEmployeeToggle() {
         employeeField: !!employeeField,
         employeeHeadField: !!employeeHeadField,
         employeeWingField: !!employeeWingField,
-        employeeDivisionField: !!employeeDivisionField
+        employeeDivisionField: !!employeeDivisionField,
+        employeeCadreField: !!employeeCadreField,
+        employeeTypeField: !!employeeTypeField
     });
     
     if (!vendorField || !vendorSelectField || !employeeField) {
@@ -144,6 +150,8 @@ function initVendorEmployeeToggle() {
             if (employeeHeadField) employeeHeadField.style.display = 'block';
             if (employeeWingField) employeeWingField.style.display = 'block';
             if (employeeDivisionField) employeeDivisionField.style.display = 'block';
+            if (employeeCadreField) employeeCadreField.style.display = 'block';
+            if (employeeTypeField) employeeTypeField.style.display = 'block';
             
             // Show employee details section
             const employeeDetailsSection = document.getElementById('employee-details-section');
