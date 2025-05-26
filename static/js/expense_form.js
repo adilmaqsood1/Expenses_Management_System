@@ -404,7 +404,7 @@ function initBudgetInfo() {
         document.querySelector('.available-budget-row td:first-child').textContent = `Available Budget (${headName})`;
         
         // Fetch budget information from the server
-        fetch(`/api/head-budget/${headId}/`)
+        fetch(`/expense/api/head-budget/${headId}/`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
