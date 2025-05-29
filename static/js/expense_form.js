@@ -459,10 +459,10 @@ function initBudgetInfo() {
                 console.error('Error fetching budget data:', error);
                 
                 // Reset to default values on error
-                document.getElementById('total-budget').textContent = '0.00';
-                document.getElementById('utilized-budget').textContent = '0.00';
-                document.getElementById('available-budget').textContent = '0.00';
-                document.getElementById('monthly-limit').textContent = '0.00';
+                document.getElementById('total-budget').textContent = '0';
+                document.getElementById('utilized-budget').textContent = '0';
+                document.getElementById('available-budget').textContent = '0';
+                document.getElementById('monthly-limit').textContent = '0';
                 document.getElementById('budget-status').textContent = 'Pending';
                 
                 // Reset hidden fields

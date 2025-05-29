@@ -43,6 +43,10 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         # Get pending expense approvals count
         pending_expenses = Expense.objects.filter(status='Pending').count()
         
+        # Get pending stationary requests count
+        from .models import StationaryRequest
+        pending_stationary = StationaryRequest.objects.filter(status='Pending').count()
+        
         # Get total employees and vendors count
         employee_count = Employee.objects.count()
         vendor_count = Vendor.objects.filter(disabled=False).count()
@@ -76,6 +80,7 @@ class EditorDashboardView(LoginRequiredMixin, EditorRequiredMixin, View):
         
         context = {
             'pending_expenses': pending_expenses,
+            'pending_stationary': pending_stationary,
             'employee_count': employee_count,
             'vendor_count': vendor_count,
             'recent_processed': recent_processed,

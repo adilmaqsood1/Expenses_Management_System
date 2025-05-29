@@ -398,10 +398,10 @@ function initBudgetInfo() {
         
         // Update the budget table title to show which head's budget is being displayed
         const selectedOption = headSelect.options[headSelect.selectedIndex];
-        const headName = selectedOption.text;
-        document.querySelector('.total-budget-row td:first-child').textContent = `Total Budget (${headName})`;
-        document.querySelector('.utilized-budget-row td:first-child').textContent = `Utilized Budget (${headName})`;
-        document.querySelector('.available-budget-row td:first-child').textContent = `Available Budget (${headName})`;
+        // const headName = selectedOption.text;
+        document.querySelector('.total-budget-row td:first-child').textContent = `Total Budget ()`;
+        document.querySelector('.utilized-budget-row td:first-child').textContent = `Utilized Budget ()`;
+        document.querySelector('.available-budget-row td:first-child').textContent = `Available Budget ()`;
         
         // Fetch budget information from the server
         fetch(`/expense/api/head-budget/${headId}/`)
@@ -459,10 +459,10 @@ function initBudgetInfo() {
                 console.error('Error fetching budget data:', error);
                 
                 // Reset to default values on error
-                document.getElementById('total-budget').textContent = '0.00';
-                document.getElementById('utilized-budget').textContent = '0.00';
-                document.getElementById('available-budget').textContent = '0.00';
-                document.getElementById('monthly-limit').textContent = '0.00';
+                document.getElementById('total-budget').textContent = '0';
+                document.getElementById('utilized-budget').textContent = '0';
+                document.getElementById('available-budget').textContent = '0';
+                document.getElementById('monthly-limit').textContent = '0';
                 document.getElementById('budget-status').textContent = 'Pending';
                 
                 // Reset hidden fields

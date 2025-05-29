@@ -4,6 +4,8 @@ from django.contrib.auth import views as auth_views
 
 app_name = 'budget'
 
+from .views import SupervisorStationaryRequestsView
+
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
@@ -35,4 +37,9 @@ urlpatterns = [
     path('editor/expenses/', views_editor.EditorExpenseListView.as_view(), name='editor_expense_list'),
     path('editor/expenses/process/', views_editor.ProcessExpenseView.as_view(), name='process_expense'),
     path('editor/expenses/process/<int:expense_id>/', views_editor.ProcessExpenseView.as_view(), name='process_expense'),
+    
+    # Stationary Requests
+    path('stationary-request/', views.StationaryRequestView.as_view(), name='stationary_request'),
+    path('supervisor-stationary-requests/', SupervisorStationaryRequestsView.as_view(), name='supervisor_stationary_requests'),
+    path('stationary-requests-list/', views.stationary_request_userlist, name='stationary_requests_userlist'),
 ]

@@ -1,7 +1,7 @@
 from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Region, Head, Vendor, Expense, GLCode, Employee, Division, Wing, Cadre, EmployeeType
+from .models import Region, Head, Vendor, Expense, GLCode, Employee, Division, Wing, Cadre, EmployeeType, StationaryRequest
 from .models_user import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -1005,3 +1005,55 @@ def expenditure_claim_view(request, expense_id, *args, **kwargs):
         return generate_pdf_response('expenses/expenditure_claim.html', context, f'expenditure_claim_{expense_id}.pdf')
 
     return render(request, 'expenses/expenditure_claim.html', context)
+
+class StationaryRequestView(View):
+    def get(self, request):
+        return render(request, 'expenses/stationary_request.html')
+
+    def post(self, request):
+        item = request.POST.get('item_name')
+        quantity = request.POST.get('quantity')
+        reason = request.POST.get('reason')
+
+        if not item or not quantity or not reason:
+            messages.error(request, "All fields are required.")
+            return redirect('budget:stationary_request')
+
+        # Save the stationary request with correct field names
+        StationaryRequest.objects.create(
+            item=item,
+            quantity=quantity,
+            reason=reason,
+            user=request.user
+        )
+
+        messages.success(request, "Stationary request submitted successfully.")
+        return redirect('budget:stationary_request')
+
+class SupervisorStationaryRequestsView(View):
+    def get(self, request):
+        requests = StationaryRequest.objects.all()
+        return render(request, 'expenses/supervisor_stationary_requests.html', {'requests': requests})
+
+    def post(self, request):
+        print('POST DATA:', request.POST)
+        request_id = request.POST.get('request_id')
+        action = request.POST.get('action')
+        try:
+            stationary_request = StationaryRequest.objects.get(id=request_id)
+            if action == 'accept':
+                stationary_request.status = 'Approved'
+                stationary_request.approved_by = request.user
+                messages.success(request, f"Request for {stationary_request.item} approved.")
+            elif action == 'reject':
+                stationary_request.status = 'Rejected'
+                messages.success(request, f"Request for {stationary_request.item} rejected.")
+            stationary_request.save()
+        except StationaryRequest.DoesNotExist:
+            messages.error(request, "Request not found.")
+        return redirect('budget:supervisor_stationary_requests')
+
+
+def stationary_request_userlist(request):
+    requests = StationaryRequest.objects.all()
+    return render(request, 'expenses/stationary_request_userlist.html', {'requests': requests})

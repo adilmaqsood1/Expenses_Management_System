@@ -279,3 +279,20 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class StationaryRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stationary_requests')
+    item = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField()
+    reason = models.TextField()
+    requested_date = models.DateField(auto_now_add=True)
+    approved_date = models.DateField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_stationary_requests')
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.item}"
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.item}"

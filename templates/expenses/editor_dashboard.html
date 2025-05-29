@@ -5,15 +5,15 @@
 <div class="expense-content">
     <div class="mb-6 animate-slideInLeft">
         <h3 class="text-xl text-center font-bold text-gray-800 mb-2">Welcome to Editor Dashboard</h3>
-        <p class="text-gray-600">Manage allowance requests, employees, and vendors from this dashboard.</p>
+        <p class="text-gray-600">Manage Stationary requests, employees, and vendors from this dashboard.</p>
     </div>
     
     <!-- System Overview Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animate-slideInBottom">
         <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
-            <div class="text-sm text-gray-500 mb-1">Pending Allowances</div>
-            <div class="text-2xl font-bold text-gray-800">{{ pending_allowances }}</div>
-            <div class="text-xs text-yellow-500 mt-1">{% if pending_allowances > 0 %}Requires attention{% else %}No pending requests{% endif %}</div>
+            <div class="text-sm text-gray-500 mb-1">Pending Stationary Requests</div>
+            <div class="text-2xl font-bold text-gray-800">{{ pending_stationary }}</div>
+            <div class="text-xs text-yellow-500 mt-1">{% if pending_stationary > 0 %}Requires attention{% else %}No pending requests{% endif %}</div>
         </div>
         <div class="stats-card bg-white p-4 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <div class="text-sm text-gray-500 mb-1">Pending Expenses</div>
@@ -36,7 +36,7 @@
     <div class="mb-6 animate-slideInBottom" style="animation-delay: 0.2s;">
         <h4 class="text-lg font-bold text-gray-800 mb-4">Quick Links</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href="{% url 'budget:editor_allowance_list' %}" class="dashboard-card group">
+            <a href="{% url 'budget:supervisor_stationary_requests' %}" class="dashboard-card group">
                 <div class="bg-blue-50 p-4 flex items-center">
                     <div class="dashboard-icon bg-blue-100 p-3 rounded-full mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,8 +44,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h5 class="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">Allowance Requests</h5>
-                        <p class="text-sm text-gray-500">Process pending allowance requests</p>
+                        <h5 class="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">Stationary Requests</h5>
+                        <p class="text-sm text-gray-500">Process pending Stationary requests</p>
                     </div>
                 </div>
             </a>
