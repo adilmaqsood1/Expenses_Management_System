@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('budget-status').textContent = 'Loading...';
         
         // Fetch budget information from the server
-        fetch(`/expense/api/head-budget/${headId}/`)
+        fetch(`/expense/expense/api/head-budget/${headId}/`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
