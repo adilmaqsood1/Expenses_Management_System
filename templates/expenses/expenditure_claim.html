@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     
     <!-- Budget Title -->
-    <div class="budget-title">PROPOSED BUDGET - {{ now }}</div>
+    <div class="budget-title"> BUDGET - {{ now }}</div>
     
     <!-- Main Data Table -->
     <table class="data-table">
@@ -265,12 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <tr>
                 <td class="sr-col">13</td>
                 <td>Contact No.</td>
-                <td class="data-col">{{ contact_no|default:expense.vendor.contact_number|default:"-" }}</td>
+                <td class="data-col">{{ user.contact_number }}</td>
             </tr>
             <tr>
                 <td class="sr-col">14</td>
                 <td>Name of Contact Person</td>
-                <td class="data-col">{{ contact_person|default:expense.vendor.name|default:"-" }}</td>
+                <td class="data-col">{{ user.username }}</td>
             </tr>
         </tbody>
     </table>
@@ -278,9 +278,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Second Budget Title -->
     <div style="text-align: center; margin: 5px 0;">
         <select style="padding: 2px; margin: 1px; font-size: 1em;" id="budget-period-selector">
-            <option value="current">PROPOSED BUDGET - {{now}}</option>
-            <option value="previous">Previous BUDGET - {{one_year_ago}}</option>
-            <option value="posterior">Posterior BUDGET - {{now}}</option>
+            <option value="current">BUDGET - {{now}}</option>
+            {% comment %} <option value="previous">Previous BUDGET - {{one_year_ago}}</option>
+            <option value="posterior">Posterior BUDGET - {{now}}</option> {% endcomment %}
         </select>
     </div>
     
@@ -329,16 +329,16 @@ document.addEventListener('DOMContentLoaded', function() {
         <div>{{ expense.description|upper }} INVOICE NO {{ expense.invoice_no|default:"-" }} DT. {{ expense.invoice_date|date:"d.m.Y"|default:"-" }} M/I/O {{ expense.created_date|date:"M Y"|upper }}</div>
     </div>
     
-    <!-- Details Section -->
+    <!-- Details Section  OFFICE NOTE NO PSG/BB/84 DT -->
     <div class="details-section">
         <div class="section-title">Details</div>
-        <div>OFFICE NOTE NO PSG/BB/84 DT {{ expense.created_date|date:"d.m.Y" }}</div>
+        <div> {{ expense.created_date|date:"d.m.Y" }}</div>
     </div>
     
     <!-- Sub Group Section -->
     <div class="sub-group-section">
-        <div class="section-title">Sub Group / Wing Division</div>
-        <div>{{ expense.division.name|default:"" }} / {{ expense.wing.name|default:"" }}</div>
+        <div class="section-title"> Division / Wing </div>
+        <div>{{ user.division |default:"" }} / {{ user.wing|default:"" }}</div>
     </div>
     
     <!-- Print Button (only visible in HTML, not in PDF) -->

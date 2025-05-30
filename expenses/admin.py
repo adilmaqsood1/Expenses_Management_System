@@ -394,14 +394,14 @@ class UserAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('User Information', {
-            'fields': ('username', 'email', 'password', 'division', 'wing','first_name', 'last_name', 'date_joined')
+            'fields': ('username', 'email', 'first_name','last_name','sap_id', 'password', 'division', 'contact_number', 'wing', 'date_joined')
         }),
         ('Permissions', {
             'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
         }),
-        ('Account Details', {
-            'fields': ('account_number', 'account_type')
-        }),
+        # ('Account Details', {
+        #     'fields': ('account_number', 'account_type')
+        # }),
     )
 
     def get_queryset(self, request):

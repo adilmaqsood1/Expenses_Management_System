@@ -254,7 +254,7 @@ td a:hover {
       {% if expense.supervisor_approval == 'Approved' and expense.admin_approval == 'Approved' %}
       <div class="mt-4 text-center">
         <a
-          href="{% url 'budget:expenditure_claim' expense.id %}?format=pdf"
+          href="{% url 'budget:expenditure_claim' expense.id %}"
           class="btn bg-green-600 text-white hover:bg-green-700 transition-colors duration-200"
         >
           <svg

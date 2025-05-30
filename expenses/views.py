@@ -975,6 +975,7 @@ def generate_pdf_response(template_name, context, filename):
 # Main view
 @login_required
 def expenditure_claim_view(request, expense_id, *args, **kwargs):
+    user = User.objects.all()
     expense = get_object_or_404(Expense, id=expense_id)
     now = timezone.now().strftime('%Y')
     one_year_ago = str(int(now) - 1)

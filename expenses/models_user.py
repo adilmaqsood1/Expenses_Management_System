@@ -38,6 +38,8 @@ class User(AbstractUser):
     account_type = models.CharField(max_length=100, blank=True, null=True)
     wing = models.ForeignKey('expenses.Wing', on_delete=models.SET_NULL, null=True, blank=True)
     division = models.ForeignKey('expenses.Division', on_delete=models.SET_NULL, null=True, blank=True)
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    sap_id = models.CharField(max_length=20, blank=True, null=True)
     
     objects = UserManager()
     
