@@ -410,7 +410,7 @@ class ProcessExpenseView(LoginRequiredMixin, EditorRequiredMixin, View):
             return render(request, 'expenses/process_expense.html', context)
         
         # If no expense_id, redirect to the expense list
-        return redirect('editor_expense_list')
+        return redirect('budget:editor_expense_list')
     
     def post(self, request, expense_id=None):
         # Handle form submission from the expense list page
@@ -418,7 +418,7 @@ class ProcessExpenseView(LoginRequiredMixin, EditorRequiredMixin, View):
             expense_id = request.POST.get('expense_id')
             if not expense_id:
                 messages.error(request, "No expense specified.")
-                return redirect('editor_expense_list')
+                return redirect('budget:editor_expense_list')
         
         expense = get_object_or_404(Expense, id=expense_id)
         
@@ -430,7 +430,7 @@ class ProcessExpenseView(LoginRequiredMixin, EditorRequiredMixin, View):
             # Check if supervisor has already approved
             if expense.supervisor_approval != 'Approved':
                 messages.warning(request, "This expense must be approved by a supervisor first.")
-                return redirect('editor_expense_list')
+                return redirect('budget:editor_expense_list')
                 
             if action == 'approve':
                 expense.admin_approval = 'Approved'
@@ -478,4 +478,4 @@ class ProcessExpenseView(LoginRequiredMixin, EditorRequiredMixin, View):
         # Save the expense
         expense.save()
         
-        return redirect('editor_expense_list')
+        return redirect('budget:editor_expense_list')

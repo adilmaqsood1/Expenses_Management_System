@@ -398,10 +398,10 @@ function initBudgetInfo() {
         
         // Update the budget table title to show which head's budget is being displayed
         const selectedOption = headSelect.options[headSelect.selectedIndex];
-        // const headName = selectedOption.text;
-        document.querySelector('.total-budget-row td:first-child').textContent = `Total Budget ()`;
-        document.querySelector('.utilized-budget-row td:first-child').textContent = `Utilized Budget ()`;
-        document.querySelector('.available-budget-row td:first-child').textContent = `Available Budget ()`;
+        const headName = selectedOption.text;
+        document.querySelector('.total-budget-row td:first-child').textContent = `Total Budget (${headName})`;
+        document.querySelector('.utilized-budget-row td:first-child').textContent = `Utilized Budget (${headName})`;
+        document.querySelector('.available-budget-row td:first-child').textContent = `Available Budget (${headName})`;
         
         // Fetch budget information from the server
         fetch(`/expense/api/head-budget/${headId}/`)
@@ -528,3 +528,41 @@ function initBudgetInfo() {
         }
     }
 }
+
+// Update the form submission event listener to show more detailed error
+expenseForm.addEventListener('submit', function(event) {
+    // Get available budget and amount values
+    const availableBudgetElement = document.getElementById('available-budget');
+    const amountInput = document.getElementById('amount');
+    
+    if (availableBudgetElement && amountInput) {
+        const availableBudgetText = availableBudgetElement.textContent;
+        const availableBudget = parseFloat(availableBudgetText.replace(/[^0-9.-]+/g, ''));
+        const expenseAmount = parseFloat(amountInput.value);
+        
+        // Check if expense amount exceeds available budget
+        if (!isNaN(availableBudget) && !isNaN(expenseAmount) && expenseAmount > availableBudget) {
+            // Show error message with detailed information
+            const errorMessage = document.getElementById('budget-error-message');
+            const errorDetails = document.getElementById('budget-error-details');
+            
+            if (errorMessage && errorDetails) {
+                // Format the amounts with commas for better readability
+                const formattedBudget = availableBudget.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const formattedAmount = expenseAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                // Set detailed error message
+                errorDetails.innerHTML = `Your expense amount <strong>${formattedAmount}</strong> exceeds the available budget <strong>${formattedBudget}</strong>. Please contact your admin to increase the budget allocation.`;
+                
+                // Show the error message
+                errorMessage.style.display = 'block';
+            }
+            
+            // Prevent form submission
+            event.preventDefault();
+            
+            // Scroll to error message
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});

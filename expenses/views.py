@@ -36,7 +36,7 @@ class CustomLoginView(LoginView):
             elif self.request.user.is_maker:
                 redirect_to = '/expense/'
             else:
-                redirect_to = '/mis-dashboard/'
+                redirect_to = '/expense/mis-dashboard/'
         return redirect_to 
     
 class RegisterView(View):
@@ -549,6 +549,20 @@ class AddExpenseView(LoginRequiredMixin, View):
         except Exception as e:
             messages.error(request, f"Invalid amount format: {str(e)}")
             return redirect('budget:add_expense')
+            
+        # Check if expense amount exceeds available budget
+        try:
+            # Get the available budget for the head
+            available_budget = head.remaining_budget
+            
+            # Compare with expense amount
+            if amount_decimal > available_budget:
+                messages.error(request, "Insufficient budget available. Please contact your admin.")
+                return redirect('budget:add_expense')
+                
+        except Exception as e:
+            messages.error(request, f"Error checking budget: {str(e)}")
+            return redirect('budget:add_expense')
         
         # Create and save the expense
         try:
@@ -641,7 +655,7 @@ class AddExpenseView(LoginRequiredMixin, View):
             # Add success message and redirect to expenditure claim view
             messages.success(request, 'Expense added successfully! Viewing Expenditure Claim...')
             # Redirect to the expenditure claim view for the newly created expense
-            return redirect('budget:expenditure_claim', expense_id=expense.pk)
+            return redirect('budget:expense_detail', expense_id=expense.pk)
         except Exception as e:
             # Provide detailed error message
             messages.error(request, f"Error saving expense: {str(e)}")

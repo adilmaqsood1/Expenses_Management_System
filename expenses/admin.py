@@ -352,6 +352,11 @@ class ExpenseAdmin(admin.ModelAdmin):
         if obj.admin_approval == "Approved" and not obj.admin_date:
             from django.utils import timezone
             obj.admin_date = timezone.now()
+            
+        # Update the status field based on admin_approval
+        if obj.admin_approval in ["Approved", "Rejected"]:
+            obj.status = obj.admin_approval
+            
         super().save_model(request, obj, form, change)
     
     def status_badge(self, obj):

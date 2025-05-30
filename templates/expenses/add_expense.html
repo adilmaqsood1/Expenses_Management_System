@@ -1,13 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
 {% load static %}
 <link rel="stylesheet" href={% static 'css/expense_form.css' %}>
 <!-- Select2 CSS for enhanced dropdown search -->
@@ -17,8 +10,45 @@
 <div class="expense-header">
     Expense Posting
 </div>
+
+<!-- Enhanced message display -->
+{% if messages %}
+<div class="message-container">
+    {% for message in messages %}
+    <div class="message-box {{ message.tags }}">
+        <div class="message-icon">
+            {% if message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+        </div>
+        <div class="message-content">
+            <div class="message-title">
+                {% if message.tags == 'error' %}
+                    Error
+                {% elif message.tags == 'success' %}
+                    Success
+                {% elif message.tags == 'warning' %}
+                    Warning
+                {% else %}
+                    Information
+                {% endif %}
+            </div>
+            <div class="message-text">{{ message }}</div>
+        </div>
+        <div class="message-close" onclick="this.parentElement.style.display='none'">&times;</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="expense-content">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="expense-form">
         {% csrf_token %}
         <h4>Add New Expense:</h4>
         
@@ -162,6 +192,10 @@
                         </tr>
                     </tbody>
                 </table>
+                <!-- Add budget error message container -->
+                <div id="budget-error-message" style="color: red; font-weight: bold; margin-top: 10px; display: none;">
+                    Insufficient budget available. Please contact the admin.
+                </div>
             </div>
         </div>
          <!-- Bottom section: Invoice details -->
@@ -210,7 +244,7 @@
              
              <!-- Action buttons -->
              <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button type="submit" class="btn">Submit</button>
+                <button type="submit" class="btn" id="submit-btn">Submit</button>
                 <a href="{% url 'budget:expense_list' %}" class="btn">Back to List</a>
                 <button type="button" class="btn" onclick="window.history.back();">Close</button> {# Updated Close button to go back #}
              </div>
@@ -241,6 +275,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     return $.extend({}, data, true);
                 }
                 return null;
+            }
+        });
+    }
+    
+    // Add budget validation before form submission
+    const expenseForm = document.getElementById('expense-form');
+    if (expenseForm) {
+        expenseForm.addEventListener('submit', function(event) {
+            // Get available budget and amount values
+            const availableBudgetElement = document.getElementById('available-budget');
+            const amountInput = document.getElementById('amount');
+            
+            if (availableBudgetElement && amountInput) {
+                const availableBudgetText = availableBudgetElement.textContent;
+                const availableBudget = parseFloat(availableBudgetText.replace(/[^0-9.-]+/g, ''));
+                const expenseAmount = parseFloat(amountInput.value);
+                
+                // Check if expense amount exceeds available budget
+                if (!isNaN(availableBudget) && !isNaN(expenseAmount) && expenseAmount > availableBudget) {
+                    // Show error message
+                    const errorMessage = document.getElementById('budget-error-message');
+                    if (errorMessage) {
+                        errorMessage.style.display = 'block';
+                    }
+                    
+                    // Prevent form submission
+                    event.preventDefault();
+                    
+                    // Scroll to error message
+                    errorMessage.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         });
     }

@@ -341,37 +341,37 @@ window.onload = function() {
                         </td>
                         {% else %}
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_no|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.description|default:'-'|truncatechars:30 }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.description|default:'-'|truncatechars:30 }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.vendor.name }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.invoice_date|date:"d M Y"|default:'-' }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.payment_mode }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{% if expense.wing %}{{ expense.wing }}{% endif %}{% if expense.division %} - {{ expense.division }}{% endif %}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.amount }}));</script> (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.amount }}));</script> (<script>document.write(convertToMillions({{ expense.amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas(0.00));</script></a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas(0.00));</script></a>
                         </td>
                         <td class="py-3 px-4 text-gray-800 text-right">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.net_amount }}));</script> (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">₨ <script>document.write(formatNumberWithCommas({{ expense.net_amount }}));</script> (<script>document.write(convertToMillions({{ expense.net_amount }}));</script>)</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="hover:text-cyan-700 hover:underline">{{ expense.created_date|date:"d M Y" }}</a>
                         </td>
                         <td class="py-3 px-4 text-gray-800">
-                            <a href="{% url 'budget:expenditure_claim' expense.id %}" class="block">
+                            <a href="{% url 'budget:expense_detail' expense.id %}" class="block">
                                 <span class="px-2 py-1 text-xs rounded-full {% if expense.status == 'Approved' %}bg-green-100 text-green-800{% elif expense.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif expense.status == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ expense.status }}</span>
                             </a>
                         </td>
