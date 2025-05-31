@@ -194,6 +194,7 @@ class Expense(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     wing = models.CharField(max_length=100, blank=True, null=True, default=None)
     division = models.CharField(max_length=100, blank=True, null=True, default=None)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_expenses', null=True)
     supervisor_approval = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='supervised_expenses')
     supervisor_remarks = models.TextField(blank=True, null=True)

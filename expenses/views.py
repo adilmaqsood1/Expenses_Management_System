@@ -283,12 +283,8 @@ class ExpenseListView(LoginRequiredMixin, View):
     def get(self, request):
         # Filter expenses based on user role
         if request.user.is_maker:
-            # Makers can only see expenses from their division
-            if request.user.division:
-                division_name = request.user.division.name
-                expenses_list = Expense.objects.filter(division=division_name)
-            else:
-                expenses_list = Expense.objects.none()
+            # Makers can only see expenses they created
+            expenses_list = Expense.objects.filter(created_by=request.user)
         else:
             # Supervisors and Admins can see all expenses
             expenses_list = Expense.objects.all()
@@ -589,7 +585,8 @@ class AddExpenseView(LoginRequiredMixin, View):
                 invoice_date=invoice_date,
                 description=description,
                 division=request.user.division.name if request.user.division else None,
-                wing=request.user.wing.name if request.user.wing else None
+                wing=request.user.wing.name if request.user.wing else None,
+                created_by=request.user  # Associate expense with the current user
             )
             
             # Set optional fields if provided
