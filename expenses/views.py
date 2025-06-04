@@ -1023,24 +1023,43 @@ class StationaryRequestView(View):
         return render(request, 'expenses/stationary_request.html')
 
     def post(self, request):
-        item = request.POST.get('item_name')
-        quantity = request.POST.get('quantity')
-        reason = request.POST.get('reason')
-
-        if not item or not quantity or not reason:
-            messages.error(request, "All fields are required.")
+        # Get the JSON data from the hidden field
+        items_data = request.POST.get('items_data')
+        
+        if not items_data:
+            messages.error(request, "No items selected.")
             return redirect('budget:stationary_request')
-
-        # Save the stationary request with correct field names
-        StationaryRequest.objects.create(
-            item=item,
-            quantity=quantity,
-            reason=reason,
-            user=request.user
-        )
-
-        messages.success(request, "Stationary request submitted successfully.")
-        return redirect('budget:stationary_request')
+            
+        import json
+        try:
+            items = json.loads(items_data)
+            
+            if not items:
+                messages.error(request, "No items selected.")
+                return redirect('budget:stationary_request')
+                
+            # Create a StationaryRequest for each selected item
+            for item_data in items:
+                item_name = f"{item_data['item']} ({item_data['category']})"
+                quantity = item_data['quantity']
+                reason = item_data['reason'] or "No reason provided"
+                
+                StationaryRequest.objects.create(
+                    item=item_name,
+                    quantity=quantity,
+                    reason=reason,
+                    user=request.user
+                )
+                
+            messages.success(request, f"{len(items)} stationary request(s) submitted successfully.")
+            return redirect('budget:stationary_requests_userlist')
+            
+        except json.JSONDecodeError:
+            messages.error(request, "Invalid data format.")
+            return redirect('budget:stationary_request')
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect('budget:stationary_request')
 
 class SupervisorStationaryRequestsView(View):
     def get(self, request):

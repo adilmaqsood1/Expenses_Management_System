@@ -1,41 +1,561 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid flex justify-center items-center  bg-gradient-to-br from-cyan-50 to-blue-100">
-    <div class="w-full max-w-lg mx-auto sticky top-8">
-        <div class="bg-white rounded-lg shadow-lg p-8 mt-10">
+<div class="container-fluid flex flex-col md:flex-row bg-gradient-to-br from-cyan-50 to-blue-100 min-h-screen p-4">
+    <!-- Sidebar with categorized items -->
+    <div class="w-full md:w-1/3 lg:w-1/4 bg-white rounded-lg shadow-lg p-4 mb-4 md:mb-0 md:mr-4 overflow-y-auto max-h-screen sticky top-0">
+        <div class="flex items-center mb-4">
+            <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 mr-3">
+                <i class="fas fa-list text-blue-600 text-xl"></i>
+            </span>
+            <h2 class="text-xl font-bold text-gray-800">Stationery Items</h2>
+        </div>
+        
+        <div class="search-box mb-4">
+            <div class="relative">
+                <input type="text" id="search-items" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" placeholder="Search items...">
+                <span class="absolute right-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
+            </div>
+        </div>
+        
+        <div id="stationery-categories" class="space-y-2">
+            <!-- Writing Instruments -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Writing Instruments</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Ballpoint pen (blue)">
+                        <span>Ballpoint pen (blue)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Ballpoint pen (black)">
+                        <span>Ballpoint pen (black)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Ballpoint pen (red)">
+                        <span>Ballpoint pen (red)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Gel pen">
+                        <span>Gel pen</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Pencil (HB)">
+                        <span>Pencil (HB)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Pencil (2B)">
+                        <span>Pencil (2B)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Mechanical pencil">
+                        <span>Mechanical pencil</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Highlighter">
+                        <span>Highlighter</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Permanent marker">
+                        <span>Permanent marker</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Whiteboard marker">
+                        <span>Whiteboard marker</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Correction pen/fluid">
+                        <span>Correction pen/fluid</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Eraser">
+                        <span>Eraser</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Writing Instruments" data-item="Sharpener">
+                        <span>Sharpener</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Paper Products -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Paper Products</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="A4 printing paper (70 GSM)">
+                        <span>A4 printing paper (70 GSM)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="A4 printing paper (100 GSM)">
+                        <span>A4 printing paper (100 GSM)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Letterhead paper">
+                        <span>Letterhead paper</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Sticky notes">
+                        <span>Sticky notes</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Notepad/Notebook">
+                        <span>Notepad/Notebook</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Envelope (DL)">
+                        <span>Envelope (DL)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Envelope (A5)">
+                        <span>Envelope (A5)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Envelope (A4)">
+                        <span>Envelope (A4)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Index cards">
+                        <span>Index cards</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Paper Products" data-item="Filing papers/Index separators">
+                        <span>Filing papers/Index separators</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Files and Filing Supplies -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Files and Filing Supplies</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="File folders">
+                        <span>File folders</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Lever arch files">
+                        <span>Lever arch files</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Ring binders">
+                        <span>Ring binders</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Expanding files">
+                        <span>Expanding files</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Document wallets">
+                        <span>Document wallets</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Plastic sleeves/Sheet protectors">
+                        <span>Plastic sleeves/Sheet protectors</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="Divider tabs">
+                        <span>Divider tabs</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Files and Filing Supplies" data-item="File labels">
+                        <span>File labels</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Desk Supplies -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Desk Supplies</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Stapler">
+                        <span>Stapler</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Staples">
+                        <span>Staples</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Staple remover">
+                        <span>Staple remover</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Paper clips">
+                        <span>Paper clips</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Binder clips">
+                        <span>Binder clips</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Scissors">
+                        <span>Scissors</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Ruler">
+                        <span>Ruler</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Tape dispenser">
+                        <span>Tape dispenser</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Adhesive tape (transparent)">
+                        <span>Adhesive tape (transparent)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Adhesive tape (masking)">
+                        <span>Adhesive tape (masking)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Glue stick">
+                        <span>Glue stick</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Rubber bands">
+                        <span>Rubber bands</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Thumbtacks/Push pins">
+                        <span>Thumbtacks/Push pins</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Desk Supplies" data-item="Paper punch">
+                        <span>Paper punch</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Organization & Storage -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Organization & Storage</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Desk organizer">
+                        <span>Desk organizer</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Pen holder">
+                        <span>Pen holder</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Document tray">
+                        <span>Document tray</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Whiteboard">
+                        <span>Whiteboard</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Cork board">
+                        <span>Cork board</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Organization & Storage" data-item="Clipboard">
+                        <span>Clipboard</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Computer & Printer Supplies -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Computer & Printer Supplies</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Computer & Printer Supplies" data-item="Printer toner/ink cartridge">
+                        <span>Printer toner/ink cartridge</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Computer & Printer Supplies" data-item="CD/DVD and sleeves">
+                        <span>CD/DVD and sleeves</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Computer & Printer Supplies" data-item="USB drive">
+                        <span>USB drive</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Computer & Printer Supplies" data-item="External hard drive">
+                        <span>External hard drive</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Computer & Printer Supplies" data-item="Mouse pad">
+                        <span>Mouse pad</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Mailroom & Packaging Supplies -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Mailroom & Packaging Supplies</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Mailroom & Packaging Supplies" data-item="Packing tape">
+                        <span>Packing tape</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Mailroom & Packaging Supplies" data-item="Bubble wrap">
+                        <span>Bubble wrap</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Mailroom & Packaging Supplies" data-item="Courier envelopes/parcels">
+                        <span>Courier envelopes/parcels</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Mailroom & Packaging Supplies" data-item="Label stickers">
+                        <span>Label stickers</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Mailroom & Packaging Supplies" data-item="Box cutter">
+                        <span>Box cutter</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Cleaning & Miscellaneous -->
+            <div class="category-section">
+                <button class="category-toggle w-full flex justify-between items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition">
+                    <span class="font-semibold">Cleaning & Miscellaneous</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="category-items pl-4 pt-2 pb-1 space-y-1">
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Cleaning wipes">
+                        <span>Cleaning wipes</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Hand sanitizer">
+                        <span>Hand sanitizer</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Tissues">
+                        <span>Tissues</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Air freshener">
+                        <span>Air freshener</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Batteries (AA)">
+                        <span>Batteries (AA)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Batteries (AAA)">
+                        <span>Batteries (AAA)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input type="checkbox" class="stationery-item" data-category="Cleaning & Miscellaneous" data-item="Extension cord/power strip">
+                        <span>Extension cord/power strip</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main content area for selected items -->
+    <div class="w-full md:w-2/3 lg:w-3/4">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
             <div class="flex items-center mb-6">
                 <span class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mr-4">
                     <i class="fas fa-clipboard-list text-blue-600 text-2xl"></i>
                 </span>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800 mb-1">Stationary Request</h1>
-                    <p class="text-gray-500 text-sm">Submit a new request for stationary items</p>
+                    <p class="text-gray-500 text-sm">Selected items will appear here</p>
                 </div>
             </div>
-            <form method="post" class="space-y-6">
+            
+            <div id="selected-items-container" class="space-y-4 mb-6">
+                <div class="text-center text-gray-500 py-8" id="no-items-message">
+                    <i class="fas fa-box-open text-4xl mb-2"></i>
+                    <p>No items selected yet. Please select items from the sidebar.</p>
+                </div>
+            </div>
+            
+            <form method="post" id="stationery-form" class="hidden">
                 {% csrf_token %}
-                <div>
-                    <label for="item_name" class="block text-gray-700 font-semibold mb-2">Item Name <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <input type="text" class="form-control block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none transition" id="item_name" name="item_name" placeholder="e.g. Pen, Notebook" required>
-                        <span class="absolute right-3 top-2.5 text-gray-400"><i class="fas fa-box"></i></span>
-                    </div>
+                <input type="hidden" name="items_data" id="items-data-field">
+                <div class="border-t pt-4">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md shadow transition">
+                        Submit Request <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
                 </div>
-                <div>
-                    <label for="quantity" class="block text-gray-700 font-semibold mb-2">Quantity <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <input type="number" min="1" class="form-control block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none transition" id="quantity" name="quantity" placeholder="Enter quantity" required>
-                        <span class="absolute right-3 top-2.5 text-gray-400"><i class="fas fa-sort-numeric-up"></i></span>
-                    </div>
-                </div>
-                <div>
-                    <label for="reason" class="block text-gray-700 font-semibold mb-2">Reason</label>
-                    <textarea class="form-control block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none transition resize-none" id="reason" name="reason" rows="3" placeholder="Optional: Reason for request"></textarea>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow transition">Submit Request <i class="fas fa-paper-plane ml-2"></i></button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle category sections
+        const categoryToggles = document.querySelectorAll('.category-toggle');
+        categoryToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const categoryItems = this.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                if (categoryItems.style.display === 'none') {
+                    categoryItems.style.display = 'block';
+                    icon.classList.remove('fa-chevron-right');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    categoryItems.style.display = 'none';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-right');
+                }
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('search-items');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const itemLabels = document.querySelectorAll('.category-items label');
+            
+            itemLabels.forEach(label => {
+                const itemText = label.textContent.toLowerCase();
+                if (itemText.includes(searchTerm)) {
+                    label.style.display = 'flex';
+                    // Make sure parent category is visible
+                    const categorySection = label.closest('.category-section');
+                    const categoryItems = categorySection.querySelector('.category-items');
+                    categoryItems.style.display = 'block';
+                } else {
+                    label.style.display = 'none';
+                }
+            });
+        });
+        
+        // Handle checkbox changes
+        const checkboxes = document.querySelectorAll('.stationery-item');
+        const selectedItemsContainer = document.getElementById('selected-items-container');
+        const noItemsMessage = document.getElementById('no-items-message');
+        const stationeryForm = document.getElementById('stationery-form');
+        const itemsDataField = document.getElementById('items-data-field');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedItems);
+        });
+        
+        function updateSelectedItems() {
+            // Clear current selected items
+            const existingCards = document.querySelectorAll('.item-card');
+            const selectedItems = [];
+            
+            // Check if any items are selected
+            let hasSelectedItems = false;
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    hasSelectedItems = true;
+                    const category = checkbox.dataset.category;
+                    const itemName = checkbox.dataset.item;
+                    
+                    // Check if card already exists
+                    let existingCard = null;
+                    existingCards.forEach(card => {
+                        if (card.dataset.item === itemName && card.dataset.category === category) {
+                            existingCard = card;
+                        }
+                    });
+                    
+                    if (!existingCard) {
+                        // Create new card
+                        const card = document.createElement('div');
+                        card.className = 'item-card bg-gray-50 rounded-lg p-4 border border-gray-200';
+                        card.dataset.item = itemName;
+                        card.dataset.category = category;
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">${itemName}</h3>
+                                    <p class="text-xs text-gray-500">${category}</p>
+                                </div>
+                                <button type="button" class="remove-item text-gray-400 hover:text-red-500">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">Quantity <span class="text-red-500">*</span></label>
+                                    <input type="number" min="1" value="1" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">Reason</label>
+                                    <input type="text" class="item-reason w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm" placeholder="Optional">
+                                </div>
+                            </div>
+                        `;
+                        
+                        selectedItemsContainer.appendChild(card);
+                        
+                        // Add remove button functionality
+                        const removeBtn = card.querySelector('.remove-item');
+                        removeBtn.addEventListener('click', function() {
+                            // Uncheck the corresponding checkbox
+                            checkboxes.forEach(cb => {
+                                if (cb.dataset.item === itemName && cb.dataset.category === category) {
+                                    cb.checked = false;
+                                }
+                            });
+                            card.remove();
+                            updateSelectedItems();
+                        });
+                    }
+                    
+                    // Collect data for form submission
+                    const card = existingCard || document.querySelector(`.item-card[data-item="${itemName}"][data-category="${category}"]`);
+                    const quantity = card.querySelector('.item-quantity').value;
+                    const reason = card.querySelector('.item-reason').value;
+                    
+                    selectedItems.push({
+                        category: category,
+                        item: itemName,
+                        quantity: quantity,
+                        reason: reason
+                    });
+                }
+            });
+            
+            // Update form visibility and data field
+            if (hasSelectedItems) {
+                noItemsMessage.style.display = 'none';
+                stationeryForm.classList.remove('hidden');
+                itemsDataField.value = JSON.stringify(selectedItems);
+            } else {
+                noItemsMessage.style.display = 'block';
+                stationeryForm.classList.add('hidden');
+            }
+        }
+        
+        // Add event listeners for quantity and reason changes
+        selectedItemsContainer.addEventListener('input', function(e) {
+            if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-reason')) {
+                updateSelectedItems();
+            }
+        });
+    });
+</script>
 {% endblock %}

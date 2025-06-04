@@ -2,11 +2,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Sum
 from import_export.admin import ImportExportModelAdmin
-from .models import GLCode, Region, Head, Vendor, Expense, Employee, GLCode, Cadre, EmployeeType, Division, Wing
+from .models import GLCode, Region, Head, Vendor, Expense, Employee, GLCode, Cadre, EmployeeType, Division, Wing, StationaryRequest
 from .models_user import User
+from .resources import GLCodeResource, RegionResource, HeadResource, VendorResource, ExpenseResource, EmployeeResource, CadreResource, EmployeeTypeResource, DivisionResource, WingResource, StationaryRequestResource
 
 # Enhanced Admin Classes
-
 class GLCodeAdmin(ImportExportModelAdmin):
     list_display = ('gl_code', 'gl_description', 'limit', 'limit_utilized', 'balance_available', 'utilization_percentage')
     list_filter = ('gl_description',)
@@ -45,7 +45,8 @@ class GLCodeAdmin(ImportExportModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class RegionAdmin(admin.ModelAdmin):
+class RegionAdmin(ImportExportModelAdmin):
+    resource_class = RegionResource
     list_display = ('name',)
     search_fields = ('name',)
     list_per_page = 25
@@ -64,7 +65,8 @@ class RegionAdmin(admin.ModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class CadreAdmin(admin.ModelAdmin):
+class CadreAdmin(ImportExportModelAdmin):
+    resource_class = CadreResource
     list_display = ('name',)
     search_fields = ('name',)
     list_per_page = 25
@@ -83,7 +85,8 @@ class CadreAdmin(admin.ModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class EmployeeTypeAdmin(admin.ModelAdmin):
+class EmployeeTypeAdmin(ImportExportModelAdmin):
+    resource_class = EmployeeTypeResource
     list_display = ('name',)
     search_fields = ('name',)
     list_per_page = 25
@@ -102,7 +105,8 @@ class EmployeeTypeAdmin(admin.ModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class HeadAdmin(admin.ModelAdmin):
+class HeadAdmin(ImportExportModelAdmin):
+    resource_class = HeadResource
     list_display = ('code', 'name','budget', 'utilized_budget', 'available_budget', 'utilization_percentage', 'gl_code_count')
     search_fields = ('code__gl_code',)
     readonly_fields = ('utilized_budget', 'available_budget')
@@ -301,7 +305,8 @@ class EmployeeAdmin(ImportExportModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class ExpenseAdmin(admin.ModelAdmin):
+class ExpenseAdmin(ImportExportModelAdmin):
+    resource_class = ExpenseResource
     list_display = ['invoice_no', 'vendor', 'amount', 'net_amount', 'payment_mode', 'invoice_date', 'status']
     list_filter = ('status', )
     search_fields = ('expense', 'description', 'vendor__name')
@@ -425,7 +430,8 @@ class WingInline(admin.TabularInline):
     extra = 1
     fields = ('name', 'description')
 
-class DivisionAdmin(admin.ModelAdmin):
+class DivisionAdmin(ImportExportModelAdmin):
+    resource_class = DivisionResource
     list_display = ('name', 'description', 'wing_count')
     list_per_page = 20
     inlines = [WingInline]
@@ -448,7 +454,8 @@ class DivisionAdmin(admin.ModelAdmin):
 
     get_serial_number.short_description = 'Sr. No'
 
-class WingAdmin(admin.ModelAdmin):
+class WingAdmin(ImportExportModelAdmin):
+    resource_class = WingResource
     list_display = ('name', 'description')
     list_per_page = 25
     
@@ -467,6 +474,28 @@ class WingAdmin(admin.ModelAdmin):
     get_serial_number.short_description = 'Sr. No'
 
     
+class StationaryRequestAdmin(ImportExportModelAdmin):
+    resource_class = StationaryRequestResource
+    list_display = ('user', 'item', 'quantity', 'status', 'requested_date', 'approved_date', 'approved_by')
+    list_filter = ('status', 'requested_date')
+    search_fields = ('user__username', 'item', 'reason')
+    readonly_fields = ('requested_date',)
+    list_per_page = 25
+    
+    def get_queryset(self, request):
+        self.request = request
+        qs = super().get_queryset(request)
+        return qs.order_by('-requested_date')  # Newest first
+
+    def get_list_display(self, request):
+        return ('get_serial_number',) + tuple(super().get_list_display(request))
+
+    def get_serial_number(self, obj):
+        queryset = self.get_queryset(self.request)
+        return list(queryset).index(obj) + 1
+
+    get_serial_number.short_description = 'Sr. No'
+
 # Register models with custom admin classes
 admin.site.register(GLCode, GLCodeAdmin)
 admin.site.register(Region, RegionAdmin)
@@ -479,3 +508,4 @@ admin.site.register(Cadre, CadreAdmin)
 admin.site.register(EmployeeType, EmployeeTypeAdmin)
 admin.site.register(Wing, WingAdmin)
 admin.site.register(Division, DivisionAdmin)
+admin.site.register(StationaryRequest, StationaryRequestAdmin)

@@ -109,6 +109,7 @@ function initVendorEmployeeToggle() {
     let employeeCadreSelect = document.getElementById('employee_cadre');
     let employeeTypeSelect = document.getElementById('employee_type');
     
+    
     if (employeeSelect) {
         console.log('Employee select element found');
     } else {
@@ -172,7 +173,9 @@ function initVendorEmployeeToggle() {
             if (employeeHeadField) employeeHeadField.style.display = 'none';
             if (employeeWingField) employeeWingField.style.display = 'none';
             if (employeeDivisionField) employeeDivisionField.style.display = 'none';
-            
+            if (employeeCadreField) employeeCadreField.style.display = 'none';
+            if (employeeTypeField) employeeTypeField.style.display = 'none';
+
             // Hide employee details section
             const employeeDetailsSection = document.getElementById('employee-details-section');
             if (employeeDetailsSection) {
@@ -200,7 +203,7 @@ function initVendorEmployeeToggle() {
     
     // Function to initialize employee filtering based on head, wing, and division
     function initEmployeeFiltering() {
-        if (!employeeHeadSelect || !employeeWingSelect || !employeeDivisionSelect || !employeeSelect) {
+        if (!employeeHeadSelect || !employeeWingSelect || !employeeDivisionSelect  ) {
             console.error('One or more employee filter elements not found');
             return;
         }
